@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dao Malick BENIN</title><link href="https://dmb225.github.io/" rel="alternate"/><link href="https://dmb225.github.io/feeds/all.atom.xml" rel="self"/><id>https://dmb225.github.io/</id><updated>2025-08-28T00:00:00+02:00</updated><entry><title>A sample article 1</title><link href="https://dmb225.github.io/a-sample-article-1.html" rel="alternate"/><published>2025-08-28T00:00:00+02:00</published><updated>2025-08-28T00:00:00+02:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2025-08-28:/a-sample-article-1.html</id><summary type="html">&lt;p&gt;Summary of post 1&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Sibi nec quod est&lt;/h2&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dao Malick BENIN - Fake</title><link href="https://dmb225.github.io/" rel="alternate"/><link href="https://dmb225.github.io/feeds/fake.atom.xml" rel="self"/><id>https://dmb225.github.io/</id><updated>2025-08-28T00:00:00+02:00</updated><entry><title>A sample article 1</title><link href="https://dmb225.github.io/a-sample-article-1.html" rel="alternate"/><published>2025-08-28T00:00:00+02:00</published><updated>2025-08-28T00:00:00+02:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2025-08-28:/a-sample-article-1.html</id><summary type="html">&lt;p&gt;Summary of post 1&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Sibi nec quod est&lt;/h2&gt;
 &lt;h3&gt;Adimit victorque incerta currum&lt;/h3&gt;
 &lt;p&gt;Lorem markdownum &lt;strong&gt;consuetaque siqua status&lt;/strong&gt; voce manusque Ampyx ponit. Non
 nare pecudes tenens: vires nostri et Atque &lt;code&gt;rte&lt;/code&gt; quosque nec ad, forma prior,
@@ -219,5 +219,4 @@ iacet&lt;/a&gt;.&lt;/p&gt;
 &lt;li&gt;Coniurataeque esse aequorque o propior&lt;/li&gt;
 &lt;li&gt;Lapitharum sparsos tardae Bacchus perque quoque desectum&lt;/li&gt;
 &lt;li&gt;Habetis ore erat perstat&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Fake"/></entry><entry><title>Hello world</title><link href="https://dmb225.github.io/hello-world.html" rel="alternate"/><published>2025-08-20T00:00:00+02:00</published><updated>2025-08-20T00:00:00+02:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2025-08-20:/hello-world.html</id><content type="html">&lt;p&gt;Hello world! My name is Dao Malick BENIN.&lt;/p&gt;
-&lt;p&gt;The goal of this blog is to share what I learn and explore in the world of software engineering.&lt;/p&gt;</content><category term="Blog"/></entry></feed>
+&lt;/ul&gt;</content><category term="Fake"/></entry></feed>
