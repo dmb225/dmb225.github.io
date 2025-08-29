@@ -20,7 +20,102 @@
 
                 <aside id="featured" class="body">
                     <article>
-                        <h1 class="entry-title"><a href="https://dmb225.github.io/algorithm-patterns-two-pointers.html">Algorithm Patterns: Two Pointers</a></h1>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/algorithm-patterns-fast-and-slow-pointers.html">Algorithm patterns: Fast and Slow Pointers</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2025-08-29T00:00:00+02:00">
+                Published: Fri 29 August 2025
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/algorithms.html">algorithms</a> </p>        
+</footer><!-- /.post-info --><p>The <strong>fast and slow pointers</strong> pattern is a versatile and efficient technique for traversing linear data structures, such as arrays, linked lists, or even graphs, using two pointers that move at different speeds. This approach is often used to identify cycles or find a specific target. The speeds of the pointers can be adjusted according to the problem statement. The two pointers pattern focuses on comparing data values, whereas the fast and slow pointers method is typically used to analyze the structure or properties of the data.</p>
+<hr>
+<h2>About the pattern</h2>
+<p>Similar to the two pointers pattern, the fast and slow pointers pattern uses two pointers to traverse an iterable data structure, but at different speeds, often to identify cycles or find a specific target. The speeds of the pointers can be adjusted according to the problem statement. The two pointers pattern focuses on comparing data values, whereas the fast and slow pointers method is typically used to analyze the structure or properties of the data.</p>
+<p>The key idea is that the pointers start at the same location and then start moving at different speeds. The slow pointer moves one step at a time, while the fast pointer moves by two steps. Due to the different speeds of the pointers, this pattern is also commonly known as the Hare and Tortoise algorithm, where the Hare is the fast pointer while Tortoise is the slow pointer. If a cycle exists, the two pointers will eventually meet during traversal. This approach enables the algorithm to detect specific properties within the data structure, such as cycles, midpoints, or intersections.</p>
+<p>To visualize this, imagine two runners on a circular track starting at the same point. With different running speeds, the faster runner will eventually overtake the slower one, illustrating how this method works to detect cycles.</p>
+<p>Here’s a basic pseudocode template that you can adapt to your specific needs:</p>
+<div class="highlight"><pre><span></span><code><span class="k">FUNCTION</span><span class="w"> </span><span class="n">fastAndSlow</span><span class="p">(</span><span class="n">dataStructure</span><span class="p">)</span><span class="err">:</span>
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">initialize</span><span class="w"> </span><span class="n">pointers</span><span class="w"> </span><span class="p">(</span><span class="ow">or</span><span class="w"> </span><span class="n">indices</span><span class="p">)</span>
+<span class="w">  </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dataStructure</span><span class="p">.</span><span class="k">start</span><span class="w">   </span><span class="err">#</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="k">structure</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="k">array</span>
+<span class="w">  </span><span class="n">slowPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dataStructure</span><span class="p">.</span><span class="k">start</span><span class="w">   </span><span class="err">#</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="k">structure</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="k">array</span>
+
+<span class="w">  </span><span class="k">WHILE</span><span class="w"> </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="ow">AND</span><span class="w"> </span><span class="n">fastPointer</span><span class="p">.</span><span class="k">next</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">null</span><span class="err">:</span><span class="w"> </span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nl">arrays</span><span class="p">:</span><span class="w"> </span><span class="k">WHILE</span><span class="w"> </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">dataStructure</span><span class="p">.</span><span class="n">length</span><span class="w"> </span><span class="ow">AND</span><span class="w"> </span><span class="p">(</span><span class="n">fastPointer</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">dataStructure</span><span class="p">.</span><span class="nl">length</span><span class="p">:</span>
+
+<span class="w">    </span><span class="n">slowPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">slowPointer</span><span class="p">.</span><span class="k">next</span><span class="w">            </span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nl">arrays</span><span class="p">:</span><span class="w"> </span><span class="n">slowPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">slowPointer</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+
+<span class="w">    </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fastPointer</span><span class="p">.</span><span class="k">next</span><span class="p">.</span><span class="k">next</span><span class="w">       </span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nl">arrays</span><span class="p">:</span><span class="w"> </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span>
+
+<span class="w">    </span><span class="k">IF</span><span class="w"> </span><span class="n">fastPointer</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="ow">AND</span><span class="w"> </span><span class="n">someCondition</span><span class="p">(</span><span class="n">fastPointer</span><span class="p">,</span><span class="w"> </span><span class="n">slowPointer</span><span class="p">)</span><span class="err">:</span>
+<span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nl">arrays</span><span class="p">:</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">someCondition</span><span class="p">(</span><span class="n">dataStructure</span><span class="o">[</span><span class="n">fastPointer</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">dataStructure</span><span class="o">[</span><span class="n">slowPointer</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">needed</span>
+<span class="w">      </span><span class="n">handleCondition</span><span class="p">(</span><span class="n">fastPointer</span><span class="p">,</span><span class="w"> </span><span class="n">slowPointer</span><span class="p">)</span>
+<span class="w">      </span><span class="k">BREAK</span>
+
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">process</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">result</span>
+<span class="w">  </span><span class="n">processResult</span><span class="p">(</span><span class="n">slowPointer</span><span class="p">)</span>
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="nl">arrays</span><span class="p">:</span><span class="w"> </span><span class="n">processResult</span><span class="p">(</span><span class="n">slowPointer</span><span class="p">)</span><span class="w"> </span><span class="n">might</span><span class="w"> </span><span class="n">process</span><span class="w"> </span><span class="n">dataStructure</span><span class="o">[</span><span class="n">slowPointer</span><span class="o">]</span>
+</code></pre></div>
+
+<p>In the template above, the fastPointer moves at twice the speed of the slowPointer, allowing efficient traversal and detection of specific conditions. </p>
+<p>The fastPointer advances two steps at a time (fastPointer.next.next for linked lists or fastPointer + 2 for arrays), while the slowPointer moves one step at a time (slowPointer.next or slowPointer + 1).</p>
+<p>The loop continues until the fastPointer reaches the end of the structure or a condition (someCondition) is met, triggering handleCondition.</p>
+<p>Finally, the result is processed using the slowPointer, which often points to a meaningful position, such as the middle of the structure or the start of a cycle.</p>
+<hr>
+<h2>Examples</h2>
+<p>The following examples illustrate some problems that can be solved with this approach:</p>
+<ol>
+<li><strong>Middle of the linked list:</strong> Given the head of a singly linked list, return the middle node of the linked list.</li>
+</ol>
+<p>The idea is to iterate the linked list using fast and slow pointers with slow pointer moving one step whereas the fast pointer moving two steps. When the fast pointer reaches the last node or becomes NULL, the slow pointer will be pointing to the middle of the linked list.</p>
+<ol>
+<li><strong>Detect cycle in an array:</strong> Given an array of non-negative integers where elements are indexes pointing to the next element, determine if there is a cycle in the array.</li>
+</ol>
+<p>To detect a cycle in the given array, we'll use the fast and slow pointers. The slow pointer moves forward one step at a time, while the fast pointer moves two steps forward. If there is a cycle, the fast pointer will eventually meet the slow pointer.</p>
+<hr>
+<h2>Real-world problems</h2>
+<p>Many problems in the real world use the fast and slow pointers pattern. Let’s look at some examples.</p>
+<ul>
+<li>
+<p><strong>Symlink verification:</strong> Imagine you’re an IT administrator responsible for maintaining a large server. In one of the directories, multiple files and symbolic links (symlinks) are scattered around, each pointing to various files or even to other symlinks. Occasionally, a well-intentioned script or misconfiguration might create a loop—say, a symlink A points to B, and somehow B eventually links back to A. This creates a cycle where following those symlinks never ends. In a symlink verification utility, the fast and slow pointer approach helps detect loops where symlinks endlessly reference each other. One pointer (the “tortoise”) follows links one step at a time, while the other (the “hare”) jumps two steps. If both ever land on the same file or link again, it confirms a cycle.</p>
+</li>
+<li>
+<p><strong>Compiling an object-oriented program:</strong> During compilation, each object-oriented module may depend on others, sometimes creating a loop (A depends on B, and B depends on A). With fast and slow pointers, you track dependencies step by step: the “tortoise” moves one module at a time, and the “hare” jumps two modules at a time. If they meet, there’s a cyclic dependency. This quick, space-efficient check helps catch and break these loops, ensuring a clean compilation sequence.</p>
+</li>
+</ul>
+<hr>
+<h2>Does your problem match this pattern?</h2>
+<p>Yes, if the following condition is fulfilled:</p>
+<ul>
+<li><strong>Linear data structure:</strong> The input data can be traversed in a linear fashion, such as an array, linked list, or string.</li>
+</ul>
+<p>In addition, if either of these conditions is fulfilled:</p>
+<ul>
+<li>
+<p><strong>Cycle or intersection detection:</strong> The problem involves detecting a loop within a linked list or an array or involves finding an intersection between two linked lists or arrays.</p>
+</li>
+<li>
+<p><strong>Find the starting element of the second quantile:</strong> This means identifying the element where the second part of a divided dataset begins—like the second half, second third (tertile), or second quarter (quartile). For example, the task might ask you to find the middle element of an array or a linked list, which marks the start.</p>
+</li>
+</ul>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/algorithm-patterns-two-pointers.html" rel="bookmark"
+                               title="Permalink to Algorithm Patterns: Two Pointers">Algorithm Patterns: Two Pointers</a></h1>
+                    </header>
+
+                    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2025-08-28T00:00:00+02:00">
                 Published: Thu 28 August 2025
@@ -31,84 +126,12 @@
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
 <p>tags: <a href="https://dmb225.github.io/tag/algorithms.html">algorithms</a> </p>        
-</footer><!-- /.post-info --><p>The <strong>two pointers</strong> pattern is a versatile and efficient technique widely used in algorithmic problem-solving, especially when working with sequential data structures like arrays, strings, or linked lists. As the name suggests, this approach involves maintaining two pointers (or indices) that traverse the data structure in a coordinated manner—often starting from different positions or moving in opposite directions. By dynamically adjusting these pointers based on specific conditions, we can efficiently explore the data and solve problems with optimal time and space complexity.</p>
-<p>Whenever you need to find two elements in a sequence that satisfy a certain condition, the two pointers pattern should be one of the first strategies you consider.</p>
-<hr>
-<h2>About the Pattern</h2>
-<p>The two pointers technique is particularly useful when:</p>
-<ul>
-<li>You need to process or compare elements at different positions in a linear data structure.</li>
-<li>The problem involves searching for pairs or subarrays that meet certain criteria.</li>
-<li>You want to optimize for time and space, often reducing the need for nested loops.</li>
-</ul>
-<p>The pointers can move in the same direction, in opposite directions, or even traverse two different data structures, depending on the problem.</p>
-<hr>
-<h2>Example: Checking for Palindromes</h2>
-<p>A classic example is checking if a string is a palindrome (reads the same forwards and backwards). Here, one pointer starts at the beginning and the other at the end, moving towards each other while comparing characters.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">is_palindrome</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-
-    <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
-        <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">s</span><span class="p">[</span><span class="n">left</span><span class="p">]</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
-            <span class="n">left</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">s</span><span class="p">[</span><span class="n">right</span><span class="p">]</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
-            <span class="n">right</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">left</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">s</span><span class="p">[</span><span class="n">right</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="n">left</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">right</span> <span class="o">-=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="kc">True</span>
-
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">test_cases</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;A man, a plan, a canal: Panama&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;race a car&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;1A@2!3 23!2@a1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;No &#39;x&#39; in Nixon&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;12321&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">test_cases</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">string: </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">is_palindrome</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Result: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
-</code></pre></div>
-
-<p><strong>Why is this efficient?</strong><br>
-A naive approach might use nested loops, resulting in O(n²) time complexity. The two pointers method, however, only requires a single pass through the string—O(n) time.</p>
-<hr>
-<h2>More Examples</h2>
-<p>Here are some classic problems that benefit from the two pointers pattern:</p>
-<ol>
-<li>
-<p><strong>Reversing an Array</strong><br>
-   Reverse an array in place by swapping elements from both ends, moving towards the center.</p>
-</li>
-<li>
-<p><strong>Pair with Given Sum in a Sorted Array</strong><br>
-   Given a sorted array and a target sum, use two pointers (one at the start, one at the end) to find a pair that adds up to the target.</p>
-</li>
-</ol>
-<hr>
-<h2>Real-World Applications</h2>
-<p>The two pointers pattern isn't just for coding interviews—it appears in real-world systems too. For example:</p>
-<ul>
-<li><strong>Memory Management:</strong><br>
-  In memory allocation, two pointers can represent the start and end of a memory block. Allocation moves the start pointer forward; deallocation can move it backward, efficiently managing available memory.</li>
-</ul>
-<hr>
-<h2>Does Your Problem Match This Pattern?</h2>
-<p>Consider using the two pointers technique if:</p>
-<ul>
-<li><strong>Linear Data Structure:</strong> Your input is a sequence (array, string, linked list).</li>
-<li><strong>Process Pairs:</strong> You need to process or compare elements at two different positions.</li>
-<li><strong>Dynamic Pointer Movement:</strong> Both pointers can move independently based on certain conditions.</li>
-</ul>
-<hr>                    </article>
-                </aside><!-- /#featured -->
+</footer><!-- /.post-info -->                        <p>The <strong>two pointers</strong> pattern is a versatile and efficient technique widely used in algorithmic problem-solving, especially when working with sequential data structures like arrays, strings, or linked lists. As the name suggests, this approach involves maintaining two pointers (or indices) that traverse the data structure in a coordinated manner—often …</p>
+                        <a class="readmore" href="https://dmb225.github.io/algorithm-patterns-two-pointers.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+                    </ol><!-- /#posts-list -->
+                    </section><!-- /#content -->
                 <section id="extras" class="body">
                                 <div class="blogroll">
                                         <h2>links</h2>
