@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>Algorithm Patterns: Sliding Window</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="The sliding window pattern is a technique for efficiently processing sequential data, such as arrays and strings. It involves maintaining a..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/algorithm-patterns-sliding-window.html" rel="bookmark"
+             title="Permalink to Algorithm Patterns: Sliding Window">Algorithm Patterns: Sliding Window</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2025-08-29T00:00:00+02:00">
+                Published: Fri 29 August 2025
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/algorithms.html">algorithms</a> </p>        
+</footer><!-- /.post-info -->        <p>The <strong>sliding window</strong> pattern is a technique for efficiently processing sequential data, such as arrays and strings. It involves maintaining a dynamic window that slides across the data, allowing you to examine a fixed portion at a time. Instead of repeatedly scanning the entire dataset, this approach adjusts the window’s boundaries as needed to track relevant elements. It is especially useful for solving problems involving contiguous subarrays or substrings, such as finding the maximum sum of a subarray or detecting repeated patterns in a string. This pattern can be viewed as a variation of the two-pointer approach, where the pointers define the window’s start and end.</p>
+<hr>
+<h2>About the pattern</h2>
+<p>Imagine you have a tray of 10 cookies and want to find the most chocolate chips in any 3 cookies next to each other. Using a naive approach, you’d stand at each cookie and count its chocolate chips along with those of its immediate left and right neighbors to form every possible group of 3. This means repeating the counting process for each cookie, which quickly becomes inefficient as the number of cookies grows.</p>
+<p>We can avoid this hassle by using a smarter approach. Instead of recounting the chips for each group from scratch, you start by counting the chips in the first 3 cookies. Then, as you move to the next group, you simply subtract the chips from the cookie you leave behind and add the chips from the new cookie you include. </p>
+<p>Consider the following steps:</p>
+<p>Step 1: Count the chips in the first three cookies. This is your starting total—and your initial “best so far.”</p>
+<p>Step 2: Slide the window one cookie to the right:
+- Subtract the chips from the cookie that just slipped out of the window.
+- Add the chips from the fresh cookie that slid into view.</p>
+<p>Step 3: If this new sum tops your current record, replace it with the initial “best so far”.</p>
+<p>Step 4: Repeat the above steps for each group of three cookies, all the way to the last one.</p>
+<p>By updating the total in constant time with each slide, you find the group of neighboring cookies with maximum chocolate chips without ever recounting the entire window.</p>
+<p>The sliding window can be of a fixed size or dynamic.
+- The fixed-size window is used when the window size is given or constant. For example, find the largest sum of any three consecutive numbers.
+- The dynamic window is used when the window size changes based on conditions. For example, find the smallest subarray whose sum exceeds a target.</p>
+<p>How is the sliding window implemented?<br>
+The sliding window technique uses two pointers representing the window’s boundaries. These pointers move through an array or a string to examine a portion of the data at a time. The window is then updated by adding new elements and removing old ones as the pointers move.</p>
+<p>In a fixed-size window, both pointers move together, keeping the window size constant. For example, if you need to find the largest sum of three consecutive numbers, the window size stays at three while sliding across the array.</p>
+<p>In a dynamic window, the window size can grow or shrink based on a condition. One pointer (usually the right one) expands the window, while the other (left) contracts it when the condition is met, like finding the smallest subarray with a sum greater than a target. This two pointer strategy allows the sliding window to process data in linear time, making it a powerful tool for problems involving continuous data sections.</p>
+<p>Here is the template for the sliding window, where we maintain a dynamic window that adjusts as we traverse the array.</p>
+<div class="highlight"><pre><span></span><code><span class="k">FUNCTION</span><span class="w"> </span><span class="n">slidingWindow</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">processWindow</span><span class="p">)</span><span class="err">:</span>
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Initialize</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">window</span><span class="w"> </span><span class="k">result</span><span class="w"> </span><span class="p">(</span><span class="nf">sum</span><span class="p">,</span><span class="w"> </span><span class="n">product</span><span class="p">,</span><span class="w"> </span><span class="nf">count</span><span class="p">,</span><span class="w"> </span><span class="n">etc</span><span class="p">.)</span>
+<span class="w">  </span><span class="n">windowResult</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">INITIAL_VALUE</span>
+
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Compute</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">initial</span><span class="w"> </span><span class="k">window</span><span class="err">&#39;</span><span class="n">s</span><span class="w"> </span><span class="k">result</span>
+<span class="w">  </span><span class="k">FOR</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span>
+<span class="w">    </span><span class="k">UPDATE</span><span class="w"> </span><span class="n">windowResult</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">Process</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">first</span><span class="w"> </span><span class="k">window</span>
+<span class="w">  </span><span class="n">processWindow</span><span class="p">(</span><span class="n">windowResult</span><span class="p">)</span>
+
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">Slide</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">window</span><span class="w"> </span><span class="n">across</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">array</span>
+<span class="w">  </span><span class="k">FOR</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span>
+<span class="w">    </span><span class="k">UPDATE</span><span class="w"> </span><span class="n">windowResult</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">ADDING</span><span class="w"> </span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="k">element</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">window</span>
+<span class="w">    </span><span class="k">UPDATE</span><span class="w"> </span><span class="n">windowResult</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">REMOVING</span><span class="w"> </span><span class="n">arr</span><span class="o">[</span><span class="n">i - k</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">Remove</span><span class="w"> </span><span class="n">outgoing</span><span class="w"> </span><span class="k">element</span>
+<span class="w">    </span><span class="n">processWindow</span><span class="p">(</span><span class="n">windowResult</span><span class="p">)</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Operation</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="k">window</span>
+</code></pre></div>
+
+<p>We start by computing the result for the first k elements and storing it in windowResult. This represents the initial window in the array. Next, we slide the window across arr by moving one step at a time. For each step:</p>
+<ol>
+<li>Process the current window’s result using the function processWindow(windowResult). This step can involve updating a maximum, computing an average, counting occurrences, or any other required calculation.</li>
+<li>Add the new incoming element (arr[i]) to the window, updating windowResult accordingly.</li>
+<li>Remove the outgoing element (arr[i—k]) from the window to maintain the correct size.</li>
+<li>Repeat the process until the entire array is covered, ensuring we efficiently compute the desired result for every possible k-sized subarray.</li>
+</ol>
+<hr>
+<h2>How does the sliding window technique reduce time complexity?</h2>
+<p>We have learned that the sliding window helps process sequential data like arrays or strings efficiently. Let’s quickly see why that is the case.</p>
+<ul>
+<li>Avoids nested loops: Without a sliding window, many problems require checking all subarrays using two or more loops, leading to O(n2) time complexity or more. The sliding window allows us to update the window by adjusting pointers, reducing the complexity of traversing and processing the entire array to linear, O(n).</li>
+<li>Reuses computation: Instead of recalculating values for each window from scratch, the sliding window approach reuses previous calculations by adding new elements and removing old ones. In the example we discussed above, where we find the most chocolate chips in any 3 cookies, we only update the sum by adding the next cookie and removing the leftmost one.</li>
+</ul>
+<hr>
+<h2>Examples</h2>
+<p>The following examples illustrate some problems that can be solved with this approach:</p>
+<ol>
+<li>Maximum sum subarray of size K: Given an array of integers and a positive integer k, find the maximum sum of any contiguous subarray of size k.</li>
+<li>Longest substring without repeating characters: Given a string, find the length of the longest substring without repeating characters.</li>
+</ol>
+<hr>
+<h2>Real-world problems</h2>
+<p>Many problems in the real world use the sliding window pattern. Let’s look at some examples.</p>
+<ul>
+<li>Telecommunications: Find the maximum number of users connected to a cellular network’s base station in every k-millisecond sliding window.</li>
+<li>Video streaming: Given a stream of numbers representing the number of buffering events in a given user session, calculate the median number of buffering events in each one-minute interval.</li>
+<li>Social media content mining: Given the lists of topics that two users have posted about, find the shortest sequence of posts by one user that includes all the topics that the other user has posted about.</li>
+</ul>
+<hr>
+<h2>Does your problem match this pattern?</h2>
+<p>Yes, if all of these conditions are fulfilled:</p>
+<ul>
+<li>Contiguous data: The input data is stored in a contiguous manner, such as an array or string.</li>
+<li>Processing subsets of elements: The problem requires repeated computations on a contiguous subset of data elements (a subarray or a substring), such that the window moves across the input array from one end to the other. The size of the window may be fixed or variable, depending on the requirements of the problem. </li>
+<li>Efficient computation time complexity: The computations performed every time the window moves take constant or very small time.</li>
+</ul>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
