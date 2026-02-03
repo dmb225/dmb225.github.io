@@ -4,7 +4,7 @@
                         <meta charset="utf-8" />
                         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                         <meta name="generator" content="Pelican" />
-                        <title>System Design: Introduction to Domain Name System (DNS)</title>
+                        <title>System Design: Lesson 2 - Introduction to Domain Name System (DNS)</title>
                         <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
                                 <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
     <meta name="description" content="The origins of DNS Let’s consider the example of a mobile phone where a unique number is associated with each user. To make calls to friends, we..." />
@@ -21,8 +21,8 @@
     <article>
       <header>
         <h1 class="entry-title">
-          <a href="https://dmb225.github.io/system-design-introduction-to-domain-name-system-dns.html" rel="bookmark"
-             title="Permalink to System Design: Introduction to Domain Name System (DNS)">System Design: Introduction to Domain Name System (DNS)</a></h1>
+          <a href="https://dmb225.github.io/system-design-lesson-2-introduction-to-domain-name-system-dns.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 2 - Introduction to Domain Name System (DNS)">System Design: Lesson 2 - Introduction to Domain Name System (DNS)</a></h1>
       </header>
 
       <div class="entry-content">
@@ -38,15 +38,14 @@
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> </p>        
 </footer><!-- /.post-info -->        <h2>The origins of DNS</h2>
 <p>Let’s consider the example of a mobile phone where a unique number is associated with each user. To make calls to friends, we can initially try to memorize some of the phone numbers. However, as the number of contacts grows, we’ll have to use a phone book to keep track of all our contacts. This way, whenever we need to make a call, we’ll refer to the phone book and dial the number we need.</p>
-<p>Similarly, computers are uniquely identified by IP addresses—for example, 104.18.2.119 is an IP address. We use IP addresses to visit a website hosted on a machine. Since humans cannot easily remember IP addresses to visit domain names (an example domain name being educative.io), we need a phone book-like repository that can maintain all mappings of domain names to IP addresses. In this chapter, we’ll see how DNS serves as the Internet’s phone book.</p>
+<p>Similarly, computers are uniquely identified by IP addresses—for example, 104.18.2.119 is an IP address. We use IP addresses to visit a website hosted on a machine. Since humans cannot easily remember IP addresses to visit domain names (an example domain name being google.com), we need a phone book-like repository that can maintain all mappings of domain names to IP addresses. In this chapter, we’ll see how DNS serves as the Internet’s phone book.</p>
 <hr>
 <h2>What is DNS?</h2>
 <p>The domain name system (DNS) is the Internet’s naming service that maps human-friendly domain names to machine-readable IP addresses. The service of DNS is transparent to users. When a user enters a domain name in the browser, the browser has to translate the domain name to IP address by asking the DNS infrastructure. Once the desired IP address is obtained, the user’s request is forwarded to the destination web server.</p>
 <p>The entire operation is performed very quickly. Therefore, the end user experiences minimum delay. We’ll also see how browsers save some of the frequently used mappings for later use in the next lesson.</p>
 <h4>? Question ?</h4>
 <p>Imagine two users enter the same domain name at the exact same time. How does DNS ensure both reach the correct server?</p>
-<p>Use the AI assessment widget below to submit your solution and get an interactive response.</p>
-<p><strong>Solution: DNS is a distributed system with multiple servers that resolve domain names independently. It ensures consistency by directing both users to the current IP address of the server, using caching, propagation, and authoritative DNS records. This way, even if two users enter the same domain name at the exact same time, they will both reach the correct server without any conflict. Keep exploring!</strong></p>
+<p><strong>Solution: DNS is a distributed system with multiple servers that resolve domain names independently. It ensures consistency by directing both users to the current IP address of the server, using caching, propagation, and authoritative DNS records. This way, even if two users enter the same domain name at the exact same time, they will both reach the correct server without any conflict.</strong></p>
 <h2>Important details</h2>
 <p>Let’s highlight some of the important details about DNS, some of which we’ll cover in the next lesson:</p>
 <ul>
@@ -70,28 +69,28 @@
 <td>Provides the hostname to IP address mapping</td>
 <td>Hostname</td>
 <td>IP address</td>
-<td>(A, relay1.main.educative.io, 104.18.2.119)</td>
+<td>(A, relay1.main.google.com, 104.18.2.119)</td>
 </tr>
 <tr>
 <td>NS</td>
 <td>Provides the hostname that is the authoritative DNS for a domain</td>
 <td>Domain name</td>
 <td>Hostname</td>
-<td>(NS, educative.io, dns.educative.io)</td>
+<td>(NS, google.com, dns.google.com)</td>
 </tr>
 <tr>
 <td>CNAME</td>
 <td>Provides the mapping from alias to canonical hostname</td>
 <td>Hostname</td>
 <td>Canonical name</td>
-<td>(CNAME, educative.io, server1.primary.educative.io)</td>
+<td>(CNAME, google.com, server1.primary.google.com)</td>
 </tr>
 <tr>
 <td>MX</td>
 <td>Provides the mapping of mail server from alias to canonical host</td>
 <td>Hostname</td>
 <td>Canonical name</td>
-<td>(MX, mail.educative.io, mailserver1.backup.educative.io)</td>
+<td>(MX, mail.google.com, mailserver1.backup.google.com)</td>
 </tr>
 </tbody>
 </table>

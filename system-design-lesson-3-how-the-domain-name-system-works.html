@@ -4,7 +4,7 @@
                         <meta charset="utf-8" />
                         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                         <meta name="generator" content="Pelican" />
-                        <title>System Design: How the Domain Name System works</title>
+                        <title>System Design: Lesson 3 - How the Domain Name System works</title>
                         <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
                                 <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
     <meta name="description" content="Through this lesson, we’ll answer the following questions: How is the DNS hierarchy formed using various types of DNS name servers? How is caching..." />
@@ -21,8 +21,8 @@
     <article>
       <header>
         <h1 class="entry-title">
-          <a href="https://dmb225.github.io/system-design-how-the-domain-name-system-works.html" rel="bookmark"
-             title="Permalink to System Design: How the Domain Name System works">System Design: How the Domain Name System works</a></h1>
+          <a href="https://dmb225.github.io/system-design-lesson-3-how-the-domain-name-system-works.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 3 - How the Domain Name System works">System Design: Lesson 3 - How the Domain Name System works</a></h1>
       </header>
 
       <div class="entry-content">
@@ -48,11 +48,11 @@
 <p>There are mainly four types of servers in the DNS hierarchy:</p>
 <ul>
 <li>DNS resolver: Resolvers initiate the querying sequence and forward requests to the other DNS name servers. Typically, DNS resolvers lie within the premise of the user’s network. However, DNS resolvers can also cater to users’ DNS queries through caching techniques, as we will see shortly. These servers can also be called local or default servers.</li>
-<li>Root-level name servers: These servers receive requests from local servers. Root name servers maintain name servers based on top-level domain names, such as .com, .edu, .us, and so on. For instance, when a user requests the IP address of educative.io, root-level name servers will return a list of top-level domain (TLD) servers that hold the IP addresses of the .io domain.</li>
+<li>Root-level name servers: These servers receive requests from local servers. Root name servers maintain name servers based on top-level domain names, such as .com, .edu, .us, and so on. For instance, when a user requests the IP address of google.com, root-level name servers will return a list of top-level domain (TLD) servers that hold the IP addresses of the .io domain.</li>
 <li>Top-level domain (TLD) name servers: These servers hold the IP addresses of authoritative name servers. The querying party will get a list of IP addresses that belong to the authoritative servers of the organization.</li>
 <li>Authoritative name servers: These are the organization’s DNS name servers that provide the IP addresses of the web or application servers.</li>
 </ul>
-<p><strong>DNS names are processed from right to left, unlike UNIX file paths that go from left to right. For example, when resolving educative.io, the resolver first looks up .io, then educative. Visually, the DNS hierarchy forms a tree structure, starting from the root domain at the top and branching out to subdomains.</strong></p>
+<p><strong>DNS names are processed from right to left, unlike UNIX file paths that go from left to right. For example, when resolving google.com, the resolver first looks up .io, then educative. Visually, the DNS hierarchy forms a tree structure, starting from the root domain at the top and branching out to subdomains.</strong></p>
 <h2>Iterative versus recursive query resolution</h2>
 <p>There are two ways to perform a DNS query:</p>
 <ul>
