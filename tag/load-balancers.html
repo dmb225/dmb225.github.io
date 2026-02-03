@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>Dao Malick BENIN - load-balancers</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+
+                <aside id="featured" class="body">
+                    <article>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-31-introduction-to-load-balancers.html">System Design: Lesson 3.1 - Introduction to Load Balancers</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2026-02-03T00:00:00+01:00">
+                Published: Tue 03 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/load-balancers.html">load-balancers</a> </p>        
+</footer><!-- /.post-info --><h2>What is load balancing?</h2>
+<p>Millions of requests could arrive per second in a typical data center. To serve these requests, thousands (or a hundred thousand) servers work together to share the load of incoming requests.</p>
+<p><em>Note: Here, it’s important that we consider how the incoming requests will be divided among all the available servers.
+A load balancer (LB) is the answer to the question. The job of the load balancer is to fairly divide all clients’ requests among the pool of available servers. Load balancers perform this job to avoid overloading or crashing servers.</em></p>
+<h2>Why do we need load balancers?</h2>
+<p>The load balancing layer is the first point of contact within a data center after the firewall. A load balancer may not be required if a service entertains a few hundred or even a few thousand requests per second. However, for increasing client requests, load balancers provide the following capabilities:</p>
+<ul>
+<li>Scalability: By adding servers, the capacity of the application/service can be increased seamlessly. Load balancers make such upscaling or downscaling transparent to the end users.</li>
+<li>Availability: Even if some servers go down or suffer a fault, the system still remains available. One of the jobs of the load balancers is to hide faults and failures of servers.
+Performance: Load balancers can forward requests to servers with a lesser load so the user can get a quicker response time. This not only improves performance but also improves resource utilization.</li>
+</ul>
+<p>The requests received by a load balancer are distributed among multiple servers using a configured algorithm that we’ll discuss in the upcoming lessons:</p>
+<ul>
+<li>Round-robin</li>
+<li>Weighted round-robin</li>
+<li>Least response time</li>
+<li>Least connections</li>
+</ul>
+<p>Load balancers ensure reliability and availability by continuously monitoring server health and directing traffic only to servers capable of responding efficiently. We’ll explore these algorithms and their impact on system performance in more detail in the <em>Advanced Details of Load Balancers</em> lesson.</p>
+<h2>Placing load balancers</h2>
+<p>Generally, LBs sit between clients and servers. Requests go through to servers and back to clients via the load-balancing layer. However, that isn’t the only point where load balancers are used.</p>
+<p>Let’s consider the three well-known groups of servers. That is the web, the application, and the database servers. To divide the traffic load among the available servers, load balancers can be used between the server instances of these three services in the following way:</p>
+<ul>
+<li>Place LBs between end users of the application and web servers/application gateway.</li>
+<li>Place LBs between the web servers and application servers that run the business/application logic.</li>
+<li>Place LBs between the application servers and database servers.</li>
+</ul>
+<p>In reality, load balancers can potentially be used between any two services with multiple instances within a system’s design.</p>
+<p>Services offered by load balancers
+LBs not only enable services to be scalable, available, and highly performant, but they also offer some key services like the following:</p>
+<ul>
+<li>Health checking: LBs use the heartbeat protocol to monitor the health and, therefore, reliability of end-servers. Another advantage of health checking is the improved user experience.</li>
+<li>TLS termination: LBs reduce the burden on end-servers by handling TLS termination with the client.</li>
+<li>Predictive analytics: LBs can predict traffic patterns through analytics performed over traffic passing through them or using statistics of traffic obtained over time.</li>
+<li>Reduced human intervention: Because of LB automation, reduced system administration efforts are required in handling failures.</li>
+<li>Service discovery: An advantage of LBs is that the clients’ requests are forwarded to appropriate hosting servers by inquiring about the service registry.</li>
+<li>Security: LBs may also improve security by mitigating attacks like denial-of-service (DoS) at different layers of the OSI model (layers 3, 4, and 7).</li>
+</ul>
+<p>As a whole, load balancers provide flexibility, reliability, redundancy, and efficiency to the overall design of the system.</p>
+<h4>Avoiding single point of failure (SPOF)</h4>
+<p>To prevent load balancers from becoming a single point of failure, organizations deploy them in pairs or clusters. These clusters use heartbeat communication to monitor health. When the primary load balancer fails, a backup automatically takes over to keep the service running. In rare cases where the entire cluster fails, engineers can manually reroute traffic to restore availability.</p>
+<p>In the coming lessons, we’ll see how load balancers can be used in complex applications and which type of load balancer is appropriate for which use case.</p>                    </article>
+                </aside><!-- /#featured -->
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
