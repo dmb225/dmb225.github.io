@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 4.1 - Introduction to Databases</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="Problem statement Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 4.1 - Introduction to Databases">System Design: Lesson 4.1 - Introduction to Databases</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-03T00:00:00+01:00">
+                Published: Tue 03 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
+</footer><!-- /.post-info -->        <h2>Problem statement</h2>
+<p>Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an application like WhatsApp. People use our application to communicate with their friends. Now, where and how can we store information (a list of people’s names and their respective messages) permanently and retrieve it?</p>
+<p>We can use a simple file to store all the records on separate lines and retrieve them from the same file. But using a file for storage has some limitations.</p>
+<h2>Limitations of file storage</h2>
+<ul>
+<li>We can’t offer concurrent management to separate users accessing the storage files from different locations.</li>
+<li>We can’t grant different access rights to different users.</li>
+<li>How will the system scale and be available when adding thousands of entries?</li>
+<li>How will we search content for different users in a short time?</li>
+</ul>
+<h2>Solution</h2>
+<p>The above limitations can be addressed using databases.</p>
+<p>A database is an organized collection of data that can be managed and accessed easily. Databases are created to make it easier to store, retrieve, modify, and delete data in connection with different data-processing procedures.</p>
+<p>Some of the applications where we use database management are the banking systems, online shopping stores, and so on. Different organizations have different sizes of databases according to their needs.</p>
+<p><em>Note: It seems that the World Data Center for Climate (WDCC) is the largest database in the world. It contains around 220 terabytes of web data and 6 petabytes of additional data.</em></p>
+<p>There are two basic types of databases:</p>
+<ul>
+<li>SQL (relational databases)</li>
+<li>NoSQL (non-relational databases)
+They differ in terms of their intended use case, the type of information they hold, and the storage method they employ.</li>
+</ul>
+<p><em>Relational database has a well defined structure such as attributes (columns of the table). NoSQL databases such as document databases often have application-defined structure of data.</em></p>
+<p>Relational databases, like phone books that record contact numbers and addresses, are organized and have predetermined schemas. Non-relational databases, like file directories that store anything from a person’s contact information to shopping preferences, are unstructured, scattered, and feature a dynamic schema. We’ll discuss their differences and their types in detail in the next lesson.</p>
+<h2>Advantages</h2>
+<p>A proper database is essential for every business or organization. This is because the database stores all essential information about the organization, such as personnel records, transactions, salary information, and so on. The following are some of the reasons why the database is important:</p>
+<ul>
+<li>Managing large data: A large amount of data can be easily handled with a database, which wouldn’t be possible using other tools.</li>
+<li>Retrieving accurate data (data consistency): Due to different constraints in databases, we can retrieve accurate data whenever we want.</li>
+<li>Easy updation: It is quite easy to update data in databases using data manipulation language (DML).</li>
+<li>Security: Databases ensure the security of the data. A database only allows authorized users to access data.</li>
+<li>Data integrity: Databases ensure data integrity by using different constraints for data.</li>
+<li>Availability: Databases can be replicated (using data replication) on different servers, which can be concurrently updated. These replicas ensure availability.</li>
+<li>Scalability: Databases are divided (using data partitioning) to manage the load on a single node. This increases scalability.</li>
+</ul>
+<h2>How will we explain databases?</h2>
+<p>We have divided the database chapter into four lessons:</p>
+<ul>
+<li>Types of Databases: We’ll discuss the different types of databases, their advantages, and their disadvantages.</li>
+<li>Data Replication: We’ll discuss what data replication is and its different models with their pros and cons.</li>
+<li>Data Partitioning: We’ll discuss what data partitioning is and its different models with their pros and cons.</li>
+<li>Cost-benefit analysis: We’ll discuss which database sharding approach is best for different kinds of databases.</li>
+</ul>
+<p>Let’s get started by understanding different types of databases and their preferred use cases.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
