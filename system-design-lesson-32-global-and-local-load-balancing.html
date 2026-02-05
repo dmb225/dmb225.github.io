@@ -4,22 +4,28 @@
                         <meta charset="utf-8" />
                         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                         <meta name="generator" content="Pelican" />
-                        <title>Dao Malick BENIN - system-design</title>
+                        <title>System Design: Lesson 3.2 - Global and local load balancing</title>
                         <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
                                 <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="Introduction From the previous lesson, it may seem like load balancing is performed only within the data center. However, load balancing is..." />
         </head>
 
         <body id="index" class="home">
                 <header id="banner" class="body">
                         <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
                         <nav><ul>
-                                                <li><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
                         </ul></nav>
                 </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-32-global-and-local-load-balancing.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 3.2 - Global and local load balancing">System Design: Lesson 3.2 - Global and local load balancing</a></h1>
+      </header>
 
-                <aside id="featured" class="body">
-                    <article>
-                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-32-global-and-local-load-balancing.html">System Design: Lesson 3.2 - Global and local load balancing</a></h1>
+      <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2026-02-04T00:00:00+01:00">
                 Published: Wed 04 February 2026
@@ -30,7 +36,7 @@
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/load-balancers.html">load-balancers</a> </p>        
-</footer><!-- /.post-info --><h2>Introduction</h2>
+</footer><!-- /.post-info -->        <h2>Introduction</h2>
 <p>From the previous lesson, it may seem like load balancing is performed only within the data center. However, load balancing is required at a global and a local scale. Let’s understand the function of each of the two:</p>
 <ul>
 <li>Global server load balancing (GSLB): GSLB involves the distribution of traffic load across multiple geographical regions.</li>
@@ -71,133 +77,11 @@ Because the round-robin load-balancing algorithm doesn’t consider any end-serv
 <ul>
 <li>GTM through ADCs: Some Application Delivery Controllers (ADCs) support GSLB by forwarding requests based on real-time data such as server health and data center capacity.</li>
 <li>GTM through DNS: Organizations or DNS providers configure authoritative DNS servers that respond to client requests based on the IP address of the DNS resolver (which is usually close to the user). This allows them to direct traffic to the data center that is geographically or topologically nearest, or based on routing policies such as latency or availability. This is typically achieved via third-party managed DNS providers (e.g., AWS Route 53, Cloudflare) or custom DNS infrastructure that incorporates geolocation and health data.</li>
-</ul>                    </article>
-                </aside><!-- /#featured -->
-                    <section id="content" class="body">
-                        <h1>Other articles</h1>
-                        <hr />
-                        <ol id="posts-list" class="hfeed">
+</ul>
+      </div><!-- /.entry-content -->
 
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-33-advanced-details-of-load-balancers.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 3.3 - Advanced Details of Load Balancers">System Design: Lesson 3.3 - Advanced Details of Load Balancers</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-04T00:00:00+01:00">
-                Published: Wed 04 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/load-balancers.html">load-balancers</a> </p>        
-</footer><!-- /.post-info -->                        <p>This lesson will focus on some of the well-known algorithms used in the local load balancers. We’ll also understand how load balancers are connected to form a hierarchy, sharing work across different tiers of LBs.</p>
-<h2>Algorithms of load balancers</h2>
-<p>Load balancers distribute client requests according to an algorithm. Some …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-33-advanced-details-of-load-balancers.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-1-building-blocks.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 1 - Building Blocks">System Design: Lesson 1 - Building Blocks</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> </p>        
-</footer><!-- /.post-info -->                        <p>System design problems usually have some similarities, though specific details are often unique. We have extracted these similarities across design problems as the basic building blocks we’ll be covering. One example of a building block is a load-balancing component, which we’ll probably use in every design problem in …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-1-building-blocks.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-21-introduction-to-domain-name-system-dns.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 2.1 - Introduction to Domain Name System (DNS)">System Design: Lesson 2.1 - Introduction to Domain Name System (DNS)</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/dns.html">dns</a> </p>        
-</footer><!-- /.post-info -->                        <h2>The origins of DNS</h2>
-<p>Let’s consider the example of a mobile phone where a unique number is associated with each user. To make calls to friends, we can initially try to memorize some of the phone numbers. However, as the number of contacts grows, we’ll have to use …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-21-introduction-to-domain-name-system-dns.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-22-how-the-domain-name-system-works.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 2.2 - How the Domain Name System works">System Design: Lesson 2.2 - How the Domain Name System works</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/dns.html">dns</a> </p>        
-</footer><!-- /.post-info -->                        <p>Through this lesson, we’ll answer the following questions:</p>
-<ul>
-<li>How is the DNS hierarchy formed using various types of DNS name servers?</li>
-<li>How is caching performed at different levels of the Internet to reduce the querying burden over the DNS infrastructure?</li>
-<li>How does the distributed nature of the DNS infrastructure …</li></ul>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-22-how-the-domain-name-system-works.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-31-introduction-to-load-balancers.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 3.1 - Introduction to Load Balancers">System Design: Lesson 3.1 - Introduction to Load Balancers</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/load-balancers.html">load-balancers</a> </p>        
-</footer><!-- /.post-info -->                        <h2>What is load balancing?</h2>
-<p>Millions of requests could arrive per second in a typical data center. To serve these requests, thousands (or a hundred thousand) servers work together to share the load of incoming requests.</p>
-<p><em>Note: Here, it’s important that we consider how the incoming requests will be divided …</em></p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-31-introduction-to-load-balancers.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-                    </ol><!-- /#posts-list -->
-                    </section><!-- /#content -->
+    </article>
+  </section>
                 <section id="extras" class="body">
                                 <div class="blogroll">
                                         <h2>links</h2>
