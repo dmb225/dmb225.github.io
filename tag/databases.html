@@ -19,10 +19,10 @@
 
                 <aside id="featured" class="body">
                     <article>
-                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html">System Design: Lesson 4.1 - Introduction to Databases</a></h1>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-42-types-of-databases.html">System Design: Lesson 4.2 - Types of Databases</a></h1>
 <footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
+        <abbr class="published" title="2026-02-05T00:00:00+01:00">
+                Published: Thu 05 February 2026
         </abbr>
 
                 <address class="vcard author">
@@ -30,50 +30,143 @@
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
-</footer><!-- /.post-info --><h2>Problem statement</h2>
-<p>Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an application like WhatsApp. People use our application to communicate with their friends. Now, where and how can we store information (a list of people’s names and their respective messages) permanently and retrieve it?</p>
-<p>We can use a simple file to store all the records on separate lines and retrieve them from the same file. But using a file for storage has some limitations.</p>
-<h2>Limitations of file storage</h2>
+</footer><!-- /.post-info --><p>As we discussed earlier, databases are divided into two types: relational and non-relational. Let’s discuss these types in detail.</p>
+<h2>Relational databases</h2>
+<p>Relational databases adhere to particular schemas before storing the data. The data stored in relational databases has prior structure. Mostly, this model organizes data into one or more relations (also called tables), with a unique key for each tuple (instance). Each entity of the data consists of instances and attributes, where instances are stored in rows, and the attributes of each instance are stored in columns. Since each tuple has a unique key, a tuple in one table can be linked to a tuple in other tables by storing the primary keys in other tables, generally known as foreign keys.</p>
+<p>A <em>Structure Query Language (SQL)</em> is used for manipulating the database. This includes insertion, deletion, and retrieval of data.</p>
+<p>There are various reasons for the popularity and dominance of relational databases, which include simplicity, robustness, flexibility, performance, scalability, and compatibility in managing generic data.</p>
+<p>Relational databases provide the atomicity, consistency, isolation, and durability (ACID) properties to maintain the integrity of the database. ACID is a powerful abstraction that simplifies complex interactions with the data and hides many anomalies (like dirty reads, dirty writes, read skew, lost updates, write skew, and phantom reads) behind a simple transaction abort.</p>
+<p>But ACID is like a big hammer by design so that it’s generic enough for all the problems. If some specific application only needs to deal with a few anomalies, there’s a window of opportunity to use a custom solution for higher performance, though there is added complexity.</p>
+<p>Let’s discuss ACID in detail:</p>
+<p>Let’s discuss ACID in detail:</p>
 <ul>
-<li>We can’t offer concurrent management to separate users accessing the storage files from different locations.</li>
-<li>We can’t grant different access rights to different users.</li>
-<li>How will the system scale and be available when adding thousands of entries?</li>
-<li>How will we search content for different users in a short time?</li>
+<li>Atomicity: A transaction is considered an atomic unit. Therefore, either all the statements within a transaction will successfully execute, or none of them will execute. If a statement fails within a transaction, it should be aborted and rolled back.</li>
+<li>Consistency: At any given time, the database should be in a consistent state, and it should remain in a consistent state after every transaction. For example, if multiple users want to view a record from the database, it should return a similar result each time.</li>
+<li>Isolation: In the case of multiple transactions running concurrently, they shouldn’t be affected by each other. The final state of the database should be the same as the transactions that were executed sequentially.</li>
+<li>Durability: The system should guarantee that completed transactions will survive permanently in the database even in system failure events.
+Various database management systems (DBMS) are used to define relational database schema along with other operations, such as storing, retrieving, and running SQL queries on data. Some of the popular DBMSs are as follows:</li>
+<li>MySQL</li>
+<li>Oracle Database</li>
+<li>Microsoft SQL Server</li>
+<li>IBM DB2</li>
+<li>Postgres</li>
+<li>SQLite</li>
 </ul>
-<h2>Solution</h2>
-<p>The above limitations can be addressed using databases.</p>
-<p>A database is an organized collection of data that can be managed and accessed easily. Databases are created to make it easier to store, retrieve, modify, and delete data in connection with different data-processing procedures.</p>
-<p>Some of the applications where we use database management are the banking systems, online shopping stores, and so on. Different organizations have different sizes of databases according to their needs.</p>
-<p><em>Note: It seems that the World Data Center for Climate (WDCC) is the largest database in the world. It contains around 220 terabytes of web data and 6 petabytes of additional data.</em></p>
-<p>There are two basic types of databases:</p>
+<h3>Why relational databases?</h3>
+<p>Relational databases are the default choice of software professionals for structured data storage. There are a number of advantages to these databases. One of the greatest powers of the relational database is its abstractions of ACID transactions and related programming semantics. This makes it very convenient for the end programmer to use a relational database. Let’s revisit some important features of relational databases:</p>
+<h4>Flexibility</h4>
+<p>In the context of SQL, data definition language (DDL) provides us the flexibility to modify the database, including tables, columns, renaming the tables, and other changes. DDL even allows us to modify schema while other queries are happening and the database server is running.</p>
+<h4>Reduced redundancy</h4>
+<p>One of the biggest advantages of the relational database is that it eliminates data redundancy. The information related to a specific entity appears in one table while the relevant data to that specific entity appears in the other tables linked through foreign keys. This process is called normalization and has the additional benefit of removing an inconsistent dependency.</p>
+<h4>Concurrency</h4>
+<p>Concurrency is an important factor while designing an enterprise database. In such a case, the data is read and written by many users at the same time. We need to coordinate such interactions to avoid inconsistency in data—for example, the double booking of hotel rooms. Concurrency in a relational database is handled through transactional access to the data. As explained earlier, a transaction is considered an atomic operation, so it also works in error handling to either roll back or commit a transaction on successful execution.</p>
+<h4>Integration</h4>
+<p>The process of aggregating data from multiple sources is a common practice in enterprise applications. A common way to perform this aggregation is to integrate a shared database where multiple applications store their data. This way, all the applications can easily access each other’s data while the concurrency control measures handle the access of multiple applications.</p>
+<h4>Backup and disaster recovery</h4>
+<p>Relational databases guarantee the state of data is consistent at any time. The export and import operations make backup and restoration easier. Most cloud-based relational databases perform continuous mirroring to avoid loss of data and make the restoration process easier and quicker.</p>
+<h3>Drawback</h3>
+<h4>Impedance mismatch</h4>
+<p>Impedance mismatch is the difference between the relational model and the in-memory data structures. The relational model organizes data into a tabular structure with relations and tuples. SQL operation on this structured data yields relations aligned with relational algebra. However, it has some limitations. In particular, the values in a table take simple values that can’t be a structure or a list. The case is different for in-memory, where a complex data structure can be stored. To make the complex structures compatible with the relations, we would need a translation of the data in light of relational algebra. So, the impedance mismatch requires translation between two representations.</p>
+<h2>Why non-relational (NoSQL) databases?</h2>
+<p>A NoSQL database is designed for a variety of data models to access and manage data. There are various types of NoSQL databases, which we’ll explain in the next section. These databases are used in applications that require a large volume of semi-structured and unstructured data, low latency, and flexible data models. This can be achieved by relaxing some of the data consistency restrictions of other databases. The following are some characteristics of the NoSQL database:</p>
 <ul>
-<li>SQL (relational databases)</li>
-<li>NoSQL (non-relational databases)
-They differ in terms of their intended use case, the type of information they hold, and the storage method they employ.</li>
+<li>Simple design: Unlike relational databases, NoSQL doesn’t require dealing with the impedance mismatch—for example, storing all the employees’ data in one document instead of multiple tables that require join operations. This strategy makes it simple and easier to write less code, debug, and maintain.</li>
+<li>Horizontal scaling: Primarily, NoSQL is preferred due to its ability to run databases on a large cluster. This solves the problem when the number of concurrent users increases. NoSQL makes it easier to scale out since the data related to a specific employee is stored in one document instead of multiple tables over nodes. NoSQL databases often spread data across multiple nodes and balance data and queries across nodes automatically. In case of a node failure, it can be transparently replaced without any application disruption.</li>
+<li>Availability: To enhance the availability of data, node replacement can be performed without application downtime. Most of the non-relational databases’ variants support data replication to ensure high availability and disaster recovery.</li>
+<li>Support for unstructured and semi-structured data: Many NoSQL databases work with data that doesn’t have a schema at the time of database configuration or data writes. For example, document databases are structureless; they allow documents (JSON, XML, BSON, and so on) to have different fields. For example, one JSON document can have fewer fields than the other.</li>
+<li>Cost: Licenses for many RDBMSs are pretty expensive, while many NoSQL databases are open source and freely available. Similarly, some RDBMSs rely on costly proprietary hardware and storage systems, while NoSQL databases usually use clusters of cheap commodity servers.</li>
 </ul>
-<p><em>Relational database has a well defined structure such as attributes (columns of the table). NoSQL databases such as document databases often have application-defined structure of data.</em></p>
-<p>Relational databases, like phone books that record contact numbers and addresses, are organized and have predetermined schemas. Non-relational databases, like file directories that store anything from a person’s contact information to shopping preferences, are unstructured, scattered, and feature a dynamic schema. We’ll discuss their differences and their types in detail in the next lesson.</p>
-<h2>Advantages</h2>
-<p>A proper database is essential for every business or organization. This is because the database stores all essential information about the organization, such as personnel records, transactions, salary information, and so on. The following are some of the reasons why the database is important:</p>
-<ul>
-<li>Managing large data: A large amount of data can be easily handled with a database, which wouldn’t be possible using other tools.</li>
-<li>Retrieving accurate data (data consistency): Due to different constraints in databases, we can retrieve accurate data whenever we want.</li>
-<li>Easy updation: It is quite easy to update data in databases using data manipulation language (DML).</li>
-<li>Security: Databases ensure the security of the data. A database only allows authorized users to access data.</li>
-<li>Data integrity: Databases ensure data integrity by using different constraints for data.</li>
-<li>Availability: Databases can be replicated (using data replication) on different servers, which can be concurrently updated. These replicas ensure availability.</li>
-<li>Scalability: Databases are divided (using data partitioning) to manage the load on a single node. This increases scalability.</li>
-</ul>
-<h2>How will we explain databases?</h2>
-<p>We have divided the database chapter into four lessons:</p>
-<ul>
-<li>Types of Databases: We’ll discuss the different types of databases, their advantages, and their disadvantages.</li>
-<li>Data Replication: We’ll discuss what data replication is and its different models with their pros and cons.</li>
-<li>Data Partitioning: We’ll discuss what data partitioning is and its different models with their pros and cons.</li>
-<li>Cost-benefit analysis: We’ll discuss which database sharding approach is best for different kinds of databases.</li>
-</ul>
-<p>Let’s get started by understanding different types of databases and their preferred use cases.</p>                    </article>
+<p>NoSQL databases are divided into various categories based on the nature of the operations and features, including document store, columnar database, key-value store, and graph database. We’ll discuss each of them along with their use cases from the system design perspective in the following sections.</p>
+<h3>Types of NoSQL databases</h3>
+<h4>Key-value database</h4>
+<p>Key-value databases use key-value methods like hash tables to store data in key-value pairs. We can see this depicted in the figure a couple of paragraphs below. Here, the key serves as a unique or primary key, and the values can be anything ranging from simple scalar values to complex objects. These databases allow easy partitioning and horizontal scaling of the data. Some popular key-value databases include Amazon DynamoDB, Redis, and Memcached DB.</p>
+<p><strong>Use case</strong>: Key-value databases are efficient for session-oriented applications. Session-oriented applications, such as web applications, store users’ data in the main memory or in a database during a session. This data may include user profile information, recommendations, targeted promotions, discounts, and more. A unique ID (a key) is assigned to each user’s session for easy access and storage. Therefore, a better choice to store such data is the key-value database.</p>
+<p>The schema for storing the item attributes is defined based on the nature of the item and the number of attributes it possesses.</p>
+<h4>Document database</h4>
+<p>A document database is designed to store and retrieve documents in formats like XML, JSON, BSON, and so on. These documents are composed of a hierarchical tree data structure that can include maps, collections, and scalar values. Documents in this type of database may have varying structures and data. MongoDB and Google Cloud Firestore are examples of document databases.</p>
+<p><strong>Use case</strong>: Document databases are suitable for unstructured catalog data, like JSON files or other complex structured hierarchical data. For example, in e-commerce applications, a product has thousands of attributes, which is unfeasible to store in a relational database due to its impact on the reading performance. Here comes the role of a document database, which can efficiently store each attribute in a single file for easy management and faster reading speed. Moreover, it’s also a good option for content management applications, such as blogs and video platforms. An entity required for the application is stored as a single document in such applications.</p>
+<h4>Graph database</h4>
+<p>Graph databases use the graph data structure to store data, where nodes represent entities, and edges show relationships between entities. The organization of nodes based on relationships leads to interesting patterns between the nodes. This database allows us to store the data once and then interpret it differently based on relationships. Popular graph databases include Neo4J, OrientDB, and InfiniteGraph. Graph data is kept in store files for persistent storage. Each of the files contains data for a specific part of the graph, such as nodes, links, properties, and so on.</p>
+<p><strong>Use case</strong>: Graph databases can be used in social applications and provide interesting facts and figures among different kinds of users and their activities. The focus of graph databases is to store data and pave the way to drive analyses and decisions based on relationships between entities. The nature of graph databases makes them suitable for various applications, such as data regulation and privacy, machine learning research, financial services-based applications, and many more.</p>
+<h4>Columnar database</h4>
+<p>Columnar databases organize data by columns instead of rows. This design makes it much faster and more efficient to retrieve specific fields, especially useful when running analytics or summarizing large datasets. As a result, they are well-suited for systems where data is read frequently but updated less often. Popular columnar databases include Amazon Redshift and Google BigQuery, all widely used for high-performance analytics and data warehousing.</p>
+<p><strong>Use case</strong>: These databases shine in analytical tasks that involve processing large amounts of data, such as aggregations or trend analysis. For example, in financial systems that need to calculate total transaction amounts over time, a columnar database can quickly pull just the “amount” field without loading unrelated data like customer names or dates.</p>
+<p><em>Note: Another type of database often mistaken for columnar databases is the wide-column database. While columnar databases store each column’s data together on disk to accelerate analytical queries and aggregations, wide-column databases, such as Apache Cassandra and HBase which organize data in rows grouped into column families, making them more suitable for write-heavy workloads and flexible, semi-structured data use cases.</em></p>
+<h3>Drawbacks of NoSQL databases</h3>
+<h4>Lack of standardization</h4>
+<p>NoSQL doesn’t follow any specific standard, like how relational databases follow relational algebra. Porting applications from one type of NoSQL database to another might be a challenge.</p>
+<h4>Consistency</h4>
+<p>NoSQL databases provide different products based on the specific trade-offs between consistency and availability when failures can happen. We won’t have strong data integrity, like primary and referential integrities in a relational database. Data might not be strongly consistent but slowly converging using a weak model like eventual consistency.</p>
+<p><strong>? Let’s assess our understanding of the lesson’s content with the following question. ?</strong></p>
+<p>Imagine we’re designing a recommendation engine for a social networking platform with millions of users. The goal is to provide personalized recommendations for users to connect with others based on their interests, activities, and connections. Which database would be a natural fit for modeling and querying the complex relationship in a social network and why?</p>
+<p><strong>Solution</strong>: A graph database is the natural fit for modeling and querying complex relationships in a social network. It uses nodes and edges to represent users, interests, activities, and connections, making it efficient for traversing relationships and providing personalized recommendations. Its flexibility and scalability support the dynamic nature of social data, leading to more relevant suggestions.</p>
+<h2>Choose the right database</h2>
+<p>Various factors affect the choice of database to be used in an application. A comparison between the relational and non-relational databases is shown in the following table to help us choose:</p>
+<table>
+<thead>
+<tr>
+<th>Relational Database</th>
+<th>Non-relational Database</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>If the data to be stored is structured</td>
+<td>If the data to be stored is unstructured</td>
+</tr>
+<tr>
+<td>If ACID properties are required</td>
+<td>If ACID properties are not strictly required</td>
+</tr>
+<tr>
+<td>If the size of the data is relatively small and fits on a node</td>
+<td>If the size of the data to be stored is large</td>
+</tr>
+<tr>
+<td>Strong schema and fixed structure</td>
+<td>Flexible or schema-less structure</td>
+</tr>
+<tr>
+<td>Data is stored in tables with rows and columns</td>
+<td>Data is stored as documents, key-value, graph, or wide-column</td>
+</tr>
+<tr>
+<td>Scaling is mainly vertical</td>
+<td>Scaling is mainly horizontal</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note: When NoSQL databases first came into being, they were drastically different to program and use as compared to traditional databases. Though, due to extensive research in academia and industry over the last many years, the programmer-facing differences between NoSQL and traditional stores are blurring. We might be using the same SQL constructs to talk to a NoSQL store and get a similar level of performance and consistency as a traditional store. Google’s Cloud Spanner is one such database that’s geo-replicated with automatic horizontal sharding ability and high-speed global snapshots of data.</em></p>                    </article>
                 </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 4.1 - Introduction to Databases">System Design: Lesson 4.1 - Introduction to Databases</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-04T00:00:00+01:00">
+                Published: Wed 04 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Problem statement</h2>
+<p>Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an application like WhatsApp. People use our application to communicate with their friends. Now, where and how can we store information (a list of people’s names …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+                    </ol><!-- /#posts-list -->
+                    </section><!-- /#content -->
                 <section id="extras" class="body">
                                 <div class="blogroll">
                                         <h2>links</h2>
