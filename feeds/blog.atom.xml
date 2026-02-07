@@ -70,7 +70,7 @@ Various database management systems (DBMS) are used to define relational databas
 &lt;p&gt;NoSQL databases provide different products based on the specific trade-offs between consistency and availability when failures can happen. We won’t have strong data integrity, like primary and referential integrities in a relational database. Data might not be strongly consistent but slowly converging using a weak model like eventual consistency.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;? Let’s assess our understanding of the lesson’s content with the following question. ?&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Imagine we’re designing a recommendation engine for a social networking platform with millions of users. The goal is to provide personalized recommendations for users to connect with others based on their interests, activities, and connections. Which database would be a natural fit for modeling and querying the complex relationship in a social network and why?&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Solution&lt;/strong&gt;: A graph database is the natural fit for modeling and querying complex relationships in a social network. It uses nodes and edges to represent users, interests, activities, and connections, making it efficient for traversing relationships and providing personalized recommendations. Its flexibility and scalability support the dynamic nature of social data, leading to more relevant suggestions.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; A graph database is the natural fit for modeling and querying complex relationships in a social network. It uses nodes and edges to represent users, interests, activities, and connections, making it efficient for traversing relationships and providing personalized recommendations. Its flexibility and scalability support the dynamic nature of social data, leading to more relevant suggestions.&lt;/p&gt;
 &lt;h2&gt;Choose the right database&lt;/h2&gt;
 &lt;p&gt;Various factors affect the choice of database to be used in an application. A comparison between the relational and non-relational databases is shown in the following table to help us choose:&lt;/p&gt;
 &lt;table&gt;
@@ -107,7 +107,302 @@ Various database management systems (DBMS) are used to define relational databas
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;em&gt;Note: When NoSQL databases first came into being, they were drastically different to program and use as compared to traditional databases. Though, due to extensive research in academia and industry over the last many years, the programmer-facing differences between NoSQL and traditional stores are blurring. We might be using the same SQL constructs to talk to a NoSQL store and get a similar level of performance and consistency as a traditional store. Google’s Cloud Spanner is one such database that’s geo-replicated with automatic horizontal sharding ability and high-speed global snapshots of data.&lt;/em&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 3.2 - Global and local load balancing</title><link href="https://dmb225.github.io/system-design-lesson-32-global-and-local-load-balancing.html" rel="alternate"/><published>2026-02-04T00:00:00+01:00</published><updated>2026-02-04T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-04:/system-design-lesson-32-global-and-local-load-balancing.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;Note: When NoSQL databases first came into being, they were drastically different to program and use as compared to traditional databases. Though, due to extensive research in academia and industry over the last many years, the programmer-facing differences between NoSQL and traditional stores are blurring. We might be using the same SQL constructs to talk to a NoSQL store and get a similar level of performance and consistency as a traditional store. Google’s Cloud Spanner is one such database that’s geo-replicated with automatic horizontal sharding ability and high-speed global snapshots of data.&lt;/em&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.3 - Data Replication</title><link href="https://dmb225.github.io/system-design-lesson-43-data-replication.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-43-data-replication.html</id><summary type="html">&lt;p&gt;Data is a valuable asset for an organization because it drives the entire business.&lt;/p&gt;
+&lt;p&gt;Data provides critical business insights into what’s important and what needs to be changed. Organizations also need to securely save and serve their clients’ data on demand. Timely access to the required data under varying …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Data is a valuable asset for an organization because it drives the entire business.&lt;/p&gt;
+&lt;p&gt;Data provides critical business insights into what’s important and what needs to be changed. Organizations also need to securely save and serve their clients’ data on demand. Timely access to the required data under varying conditions (including increasing reads and writes, disk and node failures, network and power outages, and others) is necessary to successfully run an online business.&lt;/p&gt;
+&lt;p&gt;We need the following characteristics from our data store:
+- Availability under faults (failure of one or more disks, nodes, network, or power outages).
+- Scalability (with increasing reads, writes, and other operations).
+- Performance (low latency and high throughput for the clients).&lt;/p&gt;
+&lt;p&gt;It’s challenging, or even impossible, to achieve the above characteristics on a single node.&lt;/p&gt;
+&lt;h2&gt;Replication&lt;/h2&gt;
+&lt;p&gt;Replication refers to keeping multiple copies of the data at various nodes (preferably geographically distributed) to achieve availability, scalability, and performance. In this lesson, we assume that a single node is enough to hold our entire data. We won’t use this assumption while discussing the partitioning of data in multiple nodes. Often, the concepts of replication and partitioning go together.&lt;/p&gt;
+&lt;p&gt;Replication provides several key benefits for distributed systems:
+- Keeps data geographically close to your users, thus reducing access latency.
+- Allows the system to continue working even if some of its parts have failed, thus increasing availability.
+- Scales out the number of machines that can serve read queries, thus increasing read throughput.&lt;/p&gt;
+&lt;p&gt;However, with many benefits, like availability, replication comes with its complexities. Replication is relatively simple if the replicated data doesn’t require frequent changes. The main problem in replication arises when we have to maintain changes in the replicated data over time.&lt;/p&gt;
+&lt;p&gt;If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data is a real challenge; it requires careful thinking about concurrency and all the things that can go wrong so that we can deal with the consequences of those faults.&lt;/p&gt;
+&lt;p&gt;Additional complexities that could arise due to replication are as follows:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;How do we keep multiple copies of data consistent with each other?&lt;/li&gt;
+&lt;li&gt;How do we deal with failed replica nodes?&lt;/li&gt;
+&lt;li&gt;Should we replicate synchronously or asynchronously?&lt;ul&gt;
+&lt;li&gt;How do we deal with replication lag in case of asynchronous replication?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;How do we handle concurrent writes?&lt;/li&gt;
+&lt;li&gt;What consistency model needs to be exposed to the end programmers?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We’ll explore the answer to these questions in this lesson.&lt;/p&gt;
+&lt;h2&gt;Synchronous vs. asynchronous replication&lt;/h2&gt;
+&lt;p&gt;There are two ways to disseminate changes to the replica nodes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Synchronous replication&lt;/li&gt;
+&lt;li&gt;Asynchronous replication
+In synchronous replication, the primary node waits for acknowledgments from secondary nodes to confirm that the data has been updated.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After receiving acknowledgment from all secondary nodes, the primary node reports success to the client. In asynchronous replication, the primary node doesn’t wait for acknowledgments from the secondary nodes and reports success to the client after updating itself. The advantage of synchronous replication is that all secondary nodes are completely up-to-date with the primary node.&lt;/p&gt;
+&lt;p&gt;However, there’s a disadvantage to this approach.&lt;/p&gt;
+&lt;p&gt;If one of the secondary nodes fails to acknowledge due to a network failure or fault, the primary node will be unable to acknowledge the client until it receives a successful acknowledgment from the crashed node. This causes high latency in the response from the primary node to the client. On the other hand, the advantage of asynchronous replication is that the primary node can continue its work even if all the secondary nodes are down.&lt;/p&gt;
+&lt;p&gt;However, if the primary node fails, the writes that weren’t copied to the secondary nodes will be lost.&lt;/p&gt;
+&lt;p&gt;Often, leader-based replication is configured to be completely asynchronous. In this case, if the master fails and is not recoverable, any writes that have not yet been replicated to slaves are lost. This means that a write is not guaranteed to be durable, and weakening durability is a significant trade-off that must be carefully considered. The above paragraph explains a trade-off between data consistency and availability when different components of the system can fail.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Let’s assess our understanding of the content provided in this lesson with this question:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Imagine you’re leading the database architecture for a real-time financial trading platform that operates globally. The platform demands extremely low-latency data updates to ensure traders receive up-to-the-moment information for making split-second decisions.&lt;/p&gt;
+&lt;p&gt;The existing database infrastructure is struggling to meet the stringent latency requirements.&lt;/p&gt;
+&lt;p&gt;In this case, the low latency is paramount, and a certain degree of eventual consistency is acceptable. Which one of the following two choices would you recommend for data updates in the database, and why?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Synchronous updates&lt;/li&gt;
+&lt;li&gt;Asynchronous updates&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; Certainly! In a real-time financial trading platform where low latency is critical and some eventual consistency is acceptable, asynchronous updates are the recommended choice. This approach allows the primary database to continue processing data without waiting for acknowledgments from secondary nodes, significantly reducing latency. It ensures traders receive timely information, which is vital for making split-second decisions.&lt;/p&gt;
+&lt;h2&gt;Data replication models&lt;/h2&gt;
+&lt;p&gt;If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.&lt;/p&gt;
+&lt;p&gt;At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.&lt;/p&gt;
+&lt;p&gt;Here are the following algorithms for replicating changes across nodes:
+- Single leader or primary-secondary, or master-slave replication
+- Multi-leader replication
+- Peer-to-peer or leaderless replication&lt;/p&gt;
+&lt;h3&gt;Data replication models&lt;/h3&gt;
+&lt;p&gt;If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.&lt;/p&gt;
+&lt;p&gt;At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.&lt;/p&gt;
+&lt;p&gt;Here are the following algorithms for replicating changes across nodes:
+- Single leader or primary-secondary, or master-slave replication
+- Multi-leader replication
+- Peer-to-peer or leaderless replication&lt;/p&gt;
+&lt;h3&gt;Single leader/primary-secondary replication&lt;/h3&gt;
+&lt;p&gt;In primary-secondary replication, data is replicated across multiple nodes.&lt;/p&gt;
+&lt;p&gt;One node is designated as the primary. It’s responsible for processing any writes to data stored on the cluster. It also sends all the writes to the secondary nodes and keeps them in sync. Primary-secondary replication is appropriate when our workload is read-heavy.&lt;/p&gt;
+&lt;p&gt;To better scale with increasing readers, we can add more followers and distribute the read load across the available followers.&lt;/p&gt;
+&lt;p&gt;However, replicating data to many followers can create a primary bottleneck. Additionally, primary-secondary replication is inappropriate if our workload is write-heavy. Another advantage of primary-secondary replication is that it’s read-resilient.&lt;/p&gt;
+&lt;p&gt;Secondary nodes can still handle read requests in the event of a primary node failure. Therefore, it’s a helpful approach for read-intensive applications.&lt;/p&gt;
+&lt;p&gt;Replication via this approach introduces inconsistency when using asynchronous replication. Clients reading from different replicas may see inconsistent data in the event of a primary node failure, as the primary node cannot propagate updated data to the secondary nodes.&lt;/p&gt;
+&lt;p&gt;So, if the primary node fails, any missed updates not passed on to the secondary nodes can be lost.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;What happens when the primary node fails?&lt;/strong&gt;
+In case of failure of the primary node, a secondary node can be appointed as a primary node, which speeds up the process of recovering the initial primary node. There are two approaches to select the new primary node: manual and automatic.&lt;/p&gt;
+&lt;p&gt;In a manual approach, an operator decides which node should be the primary node and notifies all secondary nodes.&lt;/p&gt;
+&lt;p&gt;In an automatic approach, when secondary nodes find out that the primary node has failed, they appoint the new primary node by conducting an election known as a leader election.&lt;/p&gt;
+&lt;h4&gt;Primary-secondary replication methods&lt;/h4&gt;
+&lt;p&gt;There are many different replication methods in primary-secondary replication:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Statement-based replication&lt;/li&gt;
+&lt;li&gt;Write-ahead log (WAL) shipping&lt;/li&gt;
+&lt;li&gt;Logical (row-based) replication&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s discuss each of them in detail.&lt;/p&gt;
+&lt;h3&gt;Statement-based replication&lt;/h3&gt;
+&lt;p&gt;Statement-based replication (SBR) is an approach used in MySQL databases.&lt;/p&gt;
+&lt;p&gt;In this approach, the primary node executes the SQL statements such as INSERT, UPDATE, DELETE, etc., and then the statements are written into a log file. In the next step, the log file is sent to the secondary nodes for execution.&lt;/p&gt;
+&lt;p&gt;This type of replication was used in MySQL before version 5.1.&lt;/p&gt;
+&lt;p&gt;*Best case usage: This type of replication requires all writes to be directed through a single master node, while read-only queries can be served by any replica.&lt;/p&gt;
+&lt;p&gt;For workloads that consist mostly of reads and only a small percentage of writes (a common pattern on the web), there is an attractive option to create multiple followers and distribute read requests across them. This removes a load from the leader and allows read requests to be served by nearby replicas.*&lt;/p&gt;
+&lt;p&gt;While this type of replication appears beneficial, it also has some drawbacks. For example, any nondeterministic functions such as NOW() might result in distinct writes on the primary and secondary nodes.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: The NOW() function returns the current date and time according to the system clock.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Write-ahead log (WAL) shipping&lt;/strong&gt;
+Write-ahead log (WAL) shipping is a data replication technique used in both PostgreSQL and Oracle.&lt;/p&gt;
+&lt;p&gt;In this technique, when a transaction occurs, it’s initially recorded in a transactional log file, and the log file is written to disk. Subsequently, the recorded operations are executed on the primary database before being transmitted to secondary nodes for execution.&lt;/p&gt;
+&lt;p&gt;Unlike SBR, WAL maintains transactional logs instead of SQL statements in a log file, ensuring consistency when dealing with nondeterministic functions. Writing to disk also aids in recovery in case of crash failures.&lt;/p&gt;
+&lt;p&gt;For example, when an operation like an UPDATE is executed in PostgreSQL, it’s first written to the transactional log file and disk before being applied to the database. This entry in the transactional log can include details such as the transaction ID, operation type, affected table, and new values, after which the changes are replicated to the secondary nodes.&lt;/p&gt;
+&lt;p&gt;However, the drawback of WAL is its tight coupling with the inner structure of the database engine, making software upgrades on the leader and followers complicated.&lt;/p&gt;
+&lt;h3&gt;Logical (row-based) replication&lt;/h3&gt;
+&lt;p&gt;Logical (row-based) replication is utilized in various relational databases, including PostgreSQL and MySQL.&lt;/p&gt;
+&lt;p&gt;In this approach, changes made to the database are captured at the level of individual rows and then replicated to the secondary nodes. Instead of replicating the actual physical changes made to the database, this approach captures the operations in a logical format and then executes them on secondary nodes.&lt;/p&gt;
+&lt;p&gt;For example, when operations like INSERT or UPDATE are performed, the entire affected row is captured on the primary node, containing all the column values of the specified row.&lt;/p&gt;
+&lt;p&gt;This captured change is then executed on secondary nodes, ensuring that the data remains consistent with the data on the primary node. It offers advantages in terms of flexibility and compatibility with various schema types.&lt;/p&gt;
+&lt;p&gt;Common problems using asynchronous primary-secondary replication
+Asynchronous primary-secondary replication introduces certain challenges that can affect data consistency and user experience. Key issues include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is a chance that the new master may not receive all the writes from the old master (assuming it is still down). Hence, those write changes will be discarded, which could impact other listening applications and end clients.&lt;/li&gt;
+&lt;li&gt;If the user attempts to read the data immediately after writing, the new data may not have been replicated yet. However, to the user, it will look as though the data they submitted was lost.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; When reading something that the user may have modified, read it from the leader; otherwise, read it from a follower.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Cons:&lt;/em&gt; This adds more stress to the master node.&lt;/p&gt;
+&lt;h3&gt;Multi-leader replication&lt;/h3&gt;
+&lt;p&gt;As discussed above, single leader replication using asynchronous replication has a drawback.&lt;/p&gt;
+&lt;p&gt;There’s only one primary node, and all writes must go through it, which limits performance. In the event of the primary node's failure, the secondary nodes may not have the updated database. Multi-leader replication is an alternative to single-leader replication.&lt;/p&gt;
+&lt;p&gt;There are multiple primary nodes that process the writes and send them to all other primary and secondary nodes to replicate.&lt;/p&gt;
+&lt;p&gt;This type of replication is used in databases, along with external tools such as the Tungsten Replicator for MySQL. This kind of replication is particularly useful in applications where we can continue working even when offline—for example, a calendar application that allows us to schedule meetings even without internet access.&lt;/p&gt;
+&lt;p&gt;Once we’re online, it replicates its changes from our local database (our mobile phone or laptop acts as a primary node) to other nodes.&lt;/p&gt;
+&lt;p&gt;** Common data distribution/migration pattern
+- Bi-direction: Reporting instance
+- Unidirectional: Instant fail-over (Multi-leader replication)
+- Peer-to-peer: Load balancing (High Availability)
+- Broadcast: Wide-level data distribution to multiple instances
+- Consolidation: Data warehouse (data storage)&lt;/p&gt;
+&lt;h4&gt;Conflict&lt;/h4&gt;
+&lt;p&gt;Multi-leader replication gives better performance and scalability than single-leader replication, but it also has a significant disadvantage.&lt;/p&gt;
+&lt;p&gt;Since all primary nodes concurrently handle write requests, they may modify the same data, potentially creating a conflict between them. For example, suppose the same data is edited by two clients simultaneously. In that case, their writes will be successful in their associated primary nodes, but when they reach the other primary nodes asynchronously, it creates a conflict.&lt;/p&gt;
+&lt;h4&gt;Handle conflicts&lt;/h4&gt;
+&lt;p&gt;Conflicts can result in different data at different nodes. These should be handled efficiently without losing any data. Let’s discuss some of the approaches to handling conflicts:&lt;/p&gt;
+&lt;h5&gt;Conflict avoidance&lt;/h5&gt;
+&lt;p&gt;A simple strategy to deal with conflicts is to prevent them from happening in the first place.&lt;/p&gt;
+&lt;p&gt;Conflicts can be avoided if the application can verify that all writes for a given record are routed through the same leader. However, the conflict may still occur if a user moves to a different location and is now near a different data center.&lt;/p&gt;
+&lt;p&gt;If that happens, we need to reroute the traffic. In such scenarios, the conflict avoidance approach fails, resulting in concurrent writes.&lt;/p&gt;
+&lt;h5&gt;Last-write-wins&lt;/h5&gt;
+&lt;p&gt;Using their local clock, all nodes assign a timestamp to each update.&lt;/p&gt;
+&lt;p&gt;When a conflict occurs, the update with the latest timestamp is selected. This approach can also create difficulty because the clock synchronization across nodes is challenging in distributed systems. There’s a clock skew that can result in data loss.&lt;/p&gt;
+&lt;h5&gt;Custom logic&lt;/h5&gt;
+&lt;p&gt;In this approach, we can write our own logic to handle conflicts according to the needs of our application. This custom logic can be executed on both read and write operations. When the system detects a conflict, it calls our custom conflict handler.&lt;/p&gt;
+&lt;h4&gt;Multi-leader replication topologies&lt;/h4&gt;
+&lt;p&gt;There are several topologies through which multi-leader replication is implemented, including the circular topology, star topology, and all-to-all topology.&lt;/p&gt;
+&lt;p&gt;The most common is the all-to-all topology. In a star and circular topology, there’s again a similar drawback that if one of the nodes fails, it can affect the whole system. That’s why all-to-all is the most used topology.&lt;/p&gt;
+&lt;h3&gt;Peer-to-peer/leaderless replication&lt;/h3&gt;
+&lt;p&gt;In primary-secondary replication, the primary node is a bottleneck and a single point of failure.&lt;/p&gt;
+&lt;p&gt;Moreover, it helps to achieve read scalability but fails to provide write scalability. The peer-to-peer replication model resolves these problems by eliminating the need for a single primary node. All nodes have equal weight and can accept both read and write requests.&lt;/p&gt;
+&lt;p&gt;This replication scheme is stored in the Cassandra database.&lt;/p&gt;
+&lt;p&gt;Like primary-secondary replication, this replication can also yield inconsistency. This is because when several nodes accept write requests, it may lead to concurrent writes. A helpful approach used for solving write-write inconsistency is called quorums.&lt;/p&gt;
+&lt;h3&gt;Quorums&lt;/h3&gt;
+&lt;p&gt;Let’s suppose we have three nodes.&lt;/p&gt;
+&lt;p&gt;If at least two out of three nodes are guaranteed to return successful updates, it means only one node has failed. This means that if we read from two nodes, at least one of them will have the updated version, and our system can continue working.&lt;/p&gt;
+&lt;p&gt;If we have n nodes, then every write must be updated in at least w nodes to be considered a success, and we must read from r nodes.&lt;/p&gt;
+&lt;p&gt;We’ll get an updated value from reading as long as w + r &amp;gt; n because at least one of the nodes must have an updated write from which we can read. Quorum reads and writes adhere to these r and w values. These n, w and r are configurable in Dynamo-style databases.&lt;/p&gt;
+&lt;p&gt;For more details on the topic of Quorum, refer to these links:
+&lt;a href="https://www.educative.io/answers/what-is-a-quorum"&gt;What is Quorum?&lt;/a&gt;
+&lt;a href="https://www.educative.io/answers/what-is-quorum-in-distributed-systems"&gt;What is Quorum in distributed systems?&lt;/a&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.4 - Data Partitioning</title><link href="https://dmb225.github.io/system-design-lesson-44-data-partitioning.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-44-data-partitioning.html</id><summary type="html">&lt;h2&gt;Why do we partition data?&lt;/h2&gt;
+&lt;p&gt;Data is an asset for any organization. Increasing data and concurrent read/write traffic to the data puts scalability pressure on traditional databases. As a result, the latency and throughput are affected. Traditional databases are attractive due to their properties such as range queries, secondary …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Why do we partition data?&lt;/h2&gt;
+&lt;p&gt;Data is an asset for any organization. Increasing data and concurrent read/write traffic to the data puts scalability pressure on traditional databases. As a result, the latency and throughput are affected. Traditional databases are attractive due to their properties such as range queries, secondary indices, and transactions with the ACID properties.&lt;/p&gt;
+&lt;p&gt;At some point, a single node-based database isn’t enough to tackle the load. We might need to distribute the data over many nodes, but still export all the nice properties of relational databases. In practice, it has proved challenging to provide single-node database-like properties over a distributed database.&lt;/p&gt;
+&lt;p&gt;One solution is to move data to a NoSQL-like system. However, the historical codebase and its close cohesion with traditional databases make it an expensive problem to tackle.&lt;/p&gt;
+&lt;p&gt;Organizations might scale traditional databases by using a third-party solution. But often, integrating a third-party solution has its complexities. More importantly, there are abundant opportunities to optimize for the specific problem at hand and get much better performance than a general-purpose solution.&lt;/p&gt;
+&lt;p&gt;Data partitioning (or sharding) enables us to use multiple nodes where each node manages some part of the whole data. To handle increasing query rates and data amounts, we strive for balanced partitions and balanced read/write load.&lt;/p&gt;
+&lt;p&gt;We’ll discuss different ways to partition data, related challenges, and their solutions in this lesson.&lt;/p&gt;
+&lt;h2&gt;Sharding&lt;/h2&gt;
+&lt;p&gt;To divide load among multiple nodes, we need to partition the data by a phenomenon known as partitioning or sharding. In this approach, we split a large dataset into smaller chunks of data stored at different nodes on our network.&lt;/p&gt;
+&lt;p&gt;The partitioning must be balanced so that each partition receives about the same amount of data. If partitioning is unbalanced, the majority of queries will fall into a few partitions. Partitions that are heavily loaded will create a system bottleneck. The efficacy of partitioning will be harmed because a significant portion of data retrieval queries will be sent to the nodes that carry the highly congested partitions. Such partitions are known as hotspots. Generally, we use the following two ways to shard the data:
+- Vertical sharding
+- Horizontal sharding&lt;/p&gt;
+&lt;h3&gt;Vertical sharding&lt;/h3&gt;
+&lt;p&gt;We can put different tables in various database instances, which might be running on a different physical server. We might break a table into multiple tables so that some columns are in one table while the rest are in the other. We should be careful if there are joins between multiple tables. We may like to keep such tables together on one shard.&lt;/p&gt;
+&lt;p&gt;Often, vertical sharding is used to increase the speed of data retrieval from a table consisting of columns with very wide text or a binary large object (blob). In this case, the column with large text or a blob is split into a different table.&lt;/p&gt;
+&lt;p&gt;As shown in the figure a couple paragraphs below, the Employee table is divided into two tables: a reduced Employee table and an EmployeePicture table. The EmployeePicture table has just two columns, EmployeeID and Picture, separated from the original table. Moreover, the primary key EmployeeID of the Employee table is added in both partitioned tables. This makes the data read and write easier, and the reconstruction of the table is performed efficiently.&lt;/p&gt;
+&lt;p&gt;Vertical sharding has its intricacies and is more amenable to manual partitioning, where stakeholders carefully decide how to partition data. In comparison, horizontal sharding is suitable to automate even under dynamic conditions.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: Creating shards by moving specific tables of a database around is also a form of vertical sharding. Usually, those tables are put in the same shard because they often appear together in queries, for example, for joins. We will see an example of such a use-case ahead in the course.&lt;/em&gt;&lt;/p&gt;
+&lt;h3&gt;Horizontal sharding&lt;/h3&gt;
+&lt;p&gt;At times, some tables in the databases become too big and affect read/write latency. Horizontal sharding or partitioning is used to divide a table into multiple tables by splitting data row-wise, as shown in the figure in the next section. Each partition of the original table distributed over database servers is called a shard. Usually, there are two strategies available:
+- Key-range based sharding
+- Hash-based sharding&lt;/p&gt;
+&lt;h4&gt;Key-range based sharding&lt;/h4&gt;
+&lt;p&gt;In the key-range based sharding, each partition is assigned a continuous range of keys.&lt;/p&gt;
+&lt;p&gt;Sometimes, a database consists of multiple tables bound by foreign key relationships. In such a case, the horizontal partition is performed using the same partition key on all tables in a relation. Tables (or subtables) that belong to the same partition key are distributed to one database shard. &lt;/p&gt;
+&lt;p&gt;The basic design techniques used in multi-table sharding are as follows:
+- There’s a partition key in the Customer mapping table. This table resides on each shard and stores the partition keys used in the shard. Applications create a mapping logic between the partition keys and database shards by reading this table from all shards to make the mapping efficient. Sometimes, applications use advanced algorithms to determine the location of a partition key belonging to a specific shard.
+- The partition key column, Customer_Id, is replicated in all other tables as a data isolation point. It has a trade-off between an impact on increased storage and locating the desired shards efficiently. Apart from this, it’s helpful for data and workload distribution to different database shards. The data routing logic uses the partition key at the application tier to map queries specified for a database shard.
+Primary keys are unique across all database shards to avoid key collision during data migration among shards and the merging of data in the online analytical processing (OLAP)environment.
+The column Creation_date serves as the data consistency point, with an assumption that the clocks of all nodes are synchronized. This column is used as a criterion for merging data from all database shards into the global view when essential.&lt;/p&gt;
+&lt;h5&gt;Advantages&lt;/h5&gt;
+&lt;p&gt;Using key-range-based sharding method, the range-query-based scheme is easy to implement. We precisely know where (which node, which shard) to look for a specific range of keys.
+Range queries can be performed using the partitioning keys, and those can be kept in partitions in sorted order. How exactly such a sorting happens over time as new data comes in is implementation specific.&lt;/p&gt;
+&lt;h5&gt;Disadvantages&lt;/h5&gt;
+&lt;p&gt;Range queries can’t be performed using keys other than the partitioning key.&lt;/p&gt;
+&lt;p&gt;If keys aren’t selected properly, some nodes may have to store more data due to an uneven distribution of the traffic.&lt;/p&gt;
+&lt;h4&gt;Hash-based sharding&lt;/h4&gt;
+&lt;p&gt;Hash-based sharding uses a hash function on an attribute. This hash function produces a hash value that is used to perform partitioning. The main concept is to use a hash function on the key to get a hash value and then mod by the number of partitions. Once we’ve found an appropriate hash function for keys, we may give each partition a range of hashes (rather than a range of keys). Any key whose hash occurs inside that range will be kept in that partition.&lt;/p&gt;
+&lt;h5&gt;Advantages&lt;/h5&gt;
+&lt;p&gt;Keys are uniformly distributed across the nodes.&lt;/p&gt;
+&lt;h5&gt;Disadvantages&lt;/h5&gt;
+&lt;p&gt;We can’t perform range queries with this technique. Keys will be spread over all partitions.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Why do you need databases? Why can’t you just use files?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; Databases are crucial for several reasons: they efficiently manage large volumes of data, ensure data consistency and integrity, allow for easy updates, provide robust security measures, guarantee data availability, offer scalability, enable efficient data retrieval, and support data recovery and backup. These capabilities make databases superior to using files for data management, especially in applications requiring quick access to accurate and secure data&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note: How many shards per database?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empirically, we can determine how much each node can serve with acceptable performance. It can help us find out the maximum amount of data that we would like to keep on any one node. For example, if we find out that we can put a maximum of 50 GB of data on one node, we have the following:
+- Database size = 10 TB
+- Size of a single shard = 50 GB
+- Number of shards the database should be distributed in 10 TB/50 GB = 200 shards&lt;/p&gt;
+&lt;h4&gt;Consistent hashing&lt;/h4&gt;
+&lt;p&gt;Consistent hashing assigns each server or item in a distributed hash table a place on an abstract circle, called a ring, irrespective of the number of servers in the table. This permits servers and objects to scale without compromising the system’s overall performance.&lt;/p&gt;
+&lt;h5&gt;Advantages of consistent hashing&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;It’s easy to scale horizontally.&lt;/li&gt;
+&lt;li&gt;It increases the throughput and improves the latency of the application.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5&gt;Disadvantages of consistent hashing&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Randomly assigning nodes in the ring may cause non-uniform distribution.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Rebalance the partitions&lt;/h3&gt;
+&lt;p&gt;Query load can be imbalanced across the nodes due to many reasons, including the following:
+- The distribution of the data isn’t equal.
+- There’s too much load on a single partition.
+- There’s an increase in the query traffic, and we need to add more nodes to keep up.&lt;/p&gt;
+&lt;p&gt;We can apply the following strategies to rebalance partitions.&lt;/p&gt;
+&lt;h3&gt;Avoid hash mod n&lt;/h3&gt;
+&lt;p&gt;Usually, we avoid the hash of a key for partitioning (we used such a scheme to explain the concept of hashing in simple terms earlier). The problem with the addition or removal of nodes in the case of hash mod n is that every node’s partition number changes, and a lot of data moves. For example, assume we have hash(key)=1235. If we have five nodes at the start, the key will start on the first node (1235 mod 5=0). Now, if a new node is added, the key would have to be moved to the sixth node (1235 mod 6 = 5), and so on. This moving of keys from one node to another makes rebalancing costly.&lt;/p&gt;
+&lt;h3&gt;Fixed number of partitions&lt;/h3&gt;
+&lt;p&gt;In this approach, the number of partitions to be created is fixed at the time when we set our database up. We create a higher number of partitions than the nodes and assign these partitions to nodes. So, when a new node is added to the system, it can take a few partitions from the existing nodes until the partitions are equally divided.&lt;/p&gt;
+&lt;p&gt;There’s a downside to this approach. The size of each partition grows with the total amount of data in the cluster since all the partitions contain a small part of the total data. If a partition is very small, it will result in too much overhead because we may have to make a large number of small-sized partitions, each costing us some overhead. If the partition is very large, rebalancing the nodes and recovering from node failures will be expensive. It’s very important to choose the right number of partitions. A fixed number of partitions is used in Elasticsearch, Riak, and many more.&lt;/p&gt;
+&lt;h3&gt;Dynamic partitioning&lt;/h3&gt;
+&lt;p&gt;In this approach, when the size of a partition reaches the threshold, it’s split equally into two partitions. One of the two split partitions is assigned to one node and the other one to another node. In this way, the load is divided equally. The number of partitions adapts to the overall data amount, which is an advantage of dynamic partitioning.&lt;/p&gt;
+&lt;p&gt;However, there’s a downside to this approach. It’s difficult to apply dynamic rebalancing while serving the reads and writes. Dynamic rebalancing during reads and writes is challenging because it involves moving data between nodes, causing latency and potential conflicts. Ensuring data consistency (as data is simultaneously moved and accessed) and availability (potentially requiring pauses in reads/writes during rebalancing) introduces complexities that can impact system performance and reliability. This approach is used in HBase and MongoDB.&lt;/p&gt;
+&lt;h3&gt;Partition proportionally to nodes&lt;/h3&gt;
+&lt;p&gt;In this approach, the number of partitions is proportionate to the number of nodes, which means every node has fixed partitions. In earlier approaches, the number of partitions was dependent on the size of the dataset. That isn’t the case here. While the number of nodes remains constant, the size of each partition rises according to the dataset size. However, as the number of nodes increases, the partitions shrink. When a new node enters the network, it splits a certain number of current partitions at random, then takes one half of the split and leaves the other half alone. This can result in an unfair split. This approach is used by Cassandra and Ketama.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;How is rebalancing triggered when partitioning proportionally to nodes: automatically or manually?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; When partitioning proportionally to nodes, rebalancing is typically performed automatically. The system calculates partition distribution based on current node capacities and automatically moves data when nodes are added or removed.&lt;/p&gt;
+&lt;p&gt;Manual rebalancing, where an administrator manually redistributes partitions, is uncommon in this context but may be used in specialized setups.&lt;/p&gt;
+&lt;h3&gt;Partitioning and secondary indexes&lt;/h3&gt;
+&lt;p&gt;We’ve discussed key-value data model partitioning schemes in which the records are retrieved with primary keys. But what if we have to access the records through secondary indexes? Secondary indexes are the records that aren’t identified by primary keys but are just a way of searching for some value.&lt;/p&gt;
+&lt;p&gt;We can partition with secondary indexes in the following ways.&lt;/p&gt;
+&lt;h4&gt;Partition secondary indexes by document&lt;/h4&gt;
+&lt;p&gt;Each partition is fully independent in this indexing approach. Each partition has its secondary indexes covering just the documents in that partition. It’s unconcerned with the data held in other partitions. If we want to write anything to our database, we need to handle that partition only containing the document ID we’re writing. It’s also known as the local index.&lt;/p&gt;
+&lt;p&gt;However, this type of querying on secondary indexes can be expensive. As a result of being restricted by the latency of a poor-performing partition, read query latencies may increase.&lt;/p&gt;
+&lt;h4&gt;Partition secondary indexes by the term&lt;/h4&gt;
+&lt;p&gt;Instead of creating a secondary index for each partition (a local index), we can make a global index for secondary terms that encompasses data from all partitions.&lt;/p&gt;
+&lt;p&gt;Partitioning secondary indexes by the term is more read-efficient than partitioning secondary indexes by the document. This is because it only accesses the partition that contains the term. However, a single write in this approach affects multiple partitions, making the method write-intensive and complex.&lt;/p&gt;
+&lt;h2&gt;Request routing&lt;/h2&gt;
+&lt;p&gt;We’ve learned how to partition our data. However, one question arises here: How does a client know which node to connect to while making a request? The allocation of partitions to nodes varies after rebalancing. If we want to read a specific key, how do we know which IP address we need to connect to read?&lt;/p&gt;
+&lt;p&gt;This problem is also known as service discovery. The following are a few approaches to this problem:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Allow the clients to request any node in the network. If that node doesn’t contain the requested data, it forwards that request to the node that does contain the related data.&lt;/li&gt;
+&lt;li&gt;The second approach contains a routing tier. All the requests are first forwarded to the routing tier, and it determines which node to connect to fulfill the request.&lt;/li&gt;
+&lt;li&gt;The clients already have the information related to partitioning and which partition is connected to which node. So, they can directly contact the node that contains the data they need.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In all of these approaches, the main challenge is to determine how these components know about updates in the partitioning of the nodes.&lt;/p&gt;
+&lt;h2&gt;ZooKeeper&lt;/h2&gt;
+&lt;p&gt;To track changes in the cluster, many distributed data systems need a separate management server like ZooKeeper. Zookeeper keeps track of all the mappings in the network, and each node connects to ZooKeeper for the information. Whenever there’s a change in the partitioning, or a node is added or removed, ZooKeeper gets updated and notifies the routing tier about the change. HBase, Kafka and SolrCloud use ZooKeeper.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Question:&lt;/strong&gt; Let’s assess our understanding of what’s described in this lesson with the following question:&lt;/p&gt;
+&lt;p&gt;Imagine you’re a database architect for a rapidly expanding e-commerce platform with a global user base. The platform experiences varying user activity levels across different regions. The existing monolithic database struggles to handle the increasing load. Users in different regions have distinct sets of preferences and tend to interact more within their regions. Now, we’re looking for an efficient and scalable solution to optimize performance, enhance scalability, and cater to regional variations in user behavior. Regarding this, which one of the following strategies would you adopt, and why?
+- Database sharding
+- Database replication&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; The best strategy here is database sharding. Sharding involves dividing the database into smaller, manageable pieces called shards, each handling a specific region or subset of data. This approach improves scalability and performance by reducing the load on any single database instance and aligns well with regional user preferences and activity levels. It allows the platform to efficiently handle increasing traffic and regional variations.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;For all current distributed systems, partitioning has become the standard protocol. Because systems contain increasing amounts of data, partitioning the data makes sense since it speeds up both writes and reads. It increases the system’s availability, scalability, and performance.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.5 - Trade-offs in Databases</title><link href="https://dmb225.github.io/system-design-lesson-45-trade-offs-in-databases.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-45-trade-offs-in-databases.html</id><summary type="html">&lt;h2&gt;Which is the best database sharding approach?&lt;/h2&gt;
+&lt;p&gt;Both horizontal and vertical sharding involve adding resources to our computing infrastructure. Our business stakeholders must decide which is suitable for our organization. We must scale our resources accordingly for our organization and business to grow, to prevent downtime, and to reduce latency …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Which is the best database sharding approach?&lt;/h2&gt;
+&lt;p&gt;Both horizontal and vertical sharding involve adding resources to our computing infrastructure. Our business stakeholders must decide which is suitable for our organization. We must scale our resources accordingly for our organization and business to grow, to prevent downtime, and to reduce latency. We can scale these resources through a combination of adjustments to CPU, physical memory requirements, hard disk adjustments, and network bandwidth.&lt;/p&gt;
+&lt;p&gt;The following sections explain the pros and cons of centralized and distributed databases:&lt;/p&gt;
+&lt;h2&gt;Advantages and disadvantages of a centralized database&lt;/h2&gt;
+&lt;h3&gt;Advantages&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Data maintenance, such as updating and taking backups of a centralized database, is easy.&lt;/li&gt;
+&lt;li&gt;Centralized databases provide stronger consistency and ACID transactions than distributed databases.&lt;/li&gt;
+&lt;li&gt;Centralized databases provide a much simpler programming model for the end programmers as compared to distributed databases.&lt;/li&gt;
+&lt;li&gt;It’s more efficient for businesses that have a small amount of data to store that can reside on a single node.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Disadvantages&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;A centralized database can slow down, causing high latency for end users, when the number of queries per second accessing the centralized database is approaching single-node limits.&lt;/li&gt;
+&lt;li&gt;A centralized database has a single point of failure. Because of this, its probability of not being accessible is much higher.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Advantages and disadvantages of a distributed database&lt;/h2&gt;
+&lt;h3&gt;Advantages&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;It’s fast and easy to access data in a distributed database because data is retrieved from the nearest database shard or the one frequently used.&lt;/li&gt;
+&lt;li&gt;Data with different levels of distribution transparency can be stored in separate places.&lt;/li&gt;
+&lt;li&gt;Intensive transactions consisting of queries can be divided into multiple optimized subqueries, which can be processed in a parallel fashion.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Disadvantages&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Sometimes, data is required from multiple sites, which takes more time than expected.&lt;/li&gt;
+&lt;li&gt;Relations are partitioned vertically or horizontally among different nodes. Therefore, operations such as joins need to reconstruct complete relations by carefully fetching data. These operations can become much more expensive and complex.&lt;/li&gt;
+&lt;li&gt;It’s difficult to maintain consistency of data across sites in the distributed database, and it requires extra measures.&lt;/li&gt;
+&lt;li&gt;Updations and backups in distributed databases take time to synchronize data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Data distribution (vertical and horizontal sharding) across multiple nodes aims to improve the following features, considering that the queries are optimized:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Reliability (fault-tolerance)&lt;/li&gt;
+&lt;li&gt;Performance&lt;/li&gt;
+&lt;li&gt;Balanced storage capacity and dollar costs&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Both centralized and distributed databases have their pros and cons. We should choose them according to the needs of our application.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 3.2 - Global and local load balancing</title><link href="https://dmb225.github.io/system-design-lesson-32-global-and-local-load-balancing.html" rel="alternate"/><published>2026-02-04T00:00:00+01:00</published><updated>2026-02-04T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-04:/system-design-lesson-32-global-and-local-load-balancing.html</id><summary type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
 &lt;p&gt;From the previous lesson, it may seem like load balancing is performed only within the data center. However, load balancing is required at a global and a local scale. Let’s understand the function of each of the two:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Global server load balancing (GSLB): GSLB involves the distribution of …&lt;/li&gt;&lt;/ul&gt;</summary><content type="html">&lt;h2&gt;Introduction&lt;/h2&gt;
@@ -185,7 +480,7 @@ Because the round-robin load-balancing algorithm doesn’t consider any end-serv
 &lt;p&gt;Stateless load balancing maintains no state and is, therefore, faster and lightweight. Stateless LBs use consistent hashing to make forwarding decisions. However, if infrastructure changes (for example, a new application server joining), stateless LBs may not be as resilient as stateful LBs because consistent hashing alone isn’t enough to route a request to the correct application server. Therefore, a local state may still be required along with consistent hashing.&lt;/p&gt;
 &lt;p&gt;Therefore, a state maintained across different load balancers is considered as stateful load balancing. Whereas, a state maintained within a load balancer for internal use is assumed as stateless load balancing.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Having familiarized yourself with load balancers, consider a scenario where you deploy a website that serves static content, such as text and images. Would you choose a stateful or stateless load balancer, and why?&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Solution: Well, for serving static content like text and images, a stateless load balancer is the best choice. It doesn’t need to keep track of user sessions, which makes it simpler, faster, and easier to scale. This approach ensures efficient distribution of requests and better performance overall.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; Well, for serving static content like text and images, a stateless load balancer is the best choice. It doesn’t need to keep track of user sessions, which makes it simpler, faster, and easier to scale. This approach ensures efficient distribution of requests and better performance overall.&lt;/p&gt;
 &lt;h2&gt;Types of load balancers&lt;/h2&gt;
 &lt;p&gt;Depending on the requirements, load balancing can be performed at the network/transport and application layer of the open systems interconnection (OSI) layers.&lt;/p&gt;
 &lt;ul&gt;
@@ -217,7 +512,8 @@ Because the round-robin load-balancing algorithm doesn’t consider any end-serv
 &lt;p&gt;LBs have come a long way to become a service offered in the cloud, starting since their inception in the form of hardware. They’re a key component of any enterprise-level service. Horizontal scalability of hosting servers will always require a good load balancing layer capable of providing load balancing, session maintenance, TLS offloading, service discovery, and more.&lt;/p&gt;
 &lt;p&gt;In this chapter, we have explored various functions of load balancing. In addition to different roles, load balancers are often responsible for mitigating distributed denial-of-service (DDoS) attacks.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;How can they distinguish between legitimate traffic and malicious traffic during such incidents?&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Solution: During DDoS attacks, load balancers distinguish between legitimate and malicious traffic by analyzing traffic patterns for anomalies, such as sudden spikes from a single IP. They also use rate-limiting to restrict request rates, challenge-response protocols like CAPTCHAs to verify users, and leverage threat intelligence to block known malicious IPs or regions. Additionally, behavioral analytics and machine learning models help identify attack patterns.&lt;/strong&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="load-balancers"/></entry><entry><title>System Design: Lesson 4.1 - Introduction to Databases</title><link href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html" rel="alternate"/><published>2026-02-04T00:00:00+01:00</published><updated>2026-02-04T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-04:/system-design-lesson-41-introduction-to-databases.html</id><summary type="html">&lt;h2&gt;Problem statement&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; During DDoS attacks, load balancers distinguish between legitimate and malicious traffic by analyzing traffic patterns for anomalies, such as sudden spikes from a single IP. They also use rate-limiting to restrict request rates, challenge-response protocols like CAPTCHAs to verify users, and leverage threat intelligence to block known malicious IPs or regions. Additionally, behavioral analytics and machine learning models help identify attack patterns.&lt;/p&gt;
+&lt;p&gt;This requires that you have some way of knowing if something has been modified without actually querying it. For example, user profile information on a social network is typically only editable by the profile owner and not by anyone else.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="load-balancers"/></entry><entry><title>System Design: Lesson 4.1 - Introduction to Databases</title><link href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html" rel="alternate"/><published>2026-02-04T00:00:00+01:00</published><updated>2026-02-04T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-04:/system-design-lesson-41-introduction-to-databases.html</id><summary type="html">&lt;h2&gt;Problem statement&lt;/h2&gt;
 &lt;p&gt;Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an application like WhatsApp. People use our application to communicate with their friends. Now, where and how can we store information (a list of people’s names …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Problem statement&lt;/h2&gt;
 &lt;p&gt;Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an application like WhatsApp. People use our application to communicate with their friends. Now, where and how can we store information (a list of people’s names and their respective messages) permanently and retrieve it?&lt;/p&gt;
 &lt;p&gt;We can use a simple file to store all the records on separate lines and retrieve them from the same file. But using a file for storage has some limitations.&lt;/p&gt;
@@ -306,7 +602,7 @@ They differ in terms of their intended use case, the type of information they ho
 &lt;p&gt;The entire operation is performed very quickly. Therefore, the end user experiences minimum delay. We’ll also see how browsers save some of the frequently used mappings for later use in the next lesson.&lt;/p&gt;
 &lt;h4&gt;? Question ?&lt;/h4&gt;
 &lt;p&gt;Imagine two users enter the same domain name at the exact same time. How does DNS ensure both reach the correct server?&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Solution: DNS is a distributed system with multiple servers that resolve domain names independently. It ensures consistency by directing both users to the current IP address of the server, using caching, propagation, and authoritative DNS records. This way, even if two users enter the same domain name at the exact same time, they will both reach the correct server without any conflict.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; DNS is a distributed system with multiple servers that resolve domain names independently. It ensures consistency by directing both users to the current IP address of the server, using caching, propagation, and authoritative DNS records. This way, even if two users enter the same domain name at the exact same time, they will both reach the correct server without any conflict.&lt;/p&gt;
 &lt;h2&gt;Important details&lt;/h2&gt;
 &lt;p&gt;Let’s highlight some of the important details about DNS, some of which we’ll cover in the next lesson:&lt;/p&gt;
 &lt;ul&gt;
@@ -392,7 +688,7 @@ Let's explore more details of the above points in the next lesson (&lt;em&gt;How
 &lt;p&gt;Caching refers to the temporary storage of frequently requested resource records. A record is a data unit within the DNS database that shows a name-to-value binding. Caching reduces response time to the user and decreases network traffic. When we use caching at different hierarchies, it can reduce a lot of querying burden on the DNS infrastructure. Caching can be implemented in the browser, operating systems, local name server within the user’s network, or the ISP’s DNS resolvers.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Note: Even if there is no cache available to resolve a user’s query and it’s imperative to visit the DNS infrastructure, caching can still be beneficial. The local server or ISP DNS resolver can cache the IP addresses of TLD servers or authoritative servers and avoid requesting the root-level server.&lt;/em&gt;&lt;/p&gt;
 &lt;h4&gt;Why does DNS sacrifice strong consistency to achieve high performance and scalability?&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;Solution: Certainly! DNS sacrifices strong consistency to achieve high performance and scalability because it handles a vast number of read operations compared to write operations. By propagating updates lazily, DNS ensures quick responses to queries without overwhelming its infrastructure. Keep exploring!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; Certainly! DNS sacrifices strong consistency to achieve high performance and scalability because it handles a vast number of read operations compared to write operations. By propagating updates lazily, DNS ensures quick responses to queries without overwhelming its infrastructure.&lt;/p&gt;
 &lt;h2&gt;DNS as a distributed system&lt;/h2&gt;
 &lt;p&gt;Although the DNS hierarchy facilitates the distributed Internet that we know today, it’s a distributed system itself. The distributed nature of DNS has the following advantages:&lt;/p&gt;
 &lt;p&gt;It avoids becoming a single point of failure (SPOF).
@@ -423,7 +719,7 @@ If we run the same command multiple times, we’ll receive the same IP addresses
 The 300 value in the ANSWER SECTION represents the number of seconds the cache is maintained in the DNS resolver. This means that Google’s ADNS keeps a TTL value of five minutes.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Question&lt;/strong&gt;
 DNS caching improves performance but introduces the risk of stale data. Suppose an organization updates its website’s IP address, but many users still access the old IP due to caching. Propose a strategy to minimize disruption in such scenarios.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Solution: Certainly! To minimize disruption when updating DNS records, organizations can temporarily lower the TTL (Time To Live) value before making changes, ensuring clients refresh their cached data more frequently. Additionally, implementing a phased rollout across authoritative DNS servers helps control the update process smoothly. Using DNS-based traffic management can redirect users still accessing the old IP to a temporary server with a message or alternative service. Lastly, notifying users in advance about upcoming changes helps set expectations and reduces confusion.&lt;/strong&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="dns"/></entry><entry><title>System Design: Lesson 3.1 - Introduction to Load Balancers</title><link href="https://dmb225.github.io/system-design-lesson-31-introduction-to-load-balancers.html" rel="alternate"/><published>2026-02-03T00:00:00+01:00</published><updated>2026-02-03T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-03:/system-design-lesson-31-introduction-to-load-balancers.html</id><summary type="html">&lt;h2&gt;What is load balancing?&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; Certainly! To minimize disruption when updating DNS records, organizations can temporarily lower the TTL (Time To Live) value before making changes, ensuring clients refresh their cached data more frequently. Additionally, implementing a phased rollout across authoritative DNS servers helps control the update process smoothly. Using DNS-based traffic management can redirect users still accessing the old IP to a temporary server with a message or alternative service. Lastly, notifying users in advance about upcoming changes helps set expectations and reduces confusion.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="dns"/></entry><entry><title>System Design: Lesson 3.1 - Introduction to Load Balancers</title><link href="https://dmb225.github.io/system-design-lesson-31-introduction-to-load-balancers.html" rel="alternate"/><published>2026-02-03T00:00:00+01:00</published><updated>2026-02-03T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-03:/system-design-lesson-31-introduction-to-load-balancers.html</id><summary type="html">&lt;h2&gt;What is load balancing?&lt;/h2&gt;
 &lt;p&gt;Millions of requests could arrive per second in a typical data center. To serve these requests, thousands (or a hundred thousand) servers work together to share the load of incoming requests.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Note: Here, it’s important that we consider how the incoming requests will be divided …&lt;/em&gt;&lt;/p&gt;</summary><content type="html">&lt;h2&gt;What is load balancing?&lt;/h2&gt;
 &lt;p&gt;Millions of requests could arrive per second in a typical data center. To serve these requests, thousands (or a hundred thousand) servers work together to share the load of incoming requests.&lt;/p&gt;

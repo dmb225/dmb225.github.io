@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 4.4 - Data Partitioning</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="Why do we partition data? Data is an asset for any organization. Increasing data and concurrent read/write traffic to the data puts scalability..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-44-data-partitioning.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 4.4 - Data Partitioning">System Design: Lesson 4.4 - Data Partitioning</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-05T00:00:00+01:00">
+                Published: Thu 05 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
+</footer><!-- /.post-info -->        <h2>Why do we partition data?</h2>
+<p>Data is an asset for any organization. Increasing data and concurrent read/write traffic to the data puts scalability pressure on traditional databases. As a result, the latency and throughput are affected. Traditional databases are attractive due to their properties such as range queries, secondary indices, and transactions with the ACID properties.</p>
+<p>At some point, a single node-based database isn’t enough to tackle the load. We might need to distribute the data over many nodes, but still export all the nice properties of relational databases. In practice, it has proved challenging to provide single-node database-like properties over a distributed database.</p>
+<p>One solution is to move data to a NoSQL-like system. However, the historical codebase and its close cohesion with traditional databases make it an expensive problem to tackle.</p>
+<p>Organizations might scale traditional databases by using a third-party solution. But often, integrating a third-party solution has its complexities. More importantly, there are abundant opportunities to optimize for the specific problem at hand and get much better performance than a general-purpose solution.</p>
+<p>Data partitioning (or sharding) enables us to use multiple nodes where each node manages some part of the whole data. To handle increasing query rates and data amounts, we strive for balanced partitions and balanced read/write load.</p>
+<p>We’ll discuss different ways to partition data, related challenges, and their solutions in this lesson.</p>
+<h2>Sharding</h2>
+<p>To divide load among multiple nodes, we need to partition the data by a phenomenon known as partitioning or sharding. In this approach, we split a large dataset into smaller chunks of data stored at different nodes on our network.</p>
+<p>The partitioning must be balanced so that each partition receives about the same amount of data. If partitioning is unbalanced, the majority of queries will fall into a few partitions. Partitions that are heavily loaded will create a system bottleneck. The efficacy of partitioning will be harmed because a significant portion of data retrieval queries will be sent to the nodes that carry the highly congested partitions. Such partitions are known as hotspots. Generally, we use the following two ways to shard the data:
+- Vertical sharding
+- Horizontal sharding</p>
+<h3>Vertical sharding</h3>
+<p>We can put different tables in various database instances, which might be running on a different physical server. We might break a table into multiple tables so that some columns are in one table while the rest are in the other. We should be careful if there are joins between multiple tables. We may like to keep such tables together on one shard.</p>
+<p>Often, vertical sharding is used to increase the speed of data retrieval from a table consisting of columns with very wide text or a binary large object (blob). In this case, the column with large text or a blob is split into a different table.</p>
+<p>As shown in the figure a couple paragraphs below, the Employee table is divided into two tables: a reduced Employee table and an EmployeePicture table. The EmployeePicture table has just two columns, EmployeeID and Picture, separated from the original table. Moreover, the primary key EmployeeID of the Employee table is added in both partitioned tables. This makes the data read and write easier, and the reconstruction of the table is performed efficiently.</p>
+<p>Vertical sharding has its intricacies and is more amenable to manual partitioning, where stakeholders carefully decide how to partition data. In comparison, horizontal sharding is suitable to automate even under dynamic conditions.</p>
+<p><em>Note: Creating shards by moving specific tables of a database around is also a form of vertical sharding. Usually, those tables are put in the same shard because they often appear together in queries, for example, for joins. We will see an example of such a use-case ahead in the course.</em></p>
+<h3>Horizontal sharding</h3>
+<p>At times, some tables in the databases become too big and affect read/write latency. Horizontal sharding or partitioning is used to divide a table into multiple tables by splitting data row-wise, as shown in the figure in the next section. Each partition of the original table distributed over database servers is called a shard. Usually, there are two strategies available:
+- Key-range based sharding
+- Hash-based sharding</p>
+<h4>Key-range based sharding</h4>
+<p>In the key-range based sharding, each partition is assigned a continuous range of keys.</p>
+<p>Sometimes, a database consists of multiple tables bound by foreign key relationships. In such a case, the horizontal partition is performed using the same partition key on all tables in a relation. Tables (or subtables) that belong to the same partition key are distributed to one database shard. </p>
+<p>The basic design techniques used in multi-table sharding are as follows:
+- There’s a partition key in the Customer mapping table. This table resides on each shard and stores the partition keys used in the shard. Applications create a mapping logic between the partition keys and database shards by reading this table from all shards to make the mapping efficient. Sometimes, applications use advanced algorithms to determine the location of a partition key belonging to a specific shard.
+- The partition key column, Customer_Id, is replicated in all other tables as a data isolation point. It has a trade-off between an impact on increased storage and locating the desired shards efficiently. Apart from this, it’s helpful for data and workload distribution to different database shards. The data routing logic uses the partition key at the application tier to map queries specified for a database shard.
+Primary keys are unique across all database shards to avoid key collision during data migration among shards and the merging of data in the online analytical processing (OLAP)environment.
+The column Creation_date serves as the data consistency point, with an assumption that the clocks of all nodes are synchronized. This column is used as a criterion for merging data from all database shards into the global view when essential.</p>
+<h5>Advantages</h5>
+<p>Using key-range-based sharding method, the range-query-based scheme is easy to implement. We precisely know where (which node, which shard) to look for a specific range of keys.
+Range queries can be performed using the partitioning keys, and those can be kept in partitions in sorted order. How exactly such a sorting happens over time as new data comes in is implementation specific.</p>
+<h5>Disadvantages</h5>
+<p>Range queries can’t be performed using keys other than the partitioning key.</p>
+<p>If keys aren’t selected properly, some nodes may have to store more data due to an uneven distribution of the traffic.</p>
+<h4>Hash-based sharding</h4>
+<p>Hash-based sharding uses a hash function on an attribute. This hash function produces a hash value that is used to perform partitioning. The main concept is to use a hash function on the key to get a hash value and then mod by the number of partitions. Once we’ve found an appropriate hash function for keys, we may give each partition a range of hashes (rather than a range of keys). Any key whose hash occurs inside that range will be kept in that partition.</p>
+<h5>Advantages</h5>
+<p>Keys are uniformly distributed across the nodes.</p>
+<h5>Disadvantages</h5>
+<p>We can’t perform range queries with this technique. Keys will be spread over all partitions.</p>
+<p><strong>Why do you need databases? Why can’t you just use files?</strong></p>
+<p><strong>Answer:</strong> Databases are crucial for several reasons: they efficiently manage large volumes of data, ensure data consistency and integrity, allow for easy updates, provide robust security measures, guarantee data availability, offer scalability, enable efficient data retrieval, and support data recovery and backup. These capabilities make databases superior to using files for data management, especially in applications requiring quick access to accurate and secure data</p>
+<p><strong>Note: How many shards per database?</strong></p>
+<p>Empirically, we can determine how much each node can serve with acceptable performance. It can help us find out the maximum amount of data that we would like to keep on any one node. For example, if we find out that we can put a maximum of 50 GB of data on one node, we have the following:
+- Database size = 10 TB
+- Size of a single shard = 50 GB
+- Number of shards the database should be distributed in 10 TB/50 GB = 200 shards</p>
+<h4>Consistent hashing</h4>
+<p>Consistent hashing assigns each server or item in a distributed hash table a place on an abstract circle, called a ring, irrespective of the number of servers in the table. This permits servers and objects to scale without compromising the system’s overall performance.</p>
+<h5>Advantages of consistent hashing</h5>
+<ul>
+<li>It’s easy to scale horizontally.</li>
+<li>It increases the throughput and improves the latency of the application.</li>
+</ul>
+<h5>Disadvantages of consistent hashing</h5>
+<ul>
+<li>Randomly assigning nodes in the ring may cause non-uniform distribution.</li>
+</ul>
+<h3>Rebalance the partitions</h3>
+<p>Query load can be imbalanced across the nodes due to many reasons, including the following:
+- The distribution of the data isn’t equal.
+- There’s too much load on a single partition.
+- There’s an increase in the query traffic, and we need to add more nodes to keep up.</p>
+<p>We can apply the following strategies to rebalance partitions.</p>
+<h3>Avoid hash mod n</h3>
+<p>Usually, we avoid the hash of a key for partitioning (we used such a scheme to explain the concept of hashing in simple terms earlier). The problem with the addition or removal of nodes in the case of hash mod n is that every node’s partition number changes, and a lot of data moves. For example, assume we have hash(key)=1235. If we have five nodes at the start, the key will start on the first node (1235 mod 5=0). Now, if a new node is added, the key would have to be moved to the sixth node (1235 mod 6 = 5), and so on. This moving of keys from one node to another makes rebalancing costly.</p>
+<h3>Fixed number of partitions</h3>
+<p>In this approach, the number of partitions to be created is fixed at the time when we set our database up. We create a higher number of partitions than the nodes and assign these partitions to nodes. So, when a new node is added to the system, it can take a few partitions from the existing nodes until the partitions are equally divided.</p>
+<p>There’s a downside to this approach. The size of each partition grows with the total amount of data in the cluster since all the partitions contain a small part of the total data. If a partition is very small, it will result in too much overhead because we may have to make a large number of small-sized partitions, each costing us some overhead. If the partition is very large, rebalancing the nodes and recovering from node failures will be expensive. It’s very important to choose the right number of partitions. A fixed number of partitions is used in Elasticsearch, Riak, and many more.</p>
+<h3>Dynamic partitioning</h3>
+<p>In this approach, when the size of a partition reaches the threshold, it’s split equally into two partitions. One of the two split partitions is assigned to one node and the other one to another node. In this way, the load is divided equally. The number of partitions adapts to the overall data amount, which is an advantage of dynamic partitioning.</p>
+<p>However, there’s a downside to this approach. It’s difficult to apply dynamic rebalancing while serving the reads and writes. Dynamic rebalancing during reads and writes is challenging because it involves moving data between nodes, causing latency and potential conflicts. Ensuring data consistency (as data is simultaneously moved and accessed) and availability (potentially requiring pauses in reads/writes during rebalancing) introduces complexities that can impact system performance and reliability. This approach is used in HBase and MongoDB.</p>
+<h3>Partition proportionally to nodes</h3>
+<p>In this approach, the number of partitions is proportionate to the number of nodes, which means every node has fixed partitions. In earlier approaches, the number of partitions was dependent on the size of the dataset. That isn’t the case here. While the number of nodes remains constant, the size of each partition rises according to the dataset size. However, as the number of nodes increases, the partitions shrink. When a new node enters the network, it splits a certain number of current partitions at random, then takes one half of the split and leaves the other half alone. This can result in an unfair split. This approach is used by Cassandra and Ketama.</p>
+<p><strong>How is rebalancing triggered when partitioning proportionally to nodes: automatically or manually?</strong></p>
+<p><strong>Answer:</strong> When partitioning proportionally to nodes, rebalancing is typically performed automatically. The system calculates partition distribution based on current node capacities and automatically moves data when nodes are added or removed.</p>
+<p>Manual rebalancing, where an administrator manually redistributes partitions, is uncommon in this context but may be used in specialized setups.</p>
+<h3>Partitioning and secondary indexes</h3>
+<p>We’ve discussed key-value data model partitioning schemes in which the records are retrieved with primary keys. But what if we have to access the records through secondary indexes? Secondary indexes are the records that aren’t identified by primary keys but are just a way of searching for some value.</p>
+<p>We can partition with secondary indexes in the following ways.</p>
+<h4>Partition secondary indexes by document</h4>
+<p>Each partition is fully independent in this indexing approach. Each partition has its secondary indexes covering just the documents in that partition. It’s unconcerned with the data held in other partitions. If we want to write anything to our database, we need to handle that partition only containing the document ID we’re writing. It’s also known as the local index.</p>
+<p>However, this type of querying on secondary indexes can be expensive. As a result of being restricted by the latency of a poor-performing partition, read query latencies may increase.</p>
+<h4>Partition secondary indexes by the term</h4>
+<p>Instead of creating a secondary index for each partition (a local index), we can make a global index for secondary terms that encompasses data from all partitions.</p>
+<p>Partitioning secondary indexes by the term is more read-efficient than partitioning secondary indexes by the document. This is because it only accesses the partition that contains the term. However, a single write in this approach affects multiple partitions, making the method write-intensive and complex.</p>
+<h2>Request routing</h2>
+<p>We’ve learned how to partition our data. However, one question arises here: How does a client know which node to connect to while making a request? The allocation of partitions to nodes varies after rebalancing. If we want to read a specific key, how do we know which IP address we need to connect to read?</p>
+<p>This problem is also known as service discovery. The following are a few approaches to this problem:</p>
+<ul>
+<li>Allow the clients to request any node in the network. If that node doesn’t contain the requested data, it forwards that request to the node that does contain the related data.</li>
+<li>The second approach contains a routing tier. All the requests are first forwarded to the routing tier, and it determines which node to connect to fulfill the request.</li>
+<li>The clients already have the information related to partitioning and which partition is connected to which node. So, they can directly contact the node that contains the data they need.</li>
+</ul>
+<p>In all of these approaches, the main challenge is to determine how these components know about updates in the partitioning of the nodes.</p>
+<h2>ZooKeeper</h2>
+<p>To track changes in the cluster, many distributed data systems need a separate management server like ZooKeeper. Zookeeper keeps track of all the mappings in the network, and each node connects to ZooKeeper for the information. Whenever there’s a change in the partitioning, or a node is added or removed, ZooKeeper gets updated and notifies the routing tier about the change. HBase, Kafka and SolrCloud use ZooKeeper.</p>
+<p><strong>Question:</strong> Let’s assess our understanding of what’s described in this lesson with the following question:</p>
+<p>Imagine you’re a database architect for a rapidly expanding e-commerce platform with a global user base. The platform experiences varying user activity levels across different regions. The existing monolithic database struggles to handle the increasing load. Users in different regions have distinct sets of preferences and tend to interact more within their regions. Now, we’re looking for an efficient and scalable solution to optimize performance, enhance scalability, and cater to regional variations in user behavior. Regarding this, which one of the following strategies would you adopt, and why?
+- Database sharding
+- Database replication</p>
+<p><strong>Solution:</strong> The best strategy here is database sharding. Sharding involves dividing the database into smaller, manageable pieces called shards, each handling a specific region or subset of data. This approach improves scalability and performance by reducing the load on any single database instance and aligns well with regional user preferences and activity levels. It allows the platform to efficiently handle increasing traffic and regional variations.</p>
+<h2>Conclusion</h2>
+<p>For all current distributed systems, partitioning has become the standard protocol. Because systems contain increasing amounts of data, partitioning the data makes sense since it speeds up both writes and reads. It increases the system’s availability, scalability, and performance.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
