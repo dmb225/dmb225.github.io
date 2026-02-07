@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>Dao Malick BENIN - key-value-store</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+
+                <aside id="featured" class="body">
+                    <article>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-5-2-design-of-a-key-value-store.html">System Design: Lesson 5. 2- Design of a Key-Value Store</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2026-02-06T00:00:00+01:00">
+                Published: Fri 06 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
+</footer><!-- /.post-info --><h2>Requirements</h2>
+<p>Let’s list the requirements of designing a key-value store to overcome the problems of traditional databases.</p>
+<h3>Functional requirements</h3>
+<p>Typically, key-value stores are expected to offer functions such as get and put. However, what sets this particular key-value store system apart is its distinct characteristics, explained as follows:</p>
+<ul>
+<li>Configurable service: Some applications might have a tendency to trade strong consistency for higher availability. We need to provide a configurable service so that different applications could use a range of consistency models. We need tight control over the trade-offs between availability, consistency, cost-effectiveness, and performance.</li>
+</ul>
+<p>Note: Such configurations can only be performed when instantiating a new key-value store instance and cannot be changed dynamically when the system is operational.</p>
+<ul>
+<li><strong>Ability to always write (when we picked “A” over “C” in the context of CAP):</strong> The applications should always have the ability to write into the key-value storage. If the user wants strong consistency, this requirement might not always be fulfilled due to the implications of the CAP theorem.</li>
+</ul>
+<p><em>Note: The context of the problem determines what will be classified as a functional requirement and what will be classified as non-functional. For example, the ability to always write (high availability) is a functional requirement for Amazon’s shopping cart application, while in other cases, high availability may be considered a non-functional requirement. Drawing inspiration from Amazon’s Dynamo key-value store, we can categorize the ability to always write as a functional requirement.</em></p>
+<ul>
+<li>Hardware heterogeneity: We want to add new servers with different and higher capacities, seamlessly, to our cluster without changing or upgrading existing servers. Our system should be able to accommodate and leverage different capacity servers, ensuring correct core functionality (get and put data) while balancing the workload distribution according to each server’s capacity. This calls for a peer-to-peer design with no distinguished nodes.</li>
+</ul>
+<h3>Non-functional requirements</h3>
+<p>The non-functional requirements are as follows:</p>
+<ul>
+<li>Scalability: Key-value stores should run on tens of thousands of servers distributed across the globe. Incremental scalability is highly desirable. We should add or remove the servers as needed with minimal to no disruption to the service availability. Moreover, our system should be able to handle an enormous number of users of the key-value store.</li>
+<li>Fault tolerance: The key-value store should operate uninterrupted despite failures in servers or their components.</li>
+</ul>
+<p><strong>Now that you understand the functional and non-functional requirements of a key-value store</strong></p>
+<ul>
+<li>What do you think are the key differences between key-value stores and traditional databases?</li>
+<li>In what scenarios are key-value stores particularly advantageous?</li>
+</ul>
+<p><strong>Answer:</strong> Key-value stores are designed for simple retrievals using a unique key, and they typically lack complex query languages. They often prioritize availability and scalability over strict consistency, and they store unstructured data. Traditional relational databases, on the other hand, organize data into tables with predefined schemas, support complex queries, and usually emphasize consistency.</p>
+<p>Key-value stores are particularly advantageous in scenarios involving massive data volumes, high-speed lookups, or when the data structure is flexible or not fully known in advance.</p>
+<h2>Assumptions</h2>
+<p>We’ll assume the following to keep our design simple:
+- The data centers hosting the service are trusted (non-hostile).
+- All the required authentication and authorization are already completed.
+- User requests and responses are relayed over HTTPS.</p>
+<h2>API design</h2>
+<p>Key-value stores, like ordinary hash tables, provide two primary functions, which are get and put.</p>
+<p>Let’s look at the API design.</p>
+<h3>The get function</h3>
+<p>The API call to get a value should look like this: <code>get(key)</code></p>
+<p>We return the associated value on the basis of the parameter key. When data is replicated, it locates the object replica associated with a specific key that’s hidden from the end user. It’s done by the system if the store is configured with a weaker data consistency model. For example, in eventual consistency, there might be more than one value returned against a key.</p>
+<h3>The put function</h3>
+<p>The API call to put the value into the system should look like this: ```put(key, value)````</p>
+<p>It stores the value associated with the key. The system automatically determines where data should be placed. Additionally, the system often keeps metadata about the stored object. Such metadata can include the version of the object.</p>
+<p><em>When performing data integrity checks, we often store hashes of values (and sometimes values along with their associated key) as metadata. Should these hashes be generated before or after data compression or encryption, and why?</em></p>
+<p><strong>Answer:</strong> When performing data integrity checks, hashes should be generated after compression but before encryption. This is because compression reduces data size without altering its meaning, making the hash more reliable and efficient. Hashing before encryption is avoided because encryption often involves salting or IVs, which can change the ciphertext even if the data remains the same, leading to unreliable integrity checks. So, the typical sequence is: compress, then hash, then encrypt. This approach ensures that integrity verification is based on the actual content, not the encrypted form.</p>
+<h2>Data type</h2>
+<p>The key is often a primary key in a key-value store, while the value can be any arbitrary binary data.</p>
+<p><em>Note: Dynamo uses MD5 hashes on the key to generate a 128-bit identifier. These identifiers help the system determine which server node will be responsible for this specific key.</em></p>
+<p>In the next lesson, we’ll learn how to design our key-value store. First, we’ll focus on adding scalability, replication, and versioning of our data to our system. Then, we’ll ensure the functional requirements and make our system fault-tolerant. We’ll fulfill a few of our non-functional requirements first because implementing our functional requirements depends on the method chosen for scalability.</p>
+<p><em>Note: This chapter is based on Dynamo, which is an influential work in the domain of key-value stores.</em></p>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-51-the-key-value-store.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 5.1 - The Key-Value Store">System Design: Lesson 5.1 - The Key-Value Store</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-06T00:00:00+01:00">
+                Published: Fri 06 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Introduction to key-value stores</h2>
+<p>Key-value stores are distributed hash tables (DHTs). A key is generated by the hash function and should be unique. In a key-value store, a key binds to a specific value and doesn’t assume anything about the structure of the value. A value can be a …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-51-the-key-value-store.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+                    </ol><!-- /#posts-list -->
+                    </section><!-- /#content -->
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>

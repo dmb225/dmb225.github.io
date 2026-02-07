@@ -83,7 +83,7 @@ In synchronous replication, the primary node waits for acknowledgments from seco
 <li>Synchronous updates</li>
 <li>Asynchronous updates</li>
 </ul>
-<p><strong>Solution:</strong> Certainly! In a real-time financial trading platform where low latency is critical and some eventual consistency is acceptable, asynchronous updates are the recommended choice. This approach allows the primary database to continue processing data without waiting for acknowledgments from secondary nodes, significantly reducing latency. It ensures traders receive timely information, which is vital for making split-second decisions.</p>
+<p><strong>Solution:</strong> In a real-time financial trading platform where low latency is critical and some eventual consistency is acceptable, asynchronous updates are the recommended choice. This approach allows the primary database to continue processing data without waiting for acknowledgments from secondary nodes, significantly reducing latency. It ensures traders receive timely information, which is vital for making split-second decisions.</p>
 <h2>Data replication models</h2>
 <p>If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.</p>
 <p>At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.</p>
