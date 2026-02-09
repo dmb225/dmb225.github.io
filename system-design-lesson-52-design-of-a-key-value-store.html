@@ -4,7 +4,7 @@
                         <meta charset="utf-8" />
                         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                         <meta name="generator" content="Pelican" />
-                        <title>System Design: Lesson 5. 2- Design of a Key-Value Store</title>
+                        <title>System Design: Lesson 5.2 - Design of a Key-Value Store</title>
                         <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
                                 <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
     <meta name="description" content="Requirements Let’s list the requirements of designing a key-value store to overcome the problems of traditional databases. Functional requirements..." />
@@ -21,8 +21,8 @@
     <article>
       <header>
         <h1 class="entry-title">
-          <a href="https://dmb225.github.io/system-design-lesson-5-2-design-of-a-key-value-store.html" rel="bookmark"
-             title="Permalink to System Design: Lesson 5. 2- Design of a Key-Value Store">System Design: Lesson 5. 2- Design of a Key-Value Store</a></h1>
+          <a href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 5.2 - Design of a Key-Value Store">System Design: Lesson 5.2 - Design of a Key-Value Store</a></h1>
       </header>
 
       <div class="entry-content">
@@ -76,7 +76,7 @@
 <p>The API call to get a value should look like this: <code>get(key)</code></p>
 <p>We return the associated value on the basis of the parameter key. When data is replicated, it locates the object replica associated with a specific key that’s hidden from the end user. It’s done by the system if the store is configured with a weaker data consistency model. For example, in eventual consistency, there might be more than one value returned against a key.</p>
 <h3>The put function</h3>
-<p>The API call to put the value into the system should look like this: ```put(key, value)````</p>
+<p>The API call to put the value into the system should look like this: <code>put(key, value)</code></p>
 <p>It stores the value associated with the key. The system automatically determines where data should be placed. Additionally, the system often keeps metadata about the stored object. Such metadata can include the version of the object.</p>
 <p><em>When performing data integrity checks, we often store hashes of values (and sometimes values along with their associated key) as metadata. Should these hashes be generated before or after data compression or encryption, and why?</em></p>
 <p><strong>Answer:</strong> When performing data integrity checks, hashes should be generated after compression but before encryption. This is because compression reduces data size without altering its meaning, making the hash more reliable and efficient. Hashing before encryption is avoided because encryption often involves salting or IVs, which can change the ciphertext even if the data remains the same, leading to unreliable integrity checks. So, the typical sequence is: compress, then hash, then encrypt. This approach ensures that integrity verification is based on the actual content, not the encrypted form.</p>
