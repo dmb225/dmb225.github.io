@@ -19,7 +19,86 @@
 
                 <aside id="featured" class="body">
                     <article>
-                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-61-the-content-delivery-network-cdn.html">System Design: Lesson 6.1 - The Content Delivery Network (CDN)</a></h1>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-71-sequencer.html">System Design: Lesson 7.1 - Sequencer</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2026-02-08T00:00:00+01:00">
+                Published: Sun 08 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
+</footer><!-- /.post-info --><h2>Motivation</h2>
+<p>There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet, and posting a picture on Instagram are just a few examples of such events. We need a mechanism to distinguish these events from each other. One such mechanism is the assignment of globally unique IDs to each of these events.</p>
+<p>Assigning a primary key to an entry in a database is another use case of a unique ID. Usually, the auto-increment feature in databases fulfills this requirement. However, that feature won’t work for a distributed database, where different nodes independently generate the identifiers. For this case, we need a unique ID generator that acts as a primary key in a distributed setting—for example, a horizontally-sharded table.</p>
+<p>A unique ID helps us identify the flow of an event in the logs and is useful for debugging. A real-world example of unique ID usage is Facebook’s end-to-end performance tracing and analysis system, Canopy. Canopy uses TraceID to identify an event uniquely across the execution path that may potentially perform hundreds of microservices to fulfill one user request.</p>
+<p><em>? Explain why we need to design a time-sortable unique ID generator. ?</em></p>
+<p><strong>Answer:</strong> A unique ID generator that is time-sortable is important because it helps maintain a chronological order of events or objects within a system. This ordering is crucial for analyzing event sequences, debugging issues, and performing efficient database queries, as it allows quick access to the most recent or relevant data.</p>
+<h2>How do we design a sequencer?</h2>
+<p>We’ve divided the sequencer’s comprehensive design into the following two lessons:
+- Design of a Unique ID Generator: After enlisting the requirements of the design, we discuss three ways to generate unique IDs: using UUID, using a database, and using a range handler.
+- Unique IDs with Causality: In this lesson, we incorporate an additional factor of time in the generation of IDs and explain the process by taking causality into consideration.</p>
+<p>Unique IDs are important for identifying events and objects within a distributed system. However, designing a unique ID generator within a distributed system is challenging. In the next lesson, let’s look at the requirements for a distributed unique ID generation system.</p>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 7.2 - Sequencer: Design of a Unique ID Generator">System Design: Lesson 7.2 - Sequencer: Design of a Unique ID Generator</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-08T00:00:00+01:00">
+                Published: Sun 08 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
+</footer><!-- /.post-info -->                        <p>In the previous lesson, we saw how unique identifiers are used in many systems, for example, to label tweets, uploaded videos, or track execution flow across services. In this lesson, we will build on that by exploring different ways to design a system that generates such unique IDs. We will …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-73-sequencer-unique-ids-with-causality.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality">System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-08T00:00:00+01:00">
+                Published: Sun 08 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Causality</h2>
+<p>In the previous lesson, we generated unique IDs to differentiate between various events. Apart from having unique identifiers for events, we’re also interested in finding the sequence of these events. Let’s consider an example where Peter and John are two Twitter users. John posts a comment (event …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-73-sequencer-unique-ids-with-causality.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-61-the-content-delivery-network-cdn.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 6.1 - The Content Delivery Network (CDN)">System Design: Lesson 6.1 - The Content Delivery Network (CDN)</a></h1>
+                    </header>
+
+                    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2026-02-07T00:00:00+01:00">
                 Published: Sat 07 February 2026
@@ -30,34 +109,14 @@
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/cdn.html">cdn</a> </p>        
-</footer><!-- /.post-info --><h2>Problem statement</h2>
+</footer><!-- /.post-info -->                        <h2>Problem statement</h2>
 <p>Let’s start with a question: If millions of users worldwide use our data-intensive applications, and our service is deployed in a single data center to serve the users’ requests, what possible problems can arise?</p>
 <p>The following problems can arise:</p>
 <ul>
-<li><strong>High latency:</strong> The user-perceived latency will be high due to the physical distance from the serving data center. User-perceived latency has many components, such as transmission delays (a function of available bandwidth), propagation delays (a function of distance), queuing delays (a function of network congestion), and nodal processing delays. Therefore, data transmission over a large distance results in higher latency. Real-time applications require a latency below 200 milliseconds (ms) in general. For the Voice over Internet Protocol (VoIP), latency should not be more than 150 ms, whereas video streaming applications cannot tolerate a latency above a few seconds.</li>
-</ul>
-<p><em>Note:</em> According to one of the readings taken on December 21, 2021, the average latency from US East (N. Virginia) to US West (N. California) was 62.9 ms. Across continents—for example, from the US East (N. Virginia) to Africa (Cape Town)—was 225.63 ms. This is two-way latency, known as round-trip latency.</p>
-<ul>
-<li><strong>Data-intensive applications:</strong> Data-intensive applications require transferring large traffic. Over a longer distance, this could be a problem due to the network path stretching through different kinds of ISPs. Because of some smaller Path message transmission unit (MTU) links, the throughput of applications on the network might be reduced. Similarly, different portions of the network path might have different congestion characteristics. The problem multiplies as the number of users grows because the origin servers will have to provide the data individually to each user. That is, the primary data center will need to send out a lot of redundant data when multiple clients ask for it. However, applications that use streaming services are both data-intensive and dynamic in nature.</li>
-</ul>
-<p><em>Note:</em> According to a survey, 78% of the United States consumers use streaming services, which is an increase of 25% in five years.</p>
-<ul>
-<li><strong>Scarcity of data center resources:</strong> Important data center resources like computational capacity and bandwidth become a limitation when the number of users of a service increases significantly. Services engaging millions of users simultaneously need scaling. Even if scaling is achieved in a single data center, it can still suffer from becoming a single point of failure when the data center goes offline due to natural calamity or connectivity issues with the Internet.</li>
-</ul>
-<p><em>Note:</em> According to one study, YouTube, Netflix, and Amazon Prime collectively generated 80% of Internet traffic in 2020. Circa 2016, the CDN provider Akamai served 15% to 30% of web traffic (about 30 terabits per second). For 90% of Internet users, Akamai was just one hop away. Therefore, we have strong reasons to optimize the delivery and consumption of this data without making the Internet core a bottleneck.</p>
-<p>The solution to these problems is a content delivery network (CDN), a system that brings data closer to users around the world.</p>
-<h2>How will we design a CDN?</h2>
-<p>We’ve divided the design of CDN into six lessons:
-- Introduction to a CDN: We’ll provide a thorough introduction to CDNs and identify the functional and non-functional requirements.
-- Design of a CDN: We’ll explain how to design the CDN. We’ll also briefly describe the API design.
-- In-depth Investigation of CDN: Part 1: This lesson explains caching strategies and CDN architecture. Also, we’ll discuss various approaches to finding the nearest proxy server.
-- In-depth Investigation of CDN: Part 2: We’ll discuss how to make content consistent in a CDN and the deployment of proxy servers. We’ll also cover the custom and specialized CDN in detail.
-- Evaluation of CDN: This lesson will provide an evaluation of our proposed design.</p>                    </article>
-                </aside><!-- /#featured -->
-                    <section id="content" class="body">
-                        <h1>Other articles</h1>
-                        <hr />
-                        <ol id="posts-list" class="hfeed">
+<li><strong>High latency:</strong> The user-perceived latency will be high …</li></ul>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-61-the-content-delivery-network-cdn.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
 
                 <li><article class="hentry">
                     <header>
@@ -197,76 +256,6 @@
 </footer><!-- /.post-info -->                        <h2>Data versioning</h2>
 <p>When network partitions and node failures occur during an update, an object’s version history might become fragmented. As a result, it requires a reconciliation effort on the part of the system. It’s necessary to build a way that explicitly accepts the potential of several copies of …</p>
                         <a class="readmore" href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-55-key-value-store-fault-tolerance.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.5 - Key-Value Store Fault Tolerance">System Design: Lesson 5.5 - Key-Value Store Fault Tolerance</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Handle temporary failures</h2>
-<p>Typically, distributed systems use a quorum-based approach to handle failures. A quorum is the minimum number of votes required for a distributed transaction to proceed with an operation. If a server is part of the consensus and is down, then we can’t perform the required operation …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-55-key-value-store-fault-tolerance.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-42-types-of-databases.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 4.2 - Types of Databases">System Design: Lesson 4.2 - Types of Databases</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-05T00:00:00+01:00">
-                Published: Thu 05 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
-</footer><!-- /.post-info -->                        <p>As we discussed earlier, databases are divided into two types: relational and non-relational. Let’s discuss these types in detail.</p>
-<h2>Relational databases</h2>
-<p>Relational databases adhere to particular schemas before storing the data. The data stored in relational databases has prior structure. Mostly, this model organizes data into one or more …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-42-types-of-databases.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-43-data-replication.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 4.3 - Data Replication">System Design: Lesson 4.3 - Data Replication</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-05T00:00:00+01:00">
-                Published: Thu 05 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
-</footer><!-- /.post-info -->                        <p>Data is a valuable asset for an organization because it drives the entire business.</p>
-<p>Data provides critical business insights into what’s important and what needs to be changed. Organizations also need to securely save and serve their clients’ data on demand. Timely access to the required data under varying …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-43-data-replication.html">read more</a>
                     </div><!-- /.entry-content -->
                 </article></li>
                     </ol><!-- /#posts-list -->

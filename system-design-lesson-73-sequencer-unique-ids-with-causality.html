@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="Causality In the previous lesson, we generated unique IDs to differentiate between various events. Apart from having unique identifiers for..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-73-sequencer-unique-ids-with-causality.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality">System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-08T00:00:00+01:00">
+                Published: Sun 08 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
+</footer><!-- /.post-info -->        <h2>Causality</h2>
+<p>In the previous lesson, we generated unique IDs to differentiate between various events. Apart from having unique identifiers for events, we’re also interested in finding the sequence of these events. Let’s consider an example where Peter and John are two Twitter users. John posts a comment (event A), and Peter replies to John’s comment (event B). Event B is dependent on event A and can’t happen before it. The events are not concurrent here.</p>
+<p>We can also have concurrent events—that is, two events that occur independently of each other. For example, if Peter and John comment on two different Tweets, there’s no happened-before relationship or causality between them. It’s essential to identify the dependence of one event over the other but not in the case of concurrent events.</p>
+<p><em>Note:</em> The scenario described above can also be handled by assigning a unique ID and encoding the dependence of events using a social graph. We might also use a separate time data structure and a simple unique ID. However, we want a unique ID to do double duty—provide unique identification and also help with the causality of events.</p>
+<p>Some applications need the events to have unique identifiers and carry any relevant causality information. An example of this is giving an identifier to the concurrent writes of a key into a key-value store to implement the last-write-wins strategy.</p>
+<p>We can either use logical or physical clocks to infer causality. Some systems have additional requirements where we want event identifiers’ causality to map wall-clock time. An example of this is a financial application that complies with the European MiFID regulations. MiFID requires clocks to be within 100 microseconds of UTC to detect anomalies during high-volume/high-speed market trades.</p>
+<p><em>Note:</em> There are many subtleties associated with logical or physical clocks. We can refer to the text below titled “Time in a Distributed System” to refresh our concepts of time.</p>
+<h2>Use UNIX time stamps</h2>
+<p>UNIX time stamps are granular to the millisecond and can be used to distinguish different events. We have an ID-generating server that can generate one ID in a single millisecond. Any request to generate a unique ID is routed to that server, which returns a timestamp and then returns a unique ID. The ability to generate an ID in milliseconds allows us to generate a thousand identifiers per second. This means we can get t = 24 (hour) × 60 (min/hour) × 60 (sec/min) × 1000 (ID/sec) = 86,400,000 IDs in a day. That’s less than a billion per day.</p>
+<p>Our system works well with generating IDs, but it poses a crucial problem. The ID-generating server is a single point of failure (SPOF), and we need to handle it. To cater to SPOF, we can add more servers. Each server generates a unique ID for every millisecond. To make the overall identifier unique across the system, we attach the server ID with the UNIX time stamp. Then, we add a load balancer to distribute the traffic more efficiently.</p>
+<h3>Pros</h3>
+<p>This approach is simple, scalable, and easy to implement. It also enables multiple servers to handle concurrent requests.</p>
+<h3>Cons</h3>
+<p>For two concurrent events, the same time stamp is returned and the same ID can be assigned to them. This way, the IDs are no longer unique.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Unique</th>
+<th>Sca﻿lable</th>
+<th>Available</th>
+<th>64-bit numeric ID</th>
+<th>Causality maintained</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using UUID</td>
+<td>✖️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using a database</td>
+<td>✖️</td>
+<td>✖️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using a range handler</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using UNIX time stamps</td>
+<td>✖️</td>
+<td>weak</td>
+<td>✔️</td>
+<td>✔️</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>TrueTime API</h2>
+<p>Google’s TrueTime API in Spanner is an interesting option. Instead of a particular time stamp, it reports an interval of time. When asking for the current time, we get back two values: the earliest and latest ones. These are the earliest possible and latest possible time stamps.</p>
+<p>Based on its uncertainty calculations, the clock knows that the actual current time is somewhere within that interval. The width of the interval depends, among other things, on how long it has been since the local quartz clock was last synchronized with a more accurate clock source.</p>
+<p>Google deploys a GPS receiver or atomic clock in each data center, and clocks are synchronized within about 7 ms. This allows Spanner to keep the clock uncertainty to a minimum. The uncertainty of the interval is represented as epsilon.</p>
+<p>Spanner guarantees that if two confidence intervals don’t overlap (that is, A_earliest &lt; A_latest &lt; B_earliest &lt; B_latest), then B definitely happened after A.</p>
+<p>We generate our unique ID using TrueTime intervals. Let’s say:<br>
+- Earliest interval: <code>T_E</code><br>
+- Latest interval: <code>T_L</code><br>
+- Uncertainty: <code>ε</code>  </p>
+<p>We use <code>T_E</code> in <strong>milliseconds</strong> as a timestamp in our unique ID.</p>
+<p><strong>ID structure:</strong>
+- <strong>Time stamp (41 bits):</strong><br>
+  We use <code>T_E</code> as the timestamp.
+- <strong>Uncertainty (4 bits):</strong><br>
+  Since the maximum uncertainty is claimed to be 6–10 ms, we store it using 4 bits.
+- <strong>Worker number (10 bits):</strong><br>
+  This gives us <code>2^10 = 1,024</code> possible worker IDs.
+- <strong>Sequence number (8 bits):</strong><br>
+  For every ID generated on the server, the sequence number is incremented by one.<br>
+  This gives <code>2^8 = 256</code> combinations, and we reset it to zero when it reaches 256.</p>
+<h3>Pros</h3>
+<p>TrueTime satisfies all the requirements. We’re able to generate a globally unique 64-bit identifier. The causality of events is maintained. The approach is scalable and highly available.</p>
+<h3>Cons</h3>
+<p>If two intervals overlap, then we’re unsure in what order A and B occurred. It’s possible that they’re concurrent events, but a 100% guarantee can’t be given. Additionally, Spanner is expensive because it ensures high database consistency. The dollar cost of a Spanner-like system is also high due to its elaborate infrastructure needs and monitoring.</p>
+<p>The updated table provides the comparison between the different system designs for generating a unique ID.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Unique</th>
+<th>Scalable</th>
+<th>Available</th>
+<th>64-bit numeric ID</th>
+<th>Causality maintained</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using UUID</td>
+<td>✖️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using a database</td>
+<td>✖️</td>
+<td>✖️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using a range handler</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using UNIX time stamps</td>
+<td>✖️</td>
+<td>weak</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>weak</td>
+</tr>
+<tr>
+<td>Using TrueTime</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+</tr>
+</tbody>
+</table>
+<p><em>Consider a scenario: A data center loses power for 30 minutes. After recovering, the machine clocks are out of sync by 5 minutes. What issues might this cause, and how would you resolve them?</em></p>
+<p><strong>Answer:</strong>  The issues include clock drift causing IDs with inaccurate timestamps and collision risks. To resolve this, synchronize clocks with NTP before bringing machines online, prevent ID generation until synchronization, or temporarily rely on sequence numbers without timestamps.</p>
+<h2>Summary</h2>
+<ul>
+<li>We want to avoid duplicate identifiers. Consider what will happen if duplicate payment or purchase orders are generated.</li>
+<li>UUIDs provide probabilistic guarantees about the keys’ non-collision. Deterministically getting non-collision guarantees might need consensus among different distributed entities or stores and read from the replicated store.</li>
+<li>As key length becomes large, it often causes slower tuple updates in a database. Therefore, identifiers should be big enough but not too big.</li>
+<li>Often, it’s desirable that no one is able to guess the next ID. Otherwise, undesirable data leaks can happen, and the organization’s competitors may learn how many orders were processed in a day by simply looking at order IDs. Adding a few random numbers to the bits of the identifier make it hard to guess, although this comes at a performance cost.</li>
+<li>We can use simple counters for generating unique IDs if we don’t want to relate ID to time. Fetching time stamps is slower than simple counters.</li>
+<li>Fetching time stamps is slower than simple counters, though this requires that we store generated IDs persistently. The counter needs to be stored in the database. Storage comes with its own issues. These include multiple concurrent writes becoming overwhelming for the database and the database being the single point of failure.</li>
+<li>For some distributed databases, such as Spanner, it can hurt to generate monotonically increasing or decreasing IDs. Google reports the following: “In fact, using monotonically increasing (or decreasing) values as row keys does not follow best practices in Spanner because it creates hotspots in the database, leading to a reduction in performance.”</li>
+</ul>
+<p>**Note: Globally ordering events is an expensive procedure. A feature that was fast and simple in a centralized database (auto-increment based ID) becomes slow and complicated in its distributed counterpart due to some fundamental constraints (such as consensus, which is difficult among remote entities).</p>
+<p>For example, Spanner, a geographically distributed database, reports that “if a read-update transaction on a single cell (one column in a single row) has a latency of 10 milliseconds (ms), then the maximum theoretical frequency of issuing of sequence values is 100 per second. This maximum applies to the entire database, regardless of the number of client application instances, or the number of nodes in the database. This is because a single node always manages a single row.” If we could compromise on the requirements for global orderings and gapless identifiers, we would be able to get many identifiers in a shorter time, that is, a better performance.**</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
