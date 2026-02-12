@@ -40,7 +40,7 @@
 <p>When network partitions and node failures occur during an update, an object’s version history might become fragmented. As a result, it requires a reconciliation effort on the part of the system. It’s necessary to build a way that explicitly accepts the potential of several copies of the same data so that we can avoid the loss of any updates. It’s critical to realize that some failure scenarios can lead to multiple copies of the same data in the system. So, these copies might be the same or divergent. Resolving the conflicts among these divergent histories is essential and critical for consistency purposes.</p>
 <p>To handle inconsistency, we need to maintain causality between the events. We can do this using the timestamps and update all conflicting values with the value of the latest request. But time isn’t reliable in a distributed system, so we can’t use it as a deciding factor.</p>
 <p>Another approach to maintaining causality effectively is by using vector clocks. A vector clock is a list of (node, counter) pairs. There’s a single vector clock for every version of an object. If two objects have different vector clocks, we’re able to tell whether they’re causally related or not (more on this in a bit). Unless one of the two changes is reconciled, the two are deemed at odds.</p>
-<p><em>? Explain how metadata like versioning and checksums, which detect data corruption, help maintain data integrity and consistency in a key-value store. ?</em></p>
+<p><em>Explain how metadata like versioning and checksums, which detect data corruption, help maintain data integrity and consistency in a key-value store.</em></p>
 <p><strong>Answer:</strong> Certainly! Metadata like versioning and checksums are vital for maintaining data integrity and consistency in a key-value store.</p>
 <ul>
 <li><strong>Versioning</strong> helps track changes to data, making it easier to resolve conflicts during replication and ensuring clients can identify the most recent data in eventually consistent systems.</li>
@@ -58,12 +58,12 @@ The function finds the node where the value should be placed on the basis of the
 <h2>The get and put operations</h2>
 <p>One of our functional requirements is that the system should be configurable. We want to control the trade-offs between availability, consistency, cost-effectiveness, and performance. So, let’s achieve configurability by implementing the basic get and put functions of the key-value store.</p>
 <p>Every node can handle the get (read) and put (write) operations in our system. A node handling a read or write operation is known as a coordinator. The coordinator is the first among the top n nodes in the preference list.</p>
-<p>There can be two ways for a client to select a node:
-- We route the request to a generic load balancer.</p>
+<p>There can be two ways for a client to select a node:</p>
 <ul>
-<li>We use a partition-aware client library that routes requests directly to the appropriate coordinator nodes.
-Both approaches have their benefits. The client isn’t linked to the code in the first approach, whereas lower latency is achievable in the second. The latency is lower due to the reduced number of hops because the client can directly go to a specific server.</li>
+<li>We route the request to a generic load balancer.</li>
+<li>We use a partition-aware client library that routes requests directly to the appropriate coordinator nodes.</li>
 </ul>
+<p>Both approaches have their benefits. The client isn’t linked to the code in the first approach, whereas lower latency is achievable in the second. The latency is lower due to the reduced number of hops because the client can directly go to a specific server.</p>
 <p>Let’s make our service configurable by having an ability where we can control the trade-offs between availability, consistency, cost-effectiveness, and performance. We can use a consistency protocol similar to those used in quorum systems.</p>
 <p>Let’s take an example. Say n in the top n of the preference list is equal to 3. This means three copies of the data need to be maintained. We assume that nodes are placed in a ring. Say A, B, C, D, and E is the clockwise order of the nodes in that ring. If the write function is performed on node A, then the copies of that data will be placed on B and C. This is because B and C are the next nodes we find while moving in a clockwise direction of the ring.</p>
 <p>By now, we’ve fulfilled the scalability, availability, conflict-resolution, and configurable service requirements. The last requirement is to have a fault-tolerant system. Let’s discuss how we’ll achieve it in the next lesson.</p>

@@ -101,10 +101,12 @@
 <p>Based on its uncertainty calculations, the clock knows that the actual current time is somewhere within that interval. The width of the interval depends, among other things, on how long it has been since the local quartz clock was last synchronized with a more accurate clock source.</p>
 <p>Google deploys a GPS receiver or atomic clock in each data center, and clocks are synchronized within about 7 ms. This allows Spanner to keep the clock uncertainty to a minimum. The uncertainty of the interval is represented as epsilon.</p>
 <p>Spanner guarantees that if two confidence intervals don’t overlap (that is, A_earliest &lt; A_latest &lt; B_earliest &lt; B_latest), then B definitely happened after A.</p>
-<p>We generate our unique ID using TrueTime intervals. Let’s say:<br>
-- Earliest interval: <code>T_E</code><br>
-- Latest interval: <code>T_L</code><br>
-- Uncertainty: <code>ε</code>  </p>
+<p>We generate our unique ID using TrueTime intervals. Let’s say:</p>
+<ul>
+<li>Earliest interval: <code>T_E</code>  </li>
+<li>Latest interval: <code>T_L</code>  </li>
+<li>Uncertainty: <code>ε</code>  </li>
+</ul>
 <p>We use <code>T_E</code> in <strong>milliseconds</strong> as a timestamp in our unique ID.</p>
 <p><strong>ID structure:</strong>
 - <strong>Time stamp (41 bits):</strong><br>

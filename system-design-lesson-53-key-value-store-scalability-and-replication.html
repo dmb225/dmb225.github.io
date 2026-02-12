@@ -58,7 +58,7 @@ A load balancer would interfere by spreading requests randomly, leading to misro
 - If a node fails or does routine maintenance, the workload is uniformly distributed over other nodes. For each newly accessible node, the other nodes receive nearly equal load when it comes back online or is added to the system.
 - It’s up to each node to decide how many virtual nodes it’s responsible for, considering the heterogeneity of the physical infrastructure. For example, if a node has roughly double the computational capacity as compared to the others, it can take more load.</p>
 <p>We’ve made the proposed design of key-value storage scalable. The next task is to make our system highly available.</p>
-<p><em>? Describe how a key-value store can support incremental scalability without disrupting service availability. ?</em></p>
+<p><em>Describe how a key-value store can support incremental scalability without disrupting service availability.</em></p>
 <p><strong>Answer:</strong> A key-value store can support incremental scalability without disrupting service availability by using techniques such as consistent hashing to only reassign affected keys when nodes are added or removed. Additionally, virtual nodes help reduce data movement during scaling, and background data migration ensures minimal impact on active operations. Implementing read/write forwarding allows the system to handle in-transit data smoothly during scaling transitions.</p>
 <h2>Data replication</h2>
 <p>We have various methods to replicate the storage. It can be either a primary-secondary relationship or a peer-to-peer relationship.</p>

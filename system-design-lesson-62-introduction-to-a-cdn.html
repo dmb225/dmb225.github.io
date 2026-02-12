@@ -40,9 +40,11 @@
 <p>The proxy servers are placed at the network edge and are often called edge servers. By storing copies of content near end users, edge servers reduce latency, save bandwidth, and deliver data more quickly. A basic proxy simply forwards requests, but a CDN adds intelligence that optimizes how and where content is delivered.</p>
 <p>The guiding idea behind a CDN is to minimize the distance that data must travel to reach the user. To achieve this, CDNs place small data centers near users and store copies of the required content there. By storing both static and dynamic content close to end users, CDNs can significantly reduce propagation delay, which is the time it takes for data to travel across the network. They also work to reduce transmission and queuing delays by ensuring that sufficient bandwidth is available along the delivery path, often within the user’s ISP.</p>
 <p><em>Note:</em> Cache is often confused with CDN. Cache is a local storage method for frequently used data, while a CDN spreads content across multiple locations to reach users faster and more reliably.</p>
-<p>Let’s look at the different ways CDN solves the discussed problems:
-- <strong>High latency:</strong> A CDN brings content closer to end-users via edge servers, reducing the physical distance data travels and improving response times. This also reduces network congestion and propagation delays.
-- <strong>Data-intensive applications:</strong> Since the path to the data includes only the ISP and the nearby CDN components, there’s no issue in serving a large number of users through a few CDN components in a specific area. As shown below, the origin data center will need to provide the data to local CDN components only once, whereas local CDN components can then provide the data to different users individually. No user will have to download their own copy of data from the origin servers.</p>
+<p>Let’s look at the different ways CDN solves the discussed problems:</p>
+<ul>
+<li><strong>High latency:</strong> A CDN brings content closer to end-users via edge servers, reducing the physical distance data travels and improving response times. This also reduces network congestion and propagation delays.</li>
+<li><strong>Data-intensive applications:</strong> Since the path to the data includes only the ISP and the nearby CDN components, there’s no issue in serving a large number of users through a few CDN components in a specific area. As shown below, the origin data center will need to provide the data to local CDN components only once, whereas local CDN components can then provide the data to different users individually. No user will have to download their own copy of data from the origin servers.</li>
+</ul>
 <p><em>Note:</em> Various streaming protocols are used to deliver dynamic content by the CDN providers. For example, CDNsun uses the Real-time Messaging Protocol (RTMP), HTTP Live Streaming (HLS), Real-time Streaming Protocol (RTSP), and many more to deliver dynamic content.</p>
 <ul>
 <li><strong>Scarcity of data center resources:</strong> A CDN is used to serve popular content. For this reason, most traffic is handled at the CDN instead of the origin servers. So, different local or distributed CDN components share the load on origin servers.</li>
@@ -52,13 +54,15 @@
 <p><strong>Answer:</strong> Not likely. A CDN caches a considerable portion of the content depending on its capabilities, and it mostly caches the static content.</p>
 <p>It also depends on the size of the content. For example, it might be possible for Netflix to store more than 90% of its movies in the CDN, while this might not be feasible for a service like YouTube due to the humongous volume of content.</p>
 <h2>Functional requirements</h2>
-<p>The following functional requirements will be a part of our design:
-- Retrieve: Depending upon the type of CDN models, a CDN should be able to retrieve content from the origin servers. We’ll cover CDN models in the coming lesson.
-- Request: Content delivery from the proxy server is made upon the user’s request. CDN proxy servers should be able to respond to each user’s request in this regard.
-- Deliver: In the case of the push model, the origin servers should be able to send the content to the CDN proxy servers.
-- Search: The CDN should be able to execute a search against a user query for cached or otherwise stored content within the CDN infrastructure.
-- Update: In most cases, content comes from the origin server, but if we run a script in a CDN, the CDN should be able to update the content within peer CDN proxy servers in a PoP.
-- Delete: Depending upon the type of content (static or dynamic), it should be possible to delete cached entries from the CDN servers after a certain period.</p>
+<p>The following functional requirements will be a part of our design:</p>
+<ul>
+<li>Retrieve: Depending upon the type of CDN models, a CDN should be able to retrieve content from the origin servers. We’ll cover CDN models in the coming lesson.</li>
+<li>Request: Content delivery from the proxy server is made upon the user’s request. CDN proxy servers should be able to respond to each user’s request in this regard.</li>
+<li>Deliver: In the case of the push model, the origin servers should be able to send the content to the CDN proxy servers.</li>
+<li>Search: The CDN should be able to execute a search against a user query for cached or otherwise stored content within the CDN infrastructure.</li>
+<li>Update: In most cases, content comes from the origin server, but if we run a script in a CDN, the CDN should be able to update the content within peer CDN proxy servers in a PoP.</li>
+<li>Delete: Depending upon the type of content (static or dynamic), it should be possible to delete cached entries from the CDN servers after a certain period.</li>
+</ul>
 <h2>Non-functional requirements</h2>
 <ul>
 <li>Performance: Minimizing latency is one of the core missions of a CDN. The proposed design should have the minimum possible latency.</li>
@@ -67,10 +71,12 @@
 <li>Reliability and security: Our CDN design should ensure no single point of failure. Apart from failures, the designed CDN must reliably handle massive traffic loads. Furthermore, CDNs should provide protection to hosted content from various attacks.</li>
 </ul>
 <h2>Building blocks we will use</h2>
-<p>The design of a CDN utilizes the following building blocks:
-- DNS is the service that maps human-friendly CDN domain names to machine-readable IP addresses. This IP address will take the users to the specified proxy server.
-- Load balancers distribute millions of requests among the operational proxy servers.
-In the next lesson, we’ll discuss the design of the CDN.</p>
+<p>The design of a CDN utilizes the following building blocks:</p>
+<ul>
+<li>DNS is the service that maps human-friendly CDN domain names to machine-readable IP addresses. This IP address will take the users to the specified proxy server.</li>
+<li>Load balancers distribute millions of requests among the operational proxy servers.
+In the next lesson, we’ll discuss the design of the CDN.</li>
+</ul>
       </div><!-- /.entry-content -->
 
     </article>

@@ -38,17 +38,21 @@
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
 </footer><!-- /.post-info -->        <p>Data is a valuable asset for an organization because it drives the entire business.</p>
 <p>Data provides critical business insights into what’s important and what needs to be changed. Organizations also need to securely save and serve their clients’ data on demand. Timely access to the required data under varying conditions (including increasing reads and writes, disk and node failures, network and power outages, and others) is necessary to successfully run an online business.</p>
-<p>We need the following characteristics from our data store:
-- Availability under faults (failure of one or more disks, nodes, network, or power outages).
-- Scalability (with increasing reads, writes, and other operations).
-- Performance (low latency and high throughput for the clients).</p>
+<p>We need the following characteristics from our data store:</p>
+<ul>
+<li>Availability under faults (failure of one or more disks, nodes, network, or power outages).</li>
+<li>Scalability (with increasing reads, writes, and other operations).</li>
+<li>Performance (low latency and high throughput for the clients).</li>
+</ul>
 <p>It’s challenging, or even impossible, to achieve the above characteristics on a single node.</p>
 <h2>Replication</h2>
 <p>Replication refers to keeping multiple copies of the data at various nodes (preferably geographically distributed) to achieve availability, scalability, and performance. In this lesson, we assume that a single node is enough to hold our entire data. We won’t use this assumption while discussing the partitioning of data in multiple nodes. Often, the concepts of replication and partitioning go together.</p>
-<p>Replication provides several key benefits for distributed systems:
-- Keeps data geographically close to your users, thus reducing access latency.
-- Allows the system to continue working even if some of its parts have failed, thus increasing availability.
-- Scales out the number of machines that can serve read queries, thus increasing read throughput.</p>
+<p>Replication provides several key benefits for distributed systems:</p>
+<ul>
+<li>Keeps data geographically close to your users, thus reducing access latency.</li>
+<li>Allows the system to continue working even if some of its parts have failed, thus increasing availability.</li>
+<li>Scales out the number of machines that can serve read queries, thus increasing read throughput.</li>
+</ul>
 <p>However, with many benefits, like availability, replication comes with its complexities. Replication is relatively simple if the replicated data doesn’t require frequent changes. The main problem in replication arises when we have to maintain changes in the replicated data over time.</p>
 <p>If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data is a real challenge; it requires careful thinking about concurrency and all the things that can go wrong so that we can deal with the consequences of those faults.</p>
 <p>Additional complexities that could arise due to replication are as follows:</p>
@@ -67,9 +71,9 @@
 <p>There are two ways to disseminate changes to the replica nodes:</p>
 <ul>
 <li>Synchronous replication</li>
-<li>Asynchronous replication
-In synchronous replication, the primary node waits for acknowledgments from secondary nodes to confirm that the data has been updated.</li>
+<li>Asynchronous replication</li>
 </ul>
+<p>In synchronous replication, the primary node waits for acknowledgments from secondary nodes to confirm that the data has been updated.</p>
 <p>After receiving acknowledgment from all secondary nodes, the primary node reports success to the client. In asynchronous replication, the primary node doesn’t wait for acknowledgments from the secondary nodes and reports success to the client after updating itself. The advantage of synchronous replication is that all secondary nodes are completely up-to-date with the primary node.</p>
 <p>However, there’s a disadvantage to this approach.</p>
 <p>If one of the secondary nodes fails to acknowledge due to a network failure or fault, the primary node will be unable to acknowledge the client until it receives a successful acknowledgment from the crashed node. This causes high latency in the response from the primary node to the client. On the other hand, the advantage of asynchronous replication is that the primary node can continue its work even if all the secondary nodes are down.</p>
@@ -87,17 +91,12 @@ In synchronous replication, the primary node waits for acknowledgments from seco
 <h2>Data replication models</h2>
 <p>If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.</p>
 <p>At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.</p>
-<p>Here are the following algorithms for replicating changes across nodes:
-- Single leader or primary-secondary, or master-slave replication
-- Multi-leader replication
-- Peer-to-peer or leaderless replication</p>
-<h3>Data replication models</h3>
-<p>If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.</p>
-<p>At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.</p>
-<p>Here are the following algorithms for replicating changes across nodes:
-- Single leader or primary-secondary, or master-slave replication
-- Multi-leader replication
-- Peer-to-peer or leaderless replication</p>
+<p>Here are the following algorithms for replicating changes across nodes:</p>
+<ul>
+<li>Single leader or primary-secondary, or master-slave replication</li>
+<li>Multi-leader replication</li>
+<li>Peer-to-peer or leaderless replication</li>
+</ul>
 <h3>Single leader/primary-secondary replication</h3>
 <p>In primary-secondary replication, data is replicated across multiple nodes.</p>
 <p>One node is designated as the primary. It’s responsible for processing any writes to data stored on the cluster. It also sends all the writes to the secondary nodes and keeps them in sync. Primary-secondary replication is appropriate when our workload is read-heavy.</p>
@@ -151,12 +150,14 @@ Asynchronous primary-secondary replication introduces certain challenges that ca
 <p>There are multiple primary nodes that process the writes and send them to all other primary and secondary nodes to replicate.</p>
 <p>This type of replication is used in databases, along with external tools such as the Tungsten Replicator for MySQL. This kind of replication is particularly useful in applications where we can continue working even when offline—for example, a calendar application that allows us to schedule meetings even without internet access.</p>
 <p>Once we’re online, it replicates its changes from our local database (our mobile phone or laptop acts as a primary node) to other nodes.</p>
-<p>** Common data distribution/migration pattern
-- Bi-direction: Reporting instance
-- Unidirectional: Instant fail-over (Multi-leader replication)
-- Peer-to-peer: Load balancing (High Availability)
-- Broadcast: Wide-level data distribution to multiple instances
-- Consolidation: Data warehouse (data storage)</p>
+<h2>Common data distribution/migration pattern</h2>
+<ul>
+<li>Bi-direction: Reporting instance</li>
+<li>Unidirectional: Instant fail-over (Multi-leader replication)</li>
+<li>Peer-to-peer: Load balancing (High Availability)</li>
+<li>Broadcast: Wide-level data distribution to multiple instances</li>
+<li>Consolidation: Data warehouse (data storage)</li>
+</ul>
 <h4>Conflict</h4>
 <p>Multi-leader replication gives better performance and scalability than single-leader replication, but it also has a significant disadvantage.</p>
 <p>Since all primary nodes concurrently handle write requests, they may modify the same data, potentially creating a conflict between them. For example, suppose the same data is edited by two clients simultaneously. In that case, their writes will be successful in their associated primary nodes, but when they reach the other primary nodes asynchronously, it creates a conflict.</p>
@@ -184,9 +185,11 @@ Asynchronous primary-secondary replication introduces certain challenges that ca
 <p>If at least two out of three nodes are guaranteed to return successful updates, it means only one node has failed. This means that if we read from two nodes, at least one of them will have the updated version, and our system can continue working.</p>
 <p>If we have n nodes, then every write must be updated in at least w nodes to be considered a success, and we must read from r nodes.</p>
 <p>We’ll get an updated value from reading as long as w + r &gt; n because at least one of the nodes must have an updated write from which we can read. Quorum reads and writes adhere to these r and w values. These n, w and r are configurable in Dynamo-style databases.</p>
-<p>For more details on the topic of Quorum, refer to these links:
-- <a href="https://www.educative.io/answers/what-is-a-quorum">What is Quorum?</a>
-- <a href="https://www.educative.io/answers/what-is-quorum-in-distributed-systems">What is Quorum in distributed systems?</a></p>
+<p>For more details on the topic of Quorum, refer to these links:</p>
+<ul>
+<li><a href="https://www.educative.io/answers/what-is-a-quorum">What is Quorum?</a></li>
+<li><a href="https://www.educative.io/answers/what-is-quorum-in-distributed-systems">What is Quorum in distributed systems?</a></li>
+</ul>
       </div><!-- /.entry-content -->
 
     </article>

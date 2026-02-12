@@ -45,9 +45,11 @@
 <p>We’ll discuss different ways to partition data, related challenges, and their solutions in this lesson.</p>
 <h2>Sharding</h2>
 <p>To divide load among multiple nodes, we need to partition the data by a phenomenon known as partitioning or sharding. In this approach, we split a large dataset into smaller chunks of data stored at different nodes on our network.</p>
-<p>The partitioning must be balanced so that each partition receives about the same amount of data. If partitioning is unbalanced, the majority of queries will fall into a few partitions. Partitions that are heavily loaded will create a system bottleneck. The efficacy of partitioning will be harmed because a significant portion of data retrieval queries will be sent to the nodes that carry the highly congested partitions. Such partitions are known as hotspots. Generally, we use the following two ways to shard the data:
-- Vertical sharding
-- Horizontal sharding</p>
+<p>The partitioning must be balanced so that each partition receives about the same amount of data. If partitioning is unbalanced, the majority of queries will fall into a few partitions. Partitions that are heavily loaded will create a system bottleneck. The efficacy of partitioning will be harmed because a significant portion of data retrieval queries will be sent to the nodes that carry the highly congested partitions. Such partitions are known as hotspots. Generally, we use the following two ways to shard the data:</p>
+<ul>
+<li>Vertical sharding</li>
+<li>Horizontal sharding</li>
+</ul>
 <h3>Vertical sharding</h3>
 <p>We can put different tables in various database instances, which might be running on a different physical server. We might break a table into multiple tables so that some columns are in one table while the rest are in the other. We should be careful if there are joins between multiple tables. We may like to keep such tables together on one shard.</p>
 <p>Often, vertical sharding is used to increase the speed of data retrieval from a table consisting of columns with very wide text or a binary large object (blob). In this case, the column with large text or a blob is split into a different table.</p>
@@ -55,17 +57,21 @@
 <p>Vertical sharding has its intricacies and is more amenable to manual partitioning, where stakeholders carefully decide how to partition data. In comparison, horizontal sharding is suitable to automate even under dynamic conditions.</p>
 <p><em>Note: Creating shards by moving specific tables of a database around is also a form of vertical sharding. Usually, those tables are put in the same shard because they often appear together in queries, for example, for joins. We will see an example of such a use-case ahead in the course.</em></p>
 <h3>Horizontal sharding</h3>
-<p>At times, some tables in the databases become too big and affect read/write latency. Horizontal sharding or partitioning is used to divide a table into multiple tables by splitting data row-wise, as shown in the figure in the next section. Each partition of the original table distributed over database servers is called a shard. Usually, there are two strategies available:
-- Key-range based sharding
-- Hash-based sharding</p>
+<p>At times, some tables in the databases become too big and affect read/write latency. Horizontal sharding or partitioning is used to divide a table into multiple tables by splitting data row-wise, as shown in the figure in the next section. Each partition of the original table distributed over database servers is called a shard. Usually, there are two strategies available:</p>
+<ul>
+<li>Key-range based sharding</li>
+<li>Hash-based sharding</li>
+</ul>
 <h4>Key-range based sharding</h4>
 <p>In the key-range based sharding, each partition is assigned a continuous range of keys.</p>
 <p>Sometimes, a database consists of multiple tables bound by foreign key relationships. In such a case, the horizontal partition is performed using the same partition key on all tables in a relation. Tables (or subtables) that belong to the same partition key are distributed to one database shard. </p>
-<p>The basic design techniques used in multi-table sharding are as follows:
-- There’s a partition key in the Customer mapping table. This table resides on each shard and stores the partition keys used in the shard. Applications create a mapping logic between the partition keys and database shards by reading this table from all shards to make the mapping efficient. Sometimes, applications use advanced algorithms to determine the location of a partition key belonging to a specific shard.
-- The partition key column, Customer_Id, is replicated in all other tables as a data isolation point. It has a trade-off between an impact on increased storage and locating the desired shards efficiently. Apart from this, it’s helpful for data and workload distribution to different database shards. The data routing logic uses the partition key at the application tier to map queries specified for a database shard.
+<p>The basic design techniques used in multi-table sharding are as follows:</p>
+<ul>
+<li>There’s a partition key in the Customer mapping table. This table resides on each shard and stores the partition keys used in the shard. Applications create a mapping logic between the partition keys and database shards by reading this table from all shards to make the mapping efficient. Sometimes, applications use advanced algorithms to determine the location of a partition key belonging to a specific shard.</li>
+<li>The partition key column, Customer_Id, is replicated in all other tables as a data isolation point. It has a trade-off between an impact on increased storage and locating the desired shards efficiently. Apart from this, it’s helpful for data and workload distribution to different database shards. The data routing logic uses the partition key at the application tier to map queries specified for a database shard.
 Primary keys are unique across all database shards to avoid key collision during data migration among shards and the merging of data in the online analytical processing (OLAP)environment.
-The column Creation_date serves as the data consistency point, with an assumption that the clocks of all nodes are synchronized. This column is used as a criterion for merging data from all database shards into the global view when essential.</p>
+The column Creation_date serves as the data consistency point, with an assumption that the clocks of all nodes are synchronized. This column is used as a criterion for merging data from all database shards into the global view when essential.</li>
+</ul>
 <h5>Advantages</h5>
 <p>Using key-range-based sharding method, the range-query-based scheme is easy to implement. We precisely know where (which node, which shard) to look for a specific range of keys.
 Range queries can be performed using the partitioning keys, and those can be kept in partitions in sorted order. How exactly such a sorting happens over time as new data comes in is implementation specific.</p>
@@ -81,10 +87,12 @@ Range queries can be performed using the partitioning keys, and those can be kep
 <p><strong>Why do you need databases? Why can’t you just use files?</strong></p>
 <p><strong>Answer:</strong> Databases are crucial for several reasons: they efficiently manage large volumes of data, ensure data consistency and integrity, allow for easy updates, provide robust security measures, guarantee data availability, offer scalability, enable efficient data retrieval, and support data recovery and backup. These capabilities make databases superior to using files for data management, especially in applications requiring quick access to accurate and secure data</p>
 <p><strong>Note: How many shards per database?</strong></p>
-<p>Empirically, we can determine how much each node can serve with acceptable performance. It can help us find out the maximum amount of data that we would like to keep on any one node. For example, if we find out that we can put a maximum of 50 GB of data on one node, we have the following:
-- Database size = 10 TB
-- Size of a single shard = 50 GB
-- Number of shards the database should be distributed in 10 TB/50 GB = 200 shards</p>
+<p>Empirically, we can determine how much each node can serve with acceptable performance. It can help us find out the maximum amount of data that we would like to keep on any one node. For example, if we find out that we can put a maximum of 50 GB of data on one node, we have the following:</p>
+<ul>
+<li>Database size = 10 TB</li>
+<li>Size of a single shard = 50 GB</li>
+<li>Number of shards the database should be distributed in 10 TB/50 GB = 200 shards</li>
+</ul>
 <h4>Consistent hashing</h4>
 <p>Consistent hashing assigns each server or item in a distributed hash table a place on an abstract circle, called a ring, irrespective of the number of servers in the table. This permits servers and objects to scale without compromising the system’s overall performance.</p>
 <h5>Advantages of consistent hashing</h5>
@@ -97,10 +105,12 @@ Range queries can be performed using the partitioning keys, and those can be kep
 <li>Randomly assigning nodes in the ring may cause non-uniform distribution.</li>
 </ul>
 <h3>Rebalance the partitions</h3>
-<p>Query load can be imbalanced across the nodes due to many reasons, including the following:
-- The distribution of the data isn’t equal.
-- There’s too much load on a single partition.
-- There’s an increase in the query traffic, and we need to add more nodes to keep up.</p>
+<p>Query load can be imbalanced across the nodes due to many reasons, including the following:</p>
+<ul>
+<li>The distribution of the data isn’t equal.</li>
+<li>There’s too much load on a single partition.</li>
+<li>There’s an increase in the query traffic, and we need to add more nodes to keep up.</li>
+</ul>
 <p>We can apply the following strategies to rebalance partitions.</p>
 <h3>Avoid hash mod n</h3>
 <p>Usually, we avoid the hash of a key for partitioning (we used such a scheme to explain the concept of hashing in simple terms earlier). The problem with the addition or removal of nodes in the case of hash mod n is that every node’s partition number changes, and a lot of data moves. For example, assume we have hash(key)=1235. If we have five nodes at the start, the key will start on the first node (1235 mod 5=0). Now, if a new node is added, the key would have to be moved to the sixth node (1235 mod 6 = 5), and so on. This moving of keys from one node to another makes rebalancing costly.</p>
@@ -136,9 +146,11 @@ Range queries can be performed using the partitioning keys, and those can be kep
 <h2>ZooKeeper</h2>
 <p>To track changes in the cluster, many distributed data systems need a separate management server like ZooKeeper. Zookeeper keeps track of all the mappings in the network, and each node connects to ZooKeeper for the information. Whenever there’s a change in the partitioning, or a node is added or removed, ZooKeeper gets updated and notifies the routing tier about the change. HBase, Kafka and SolrCloud use ZooKeeper.</p>
 <p><strong>Question:</strong> Let’s assess our understanding of what’s described in this lesson with the following question:</p>
-<p>Imagine you’re a database architect for a rapidly expanding e-commerce platform with a global user base. The platform experiences varying user activity levels across different regions. The existing monolithic database struggles to handle the increasing load. Users in different regions have distinct sets of preferences and tend to interact more within their regions. Now, we’re looking for an efficient and scalable solution to optimize performance, enhance scalability, and cater to regional variations in user behavior. Regarding this, which one of the following strategies would you adopt, and why?
-- Database sharding
-- Database replication</p>
+<p>Imagine you’re a database architect for a rapidly expanding e-commerce platform with a global user base. The platform experiences varying user activity levels across different regions. The existing monolithic database struggles to handle the increasing load. Users in different regions have distinct sets of preferences and tend to interact more within their regions. Now, we’re looking for an efficient and scalable solution to optimize performance, enhance scalability, and cater to regional variations in user behavior. Regarding this, which one of the following strategies would you adopt, and why?</p>
+<ul>
+<li>Database sharding</li>
+<li>Database replication</li>
+</ul>
 <p><strong>Solution:</strong> The best strategy here is database sharding. Sharding involves dividing the database into smaller, manageable pieces called shards, each handling a specific region or subset of data. This approach improves scalability and performance by reducing the load on any single database instance and aligns well with regional user preferences and activity levels. It allows the platform to efficiently handle increasing traffic and regional variations.</p>
 <h2>Conclusion</h2>
 <p>For all current distributed systems, partitioning has become the standard protocol. Because systems contain increasing amounts of data, partitioning the data makes sense since it speeds up both writes and reads. It increases the system’s availability, scalability, and performance.</p>

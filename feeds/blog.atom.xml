@@ -4,12 +4,14 @@
 &lt;p&gt;There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet, and posting a picture on Instagram are just a few examples of such events. We need a mechanism to distinguish these events from each other. One such mechanism is the assignment of globally unique IDs to each of these events.&lt;/p&gt;
 &lt;p&gt;Assigning a primary key to an entry in a database is another use case of a unique ID. Usually, the auto-increment feature in databases fulfills this requirement. However, that feature won’t work for a distributed database, where different nodes independently generate the identifiers. For this case, we need a unique ID generator that acts as a primary key in a distributed setting—for example, a horizontally-sharded table.&lt;/p&gt;
 &lt;p&gt;A unique ID helps us identify the flow of an event in the logs and is useful for debugging. A real-world example of unique ID usage is Facebook’s end-to-end performance tracing and analysis system, Canopy. Canopy uses TraceID to identify an event uniquely across the execution path that may potentially perform hundreds of microservices to fulfill one user request.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;? Explain why we need to design a time-sortable unique ID generator. ?&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Explain why we need to design a time-sortable unique ID generator.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; A unique ID generator that is time-sortable is important because it helps maintain a chronological order of events or objects within a system. This ordering is crucial for analyzing event sequences, debugging issues, and performing efficient database queries, as it allows quick access to the most recent or relevant data.&lt;/p&gt;
 &lt;h2&gt;How do we design a sequencer?&lt;/h2&gt;
-&lt;p&gt;We’ve divided the sequencer’s comprehensive design into the following two lessons:
-- Design of a Unique ID Generator: After enlisting the requirements of the design, we discuss three ways to generate unique IDs: using UUID, using a database, and using a range handler.
-- Unique IDs with Causality: In this lesson, we incorporate an additional factor of time in the generation of IDs and explain the process by taking causality into consideration.&lt;/p&gt;
+&lt;p&gt;We’ve divided the sequencer’s comprehensive design into the following two lessons:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Design of a Unique ID Generator: After enlisting the requirements of the design, we discuss three ways to generate unique IDs: using UUID, using a database, and using a range handler.&lt;/li&gt;
+&lt;li&gt;Unique IDs with Causality: In this lesson, we incorporate an additional factor of time in the generation of IDs and explain the process by taking causality into consideration.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;Unique IDs are important for identifying events and objects within a distributed system. However, designing a unique ID generator within a distributed system is challenging. In the next lesson, let’s look at the requirements for a distributed unique ID generation system.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="sequencer"/></entry><entry><title>System Design: Lesson 7.2 - Sequencer: Design of a Unique ID Generator</title><link href="https://dmb225.github.io/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html" rel="alternate"/><published>2026-02-08T00:00:00+01:00</published><updated>2026-02-08T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-08:/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html</id><summary type="html">&lt;p&gt;In the previous lesson, we saw how unique identifiers are used in many systems, for example, to label tweets, uploaded videos, or track execution flow across services. In this lesson, we will build on that by exploring different ways to design a system that generates such unique IDs. We will …&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the previous lesson, we saw how unique identifiers are used in many systems, for example, to label tweets, uploaded videos, or track execution flow across services. In this lesson, we will build on that by exploring different ways to design a system that generates such unique IDs. We will compare approaches like UUIDs, databases, and range handlers, and see how they meet key requirements identified in the following section.&lt;/p&gt;
 &lt;h2&gt;Requirements for unique identifiers&lt;/h2&gt;
 &lt;p&gt;The requirements for our system are as follows:
@@ -93,12 +95,41 @@
 &lt;p&gt;This system is scalable, available, and yields user IDs that have no duplicates. Moreover, we can maintain this range in 64 bits, which is numeric.&lt;/p&gt;
 &lt;h3&gt;Cons of using a range handler&lt;/h3&gt;
 &lt;p&gt;We lose a significant range when a server dies and can only provide a new range once it’s live again. We can overcome this shortcoming by allocating shorter ranges to the servers, although ranges should be large enough to serve identifiers for a while.&lt;/p&gt;
-&lt;p&gt;The following table sums up what this approach fulfills for us:
-|       | Unique | Sca﻿lable | Available | 64-bit numeric ID |
-|------------------------|--------|-----------|-----------|-----------------|
-| Using UUID             | ✖️     | ✔️        | ✔️        | ✖️              |
-| Using database servers | ✖️     | ✔️        | ✔️        | ✔️              |
-| Using a range handler  | ✔️     | ✔️        | ✔️        | ✔️              |&lt;/p&gt;
+&lt;p&gt;The following table sums up what this approach fulfills for us:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;Unique&lt;/th&gt;
+&lt;th&gt;Scalable&lt;/th&gt;
+&lt;th&gt;Available&lt;/th&gt;
+&lt;th&gt;64-bit numeric ID&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Using UUID&lt;/td&gt;
+&lt;td&gt;✖️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✖️&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Using database servers&lt;/td&gt;
+&lt;td&gt;✖️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Using a range handler&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;td&gt;✔️&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 &lt;p&gt;We developed a solution that provides us with a unique ID, which we can assign to various events and even use as a primary key. But what if we add a requirement that the ID is time sortable too?&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="sequencer"/></entry><entry><title>System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality</title><link href="https://dmb225.github.io/system-design-lesson-73-sequencer-unique-ids-with-causality.html" rel="alternate"/><published>2026-02-08T00:00:00+01:00</published><updated>2026-02-08T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-08:/system-design-lesson-73-sequencer-unique-ids-with-causality.html</id><summary type="html">&lt;h2&gt;Causality&lt;/h2&gt;
 &lt;p&gt;In the previous lesson, we generated unique IDs to differentiate between various events. Apart from having unique identifiers for events, we’re also interested in finding the sequence of these events. Let’s consider an example where Peter and John are two Twitter users. John posts a comment (event …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Causality&lt;/h2&gt;
 &lt;p&gt;In the previous lesson, we generated unique IDs to differentiate between various events. Apart from having unique identifiers for events, we’re also interested in finding the sequence of these events. Let’s consider an example where Peter and John are two Twitter users. John posts a comment (event A), and Peter replies to John’s comment (event B). Event B is dependent on event A and can’t happen before it. The events are not concurrent here.&lt;/p&gt;
@@ -165,10 +196,12 @@
 &lt;p&gt;Based on its uncertainty calculations, the clock knows that the actual current time is somewhere within that interval. The width of the interval depends, among other things, on how long it has been since the local quartz clock was last synchronized with a more accurate clock source.&lt;/p&gt;
 &lt;p&gt;Google deploys a GPS receiver or atomic clock in each data center, and clocks are synchronized within about 7 ms. This allows Spanner to keep the clock uncertainty to a minimum. The uncertainty of the interval is represented as epsilon.&lt;/p&gt;
 &lt;p&gt;Spanner guarantees that if two confidence intervals don’t overlap (that is, A_earliest &amp;lt; A_latest &amp;lt; B_earliest &amp;lt; B_latest), then B definitely happened after A.&lt;/p&gt;
-&lt;p&gt;We generate our unique ID using TrueTime intervals. Let’s say:&lt;br&gt;
-- Earliest interval: &lt;code&gt;T_E&lt;/code&gt;&lt;br&gt;
-- Latest interval: &lt;code&gt;T_L&lt;/code&gt;&lt;br&gt;
-- Uncertainty: &lt;code&gt;ε&lt;/code&gt;  &lt;/p&gt;
+&lt;p&gt;We generate our unique ID using TrueTime intervals. Let’s say:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Earliest interval: &lt;code&gt;T_E&lt;/code&gt;  &lt;/li&gt;
+&lt;li&gt;Latest interval: &lt;code&gt;T_L&lt;/code&gt;  &lt;/li&gt;
+&lt;li&gt;Uncertainty: &lt;code&gt;ε&lt;/code&gt;  &lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;We use &lt;code&gt;T_E&lt;/code&gt; in &lt;strong&gt;milliseconds&lt;/strong&gt; as a timestamp in our unique ID.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;ID structure:&lt;/strong&gt;
 - &lt;strong&gt;Time stamp (41 bits):&lt;/strong&gt;&lt;br&gt;
@@ -273,18 +306,22 @@
 &lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; According to one study, YouTube, Netflix, and Amazon Prime collectively generated 80% of Internet traffic in 2020. Circa 2016, the CDN provider Akamai served 15% to 30% of web traffic (about 30 terabits per second). For 90% of Internet users, Akamai was just one hop away. Therefore, we have strong reasons to optimize the delivery and consumption of this data without making the Internet core a bottleneck.&lt;/p&gt;
 &lt;p&gt;The solution to these problems is a content delivery network (CDN), a system that brings data closer to users around the world.&lt;/p&gt;
 &lt;h2&gt;How will we design a CDN?&lt;/h2&gt;
-&lt;p&gt;We’ve divided the design of CDN into six lessons:
-- Introduction to a CDN: We’ll provide a thorough introduction to CDNs and identify the functional and non-functional requirements.
-- Design of a CDN: We’ll explain how to design the CDN. We’ll also briefly describe the API design.
-- In-depth Investigation of CDN: Part 1: This lesson explains caching strategies and CDN architecture. Also, we’ll discuss various approaches to finding the nearest proxy server.
-- In-depth Investigation of CDN: Part 2: We’ll discuss how to make content consistent in a CDN and the deployment of proxy servers. We’ll also cover the custom and specialized CDN in detail.
-- Evaluation of CDN: This lesson will provide an evaluation of our proposed design.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="cdn"/></entry><entry><title>System Design: Lesson 6.2 - Introduction to a CDN</title><link href="https://dmb225.github.io/system-design-lesson-62-introduction-to-a-cdn.html" rel="alternate"/><published>2026-02-07T00:00:00+01:00</published><updated>2026-02-07T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-07:/system-design-lesson-62-introduction-to-a-cdn.html</id><summary type="html">&lt;p&gt;A content delivery network (CDN) is a distributed system of servers placed in many geographic locations to improve the speed and reliability of delivering online content. Rather than relying on a single origin server that holds the original version of the data, a CDN uses a network of proxy servers …&lt;/p&gt;</summary><content type="html">&lt;p&gt;A content delivery network (CDN) is a distributed system of servers placed in many geographic locations to improve the speed and reliability of delivering online content. Rather than relying on a single origin server that holds the original version of the data, a CDN uses a network of proxy servers positioned closer to users. When requests arrive, these nearby servers act as intermediaries, providing content on behalf of the origin server. This setup reduces the load on the origin server and helps protect it from traffic spikes and potential attacks.&lt;/p&gt;
+&lt;p&gt;We’ve divided the design of CDN into six lessons:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Introduction to a CDN: We’ll provide a thorough introduction to CDNs and identify the functional and non-functional requirements.&lt;/li&gt;
+&lt;li&gt;Design of a CDN: We’ll explain how to design the CDN. We’ll also briefly describe the API design.&lt;/li&gt;
+&lt;li&gt;In-depth Investigation of CDN: Part 1: This lesson explains caching strategies and CDN architecture. Also, we’ll discuss various approaches to finding the nearest proxy server.&lt;/li&gt;
+&lt;li&gt;In-depth Investigation of CDN: Part 2: We’ll discuss how to make content consistent in a CDN and the deployment of proxy servers. We’ll also cover the custom and specialized CDN in detail.&lt;/li&gt;
+&lt;li&gt;Evaluation of CDN: This lesson will provide an evaluation of our proposed design.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Blog"/><category term="system-design"/><category term="cdn"/></entry><entry><title>System Design: Lesson 6.2 - Introduction to a CDN</title><link href="https://dmb225.github.io/system-design-lesson-62-introduction-to-a-cdn.html" rel="alternate"/><published>2026-02-07T00:00:00+01:00</published><updated>2026-02-07T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-07:/system-design-lesson-62-introduction-to-a-cdn.html</id><summary type="html">&lt;p&gt;A content delivery network (CDN) is a distributed system of servers placed in many geographic locations to improve the speed and reliability of delivering online content. Rather than relying on a single origin server that holds the original version of the data, a CDN uses a network of proxy servers …&lt;/p&gt;</summary><content type="html">&lt;p&gt;A content delivery network (CDN) is a distributed system of servers placed in many geographic locations to improve the speed and reliability of delivering online content. Rather than relying on a single origin server that holds the original version of the data, a CDN uses a network of proxy servers positioned closer to users. When requests arrive, these nearby servers act as intermediaries, providing content on behalf of the origin server. This setup reduces the load on the origin server and helps protect it from traffic spikes and potential attacks.&lt;/p&gt;
 &lt;p&gt;The proxy servers are placed at the network edge and are often called edge servers. By storing copies of content near end users, edge servers reduce latency, save bandwidth, and deliver data more quickly. A basic proxy simply forwards requests, but a CDN adds intelligence that optimizes how and where content is delivered.&lt;/p&gt;
 &lt;p&gt;The guiding idea behind a CDN is to minimize the distance that data must travel to reach the user. To achieve this, CDNs place small data centers near users and store copies of the required content there. By storing both static and dynamic content close to end users, CDNs can significantly reduce propagation delay, which is the time it takes for data to travel across the network. They also work to reduce transmission and queuing delays by ensuring that sufficient bandwidth is available along the delivery path, often within the user’s ISP.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; Cache is often confused with CDN. Cache is a local storage method for frequently used data, while a CDN spreads content across multiple locations to reach users faster and more reliably.&lt;/p&gt;
-&lt;p&gt;Let’s look at the different ways CDN solves the discussed problems:
-- &lt;strong&gt;High latency:&lt;/strong&gt; A CDN brings content closer to end-users via edge servers, reducing the physical distance data travels and improving response times. This also reduces network congestion and propagation delays.
-- &lt;strong&gt;Data-intensive applications:&lt;/strong&gt; Since the path to the data includes only the ISP and the nearby CDN components, there’s no issue in serving a large number of users through a few CDN components in a specific area. As shown below, the origin data center will need to provide the data to local CDN components only once, whereas local CDN components can then provide the data to different users individually. No user will have to download their own copy of data from the origin servers.&lt;/p&gt;
+&lt;p&gt;Let’s look at the different ways CDN solves the discussed problems:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;High latency:&lt;/strong&gt; A CDN brings content closer to end-users via edge servers, reducing the physical distance data travels and improving response times. This also reduces network congestion and propagation delays.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Data-intensive applications:&lt;/strong&gt; Since the path to the data includes only the ISP and the nearby CDN components, there’s no issue in serving a large number of users through a few CDN components in a specific area. As shown below, the origin data center will need to provide the data to local CDN components only once, whereas local CDN components can then provide the data to different users individually. No user will have to download their own copy of data from the origin servers.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; Various streaming protocols are used to deliver dynamic content by the CDN providers. For example, CDNsun uses the Real-time Messaging Protocol (RTMP), HTTP Live Streaming (HLS), Real-time Streaming Protocol (RTSP), and many more to deliver dynamic content.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Scarcity of data center resources:&lt;/strong&gt; A CDN is used to serve popular content. For this reason, most traffic is handled at the CDN instead of the origin servers. So, different local or distributed CDN components share the load on origin servers.&lt;/li&gt;
@@ -294,13 +331,15 @@
 &lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; Not likely. A CDN caches a considerable portion of the content depending on its capabilities, and it mostly caches the static content.&lt;/p&gt;
 &lt;p&gt;It also depends on the size of the content. For example, it might be possible for Netflix to store more than 90% of its movies in the CDN, while this might not be feasible for a service like YouTube due to the humongous volume of content.&lt;/p&gt;
 &lt;h2&gt;Functional requirements&lt;/h2&gt;
-&lt;p&gt;The following functional requirements will be a part of our design:
-- Retrieve: Depending upon the type of CDN models, a CDN should be able to retrieve content from the origin servers. We’ll cover CDN models in the coming lesson.
-- Request: Content delivery from the proxy server is made upon the user’s request. CDN proxy servers should be able to respond to each user’s request in this regard.
-- Deliver: In the case of the push model, the origin servers should be able to send the content to the CDN proxy servers.
-- Search: The CDN should be able to execute a search against a user query for cached or otherwise stored content within the CDN infrastructure.
-- Update: In most cases, content comes from the origin server, but if we run a script in a CDN, the CDN should be able to update the content within peer CDN proxy servers in a PoP.
-- Delete: Depending upon the type of content (static or dynamic), it should be possible to delete cached entries from the CDN servers after a certain period.&lt;/p&gt;
+&lt;p&gt;The following functional requirements will be a part of our design:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Retrieve: Depending upon the type of CDN models, a CDN should be able to retrieve content from the origin servers. We’ll cover CDN models in the coming lesson.&lt;/li&gt;
+&lt;li&gt;Request: Content delivery from the proxy server is made upon the user’s request. CDN proxy servers should be able to respond to each user’s request in this regard.&lt;/li&gt;
+&lt;li&gt;Deliver: In the case of the push model, the origin servers should be able to send the content to the CDN proxy servers.&lt;/li&gt;
+&lt;li&gt;Search: The CDN should be able to execute a search against a user query for cached or otherwise stored content within the CDN infrastructure.&lt;/li&gt;
+&lt;li&gt;Update: In most cases, content comes from the origin server, but if we run a script in a CDN, the CDN should be able to update the content within peer CDN proxy servers in a PoP.&lt;/li&gt;
+&lt;li&gt;Delete: Depending upon the type of content (static or dynamic), it should be possible to delete cached entries from the CDN servers after a certain period.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2&gt;Non-functional requirements&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Performance: Minimizing latency is one of the core missions of a CDN. The proposed design should have the minimum possible latency.&lt;/li&gt;
@@ -309,73 +348,47 @@
 &lt;li&gt;Reliability and security: Our CDN design should ensure no single point of failure. Apart from failures, the designed CDN must reliably handle massive traffic loads. Furthermore, CDNs should provide protection to hosted content from various attacks.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2&gt;Building blocks we will use&lt;/h2&gt;
-&lt;p&gt;The design of a CDN utilizes the following building blocks:
-- DNS is the service that maps human-friendly CDN domain names to machine-readable IP addresses. This IP address will take the users to the specified proxy server.
-- Load balancers distribute millions of requests among the operational proxy servers.
-In the next lesson, we’ll discuss the design of the CDN.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="cdn"/></entry><entry><title>System Design: Lesson 6.3 - CDN Design</title><link href="https://dmb225.github.io/system-design-lesson-63-cdn-design.html" rel="alternate"/><published>2026-02-07T00:00:00+01:00</published><updated>2026-02-07T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-07:/system-design-lesson-63-cdn-design.html</id><summary type="html">&lt;h2&gt;CDN design&lt;/h2&gt;
+&lt;p&gt;The design of a CDN utilizes the following building blocks:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DNS is the service that maps human-friendly CDN domain names to machine-readable IP addresses. This IP address will take the users to the specified proxy server.&lt;/li&gt;
+&lt;li&gt;Load balancers distribute millions of requests among the operational proxy servers.
+In the next lesson, we’ll discuss the design of the CDN.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Blog"/><category term="system-design"/><category term="cdn"/></entry><entry><title>System Design: Lesson 6.3 - CDN Design</title><link href="https://dmb225.github.io/system-design-lesson-63-cdn-design.html" rel="alternate"/><published>2026-02-07T00:00:00+01:00</published><updated>2026-02-07T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-07:/system-design-lesson-63-cdn-design.html</id><summary type="html">&lt;h2&gt;CDN design&lt;/h2&gt;
 &lt;p&gt;We’ll explain our CDN design in two phases. In the first phase, we’ll cover the components that comprise a CDN. By the end of this phase, we’ll understand why we need a specific component. In the second phase, we’ll explore the workflow by explaining …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;CDN design&lt;/h2&gt;
 &lt;p&gt;We’ll explain our CDN design in two phases. In the first phase, we’ll cover the components that comprise a CDN. By the end of this phase, we’ll understand why we need a specific component. In the second phase, we’ll explore the workflow by explaining how each component interacts with others to develop a fully functional CDN. Let’s dive in.&lt;/p&gt;
-&lt;p&gt;CDN components
-The following components comprise a CDN:
-- Clients: End users use various clients, like browsers, smartphones, and other devices, to request content from the CDN.
-- Routing system: The routing system directs clients to the nearest CDN facility. To do that effectively, this component receives input from various systems to understand where content is placed, how many requests are made for particular content, the load a particular set of servers is handling, and the URI (Uniform Resource Identifier) namespace of various contents. In the next lesson, we’ll discuss different routing mechanisms to forward users to the nearest CDN facility.
-- Scrubber servers: Scrubber servers are used to separate the good traffic from malicious traffic and protect against well-known attacks, like DDoS. Scrubber servers are generally used only when an attack is detected. In that case, the traffic is scrubbed or cleaned and then routed to the target destination.
-- Proxy servers: The proxy or edge proxy servers serve the content from RAM to the users. Proxy servers store hot data in RAM, though they can store cold data in SSD or hard drive as well. These servers also provide accounting information and receive content from the distribution system.
-- Distribution system: The distribution system is responsible for distributing content to all the edge proxy servers to different CDN facilities. This system uses the Internet and intelligent broadcast-like approaches to distribute content across the active edge proxy servers.
-- Origin servers: The CDN infrastructure facilitates users with data received from the origin servers. The origin servers serve any unavailable data at the CDN to clients. Origin servers will use appropriate stores to keep content and other mapping metadata. Though, we won’t discuss the internal architecture of origin infrastructure here.
-- Management system: The management systems are important in CDNs from a business and managerial aspect where resource usage and statistics are constantly observed. This component measures important metrics, like latency, downtime, packet loss, server load, and so on. For third-party CDNs, accounting information can also be used for billing purposes.&lt;/p&gt;
+&lt;h2&gt;CDN components&lt;/h2&gt;
+&lt;p&gt;The following components comprise a CDN:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Clients: End users use various clients, like browsers, smartphones, and other devices, to request content from the CDN.&lt;/li&gt;
+&lt;li&gt;Routing system: The routing system directs clients to the nearest CDN facility. To do that effectively, this component receives input from various systems to understand where content is placed, how many requests are made for particular content, the load a particular set of servers is handling, and the URI (Uniform Resource Identifier) namespace of various contents. In the next lesson, we’ll discuss different routing mechanisms to forward users to the nearest CDN facility.&lt;/li&gt;
+&lt;li&gt;Scrubber servers: Scrubber servers are used to separate the good traffic from malicious traffic and protect against well-known attacks, like DDoS. Scrubber servers are generally used only when an attack is detected. In that case, the traffic is scrubbed or cleaned and then routed to the target destination.&lt;/li&gt;
+&lt;li&gt;Proxy servers: The proxy or edge proxy servers serve the content from RAM to the users. Proxy servers store hot data in RAM, though they can store cold data in SSD or hard drive as well. These servers also provide accounting information and receive content from the distribution system.&lt;/li&gt;
+&lt;li&gt;Distribution system: The distribution system is responsible for distributing content to all the edge proxy servers to different CDN facilities. This system uses the Internet and intelligent broadcast-like approaches to distribute content across the active edge proxy servers.&lt;/li&gt;
+&lt;li&gt;Origin servers: The CDN infrastructure facilitates users with data received from the origin servers. The origin servers serve any unavailable data at the CDN to clients. Origin servers will use appropriate stores to keep content and other mapping metadata. Though, we won’t discuss the internal architecture of origin infrastructure here.&lt;/li&gt;
+&lt;li&gt;Management system: The management systems are important in CDNs from a business and managerial aspect where resource usage and statistics are constantly observed. This component measures important metrics, like latency, downtime, packet loss, server load, and so on. For third-party CDNs, accounting information can also be used for billing purposes.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2&gt;Workflow&lt;/h2&gt;
 &lt;p&gt;The workflow for the abstract design is given below:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The origin servers provide the URI namespace delegation of all objects cached in the CDN to the request routing system.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The origin server publishes the content to the distribution system responsible for data distribution across the active edge proxy servers.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The distribution system distributes the content among the proxy servers and provides feedback to the request routing system. This feedback is helpful in optimizing the selection of the nearest proxy server for a requesting client. This feedback contains information about which content is cached on which proxy server to route traffic to relevant proxy servers.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The client requests the routing system for a suitable proxy server from the request routing system.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The request routing system returns the IP address of an appropriate proxy server.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The client request routes through the scrubber servers for security reasons.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The scrubber server forwards good traffic to the edge proxy server.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;The edge proxy server serves the client request and periodically forwards accounting information to the management system. The management system updates the origin servers and sends feedback to the routing system about the statistics and detail of the content. However, the request is routed to the origin servers if the content isn’t available in the proxy servers. It’s also possible to have a hierarchy of proxy servers if the content isn’t found in the edge proxy servers. For such cases, the request gets forwarded to the parent proxy servers.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2&gt;API Design&lt;/h2&gt;
-&lt;p&gt;This section will discuss the API design of the functionalities offered by CDN. This will help us understand how the CDN will receive requests from the clients, receive content from the origin servers, and communicate to other components in the network. Let’s develop APIs for each of the following functionalities:
-- Retrieve content
-- Deliver content
-- Request content
-- Search content
-- Update content
-- Delete content&lt;/p&gt;
+&lt;p&gt;This section will discuss the API design of the functionalities offered by CDN. This will help us understand how the CDN will receive requests from the clients, receive content from the origin servers, and communicate to other components in the network. Let’s develop APIs for each of the following functionalities:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Retrieve content&lt;/li&gt;
+&lt;li&gt;Deliver content&lt;/li&gt;
+&lt;li&gt;Request content&lt;/li&gt;
+&lt;li&gt;Search content&lt;/li&gt;
+&lt;li&gt;Update content&lt;/li&gt;
+&lt;li&gt;Delete content&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;Content can be anything, like a file, video, audio, or other web object. Here, we’ll use the word “content” to refer to all of the above. For clarity, we won’t discuss the privacy-related parameters—like if the content is public or private, who should be able to access this content, if it should be encrypted, and so on—in the following APIs.&lt;/p&gt;
 &lt;h3&gt;Retrieve (proxy server to origin server)&lt;/h3&gt;
 &lt;p&gt;If the proxy servers request content, the GET method retrieves the content through the /retrieveContent API below:
@@ -537,10 +550,12 @@ The following components comprise a CDN:
 &lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; Key-value stores are designed for simple retrievals using a unique key, and they typically lack complex query languages. They often prioritize availability and scalability over strict consistency, and they store unstructured data. Traditional relational databases, on the other hand, organize data into tables with predefined schemas, support complex queries, and usually emphasize consistency.&lt;/p&gt;
 &lt;p&gt;Key-value stores are particularly advantageous in scenarios involving massive data volumes, high-speed lookups, or when the data structure is flexible or not fully known in advance.&lt;/p&gt;
 &lt;h2&gt;Assumptions&lt;/h2&gt;
-&lt;p&gt;We’ll assume the following to keep our design simple:
-- The data centers hosting the service are trusted (non-hostile).
-- All the required authentication and authorization are already completed.
-- User requests and responses are relayed over HTTPS.&lt;/p&gt;
+&lt;p&gt;We’ll assume the following to keep our design simple:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The data centers hosting the service are trusted (non-hostile).&lt;/li&gt;
+&lt;li&gt;All the required authentication and authorization are already completed.&lt;/li&gt;
+&lt;li&gt;User requests and responses are relayed over HTTPS.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2&gt;API design&lt;/h2&gt;
 &lt;p&gt;Key-value stores, like ordinary hash tables, provide two primary functions, which are get and put.&lt;/p&gt;
 &lt;p&gt;Let’s look at the API design.&lt;/p&gt;
@@ -579,7 +594,7 @@ A load balancer would interfere by spreading requests randomly, leading to misro
 - If a node fails or does routine maintenance, the workload is uniformly distributed over other nodes. For each newly accessible node, the other nodes receive nearly equal load when it comes back online or is added to the system.
 - It’s up to each node to decide how many virtual nodes it’s responsible for, considering the heterogeneity of the physical infrastructure. For example, if a node has roughly double the computational capacity as compared to the others, it can take more load.&lt;/p&gt;
 &lt;p&gt;We’ve made the proposed design of key-value storage scalable. The next task is to make our system highly available.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;? Describe how a key-value store can support incremental scalability without disrupting service availability. ?&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Describe how a key-value store can support incremental scalability without disrupting service availability.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; A key-value store can support incremental scalability without disrupting service availability by using techniques such as consistent hashing to only reassign affected keys when nodes are added or removed. Additionally, virtual nodes help reduce data movement during scaling, and background data migration ensures minimal impact on active operations. Implementing read/write forwarding allows the system to handle in-transit data smoothly during scaling transitions.&lt;/p&gt;
 &lt;h2&gt;Data replication&lt;/h2&gt;
 &lt;p&gt;We have various methods to replicate the storage. It can be either a primary-secondary relationship or a peer-to-peer relationship.&lt;/p&gt;
@@ -598,7 +613,7 @@ A load balancer would interfere by spreading requests randomly, leading to misro
 &lt;p&gt;When network partitions and node failures occur during an update, an object’s version history might become fragmented. As a result, it requires a reconciliation effort on the part of the system. It’s necessary to build a way that explicitly accepts the potential of several copies of the same data so that we can avoid the loss of any updates. It’s critical to realize that some failure scenarios can lead to multiple copies of the same data in the system. So, these copies might be the same or divergent. Resolving the conflicts among these divergent histories is essential and critical for consistency purposes.&lt;/p&gt;
 &lt;p&gt;To handle inconsistency, we need to maintain causality between the events. We can do this using the timestamps and update all conflicting values with the value of the latest request. But time isn’t reliable in a distributed system, so we can’t use it as a deciding factor.&lt;/p&gt;
 &lt;p&gt;Another approach to maintaining causality effectively is by using vector clocks. A vector clock is a list of (node, counter) pairs. There’s a single vector clock for every version of an object. If two objects have different vector clocks, we’re able to tell whether they’re causally related or not (more on this in a bit). Unless one of the two changes is reconciled, the two are deemed at odds.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;? Explain how metadata like versioning and checksums, which detect data corruption, help maintain data integrity and consistency in a key-value store. ?&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Explain how metadata like versioning and checksums, which detect data corruption, help maintain data integrity and consistency in a key-value store.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; Certainly! Metadata like versioning and checksums are vital for maintaining data integrity and consistency in a key-value store.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Versioning&lt;/strong&gt; helps track changes to data, making it easier to resolve conflicts during replication and ensuring clients can identify the most recent data in eventually consistent systems.&lt;/li&gt;
@@ -616,12 +631,12 @@ The function finds the node where the value should be placed on the basis of the
 &lt;h2&gt;The get and put operations&lt;/h2&gt;
 &lt;p&gt;One of our functional requirements is that the system should be configurable. We want to control the trade-offs between availability, consistency, cost-effectiveness, and performance. So, let’s achieve configurability by implementing the basic get and put functions of the key-value store.&lt;/p&gt;
 &lt;p&gt;Every node can handle the get (read) and put (write) operations in our system. A node handling a read or write operation is known as a coordinator. The coordinator is the first among the top n nodes in the preference list.&lt;/p&gt;
-&lt;p&gt;There can be two ways for a client to select a node:
-- We route the request to a generic load balancer.&lt;/p&gt;
+&lt;p&gt;There can be two ways for a client to select a node:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;We use a partition-aware client library that routes requests directly to the appropriate coordinator nodes.
-Both approaches have their benefits. The client isn’t linked to the code in the first approach, whereas lower latency is achievable in the second. The latency is lower due to the reduced number of hops because the client can directly go to a specific server.&lt;/li&gt;
+&lt;li&gt;We route the request to a generic load balancer.&lt;/li&gt;
+&lt;li&gt;We use a partition-aware client library that routes requests directly to the appropriate coordinator nodes.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;Both approaches have their benefits. The client isn’t linked to the code in the first approach, whereas lower latency is achievable in the second. The latency is lower due to the reduced number of hops because the client can directly go to a specific server.&lt;/p&gt;
 &lt;p&gt;Let’s make our service configurable by having an ability where we can control the trade-offs between availability, consistency, cost-effectiveness, and performance. We can use a consistency protocol similar to those used in quorum systems.&lt;/p&gt;
 &lt;p&gt;Let’s take an example. Say n in the top n of the preference list is equal to 3. This means three copies of the data need to be maintained. We assume that nodes are placed in a ring. Say A, B, C, D, and E is the clockwise order of the nodes in that ring. If the write function is performed on node A, then the copies of that data will be placed on B and C. This is because B and C are the next nodes we find while moving in a clockwise direction of the ring.&lt;/p&gt;
 &lt;p&gt;By now, we’ve fulfilled the scalability, availability, conflict-resolution, and configurable service requirements. The last requirement is to have a fault-tolerant system. Let’s discuss how we’ll achieve it in the next lesson.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="key-value-store"/></entry><entry><title>System Design: Lesson 5.5 - Key-Value Store Fault Tolerance</title><link href="https://dmb225.github.io/system-design-lesson-55-key-value-store-fault-tolerance.html" rel="alternate"/><published>2026-02-06T00:00:00+01:00</published><updated>2026-02-06T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-06:/system-design-lesson-55-key-value-store-fault-tolerance.html</id><summary type="html">&lt;h2&gt;Handle temporary failures&lt;/h2&gt;
@@ -639,10 +654,12 @@ Both approaches have their benefits. The client isn’t linked to the code in th
 &lt;p&gt;In the event of permanent failures of nodes, we should keep our replicas synchronized to make our system more durable. We need to speed up the detection of inconsistencies between replicas and reduce the quantity of transferred data. We’ll use Merkle trees for that.&lt;/p&gt;
 &lt;p&gt;In a Merkle tree, the values of individual keys are hashed and used as the leaves of the tree. There are hashes of their children in the parent nodes higher up the tree. Each branch of the Merkle tree can be verified independently without the need to download the complete tree or the entire dataset. While checking for inconsistencies across copies, Merkle trees reduce the amount of data that must be exchanged. There’s no need for synchronization if, for example, the hash values of two trees’ roots are the same and their leaf nodes are also the same. Until the process reaches the tree leaves, the hosts can identify the keys that are out of sync when the nodes exchange the hash values of children. The Merkle tree is a mechanism to implement anti-entropy, which means to keep all the data consistent. It reduces data transmission for synchronization and the number of discs accessed during the anti-entropy process.&lt;/p&gt;
 &lt;h2&gt;Anti-entropy with Merkle trees&lt;/h2&gt;
-&lt;p&gt;Each node keeps a distinct Merkle tree for the range of keys that it hosts for each virtual node. The nodes can determine if the keys in a given range are correct. The root of the Merkle tree corresponding to the common key ranges is exchanged between two nodes. We’ll make the following comparison:
-- Compare the hashes of the root node of Merkle trees.
-- Do not proceed if they’re the same.
-- Traverse left and right children using recursion. The nodes identify whether or not they have any differences and perform the necessary synchronization.&lt;/p&gt;
+&lt;p&gt;Each node keeps a distinct Merkle tree for the range of keys that it hosts for each virtual node. The nodes can determine if the keys in a given range are correct. The root of the Merkle tree corresponding to the common key ranges is exchanged between two nodes. We’ll make the following comparison:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Compare the hashes of the root node of Merkle trees.&lt;/li&gt;
+&lt;li&gt;Do not proceed if they’re the same.&lt;/li&gt;
+&lt;li&gt;Traverse left and right children using recursion. The nodes identify whether or not they have any differences and perform the necessary synchronization.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;Note: We assume the ranges defined are hypothetical for illustration purposes.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The advantage of using Merkle trees is that each branch of the Merkle tree can be examined independently without requiring nodes to download the tree or the complete dataset. It reduces the quantity of data that must be exchanged for synchronization and the number of disc accesses that are required during the anti-entropy procedure.&lt;/p&gt;
 &lt;p&gt;The disadvantage is that when a node joins or departs the system, the tree’s hashes are recalculated because multiple key ranges are affected.&lt;/p&gt;
@@ -670,9 +687,13 @@ Both approaches have their benefits. The client isn’t linked to the code in th
 &lt;li&gt;Atomicity: A transaction is considered an atomic unit. Therefore, either all the statements within a transaction will successfully execute, or none of them will execute. If a statement fails within a transaction, it should be aborted and rolled back.&lt;/li&gt;
 &lt;li&gt;Consistency: At any given time, the database should be in a consistent state, and it should remain in a consistent state after every transaction. For example, if multiple users want to view a record from the database, it should return a similar result each time.&lt;/li&gt;
 &lt;li&gt;Isolation: In the case of multiple transactions running concurrently, they shouldn’t be affected by each other. The final state of the database should be the same as the transactions that were executed sequentially.&lt;/li&gt;
-&lt;li&gt;Durability: The system should guarantee that completed transactions will survive permanently in the database even in system failure events.
-Various database management systems (DBMS) are used to define relational database schema along with other operations, such as storing, retrieving, and running SQL queries on data. Some of the popular DBMSs are as follows:&lt;/li&gt;
-&lt;li&gt;MySQL&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Durability: The system should guarantee that completed transactions will survive permanently in the database even in system failure events.
+Various database management systems (DBMS) are used to define relational database schema along with other operations, such as storing, retrieving, and running SQL queries on data. Some of the popular DBMSs are as follows:&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MySQL&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;Oracle Database&lt;/li&gt;
 &lt;li&gt;Microsoft SQL Server&lt;/li&gt;
 &lt;li&gt;IBM DB2&lt;/li&gt;
@@ -724,7 +745,7 @@ Various database management systems (DBMS) are used to define relational databas
 &lt;p&gt;NoSQL doesn’t follow any specific standard, like how relational databases follow relational algebra. Porting applications from one type of NoSQL database to another might be a challenge.&lt;/p&gt;
 &lt;h4&gt;Consistency&lt;/h4&gt;
 &lt;p&gt;NoSQL databases provide different products based on the specific trade-offs between consistency and availability when failures can happen. We won’t have strong data integrity, like primary and referential integrities in a relational database. Data might not be strongly consistent but slowly converging using a weak model like eventual consistency.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;? Let’s assess our understanding of the lesson’s content with the following question. ?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Let’s assess our understanding of the lesson’s content with the following question.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Imagine we’re designing a recommendation engine for a social networking platform with millions of users. The goal is to provide personalized recommendations for users to connect with others based on their interests, activities, and connections. Which database would be a natural fit for modeling and querying the complex relationship in a social network and why?&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; A graph database is the natural fit for modeling and querying complex relationships in a social network. It uses nodes and edges to represent users, interests, activities, and connections, making it efficient for traversing relationships and providing personalized recommendations. Its flexibility and scalability support the dynamic nature of social data, leading to more relevant suggestions.&lt;/p&gt;
 &lt;h2&gt;Choose the right database&lt;/h2&gt;
@@ -766,17 +787,21 @@ Various database management systems (DBMS) are used to define relational databas
 &lt;p&gt;&lt;em&gt;Note: When NoSQL databases first came into being, they were drastically different to program and use as compared to traditional databases. Though, due to extensive research in academia and industry over the last many years, the programmer-facing differences between NoSQL and traditional stores are blurring. We might be using the same SQL constructs to talk to a NoSQL store and get a similar level of performance and consistency as a traditional store. Google’s Cloud Spanner is one such database that’s geo-replicated with automatic horizontal sharding ability and high-speed global snapshots of data.&lt;/em&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.3 - Data Replication</title><link href="https://dmb225.github.io/system-design-lesson-43-data-replication.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-43-data-replication.html</id><summary type="html">&lt;p&gt;Data is a valuable asset for an organization because it drives the entire business.&lt;/p&gt;
 &lt;p&gt;Data provides critical business insights into what’s important and what needs to be changed. Organizations also need to securely save and serve their clients’ data on demand. Timely access to the required data under varying …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Data is a valuable asset for an organization because it drives the entire business.&lt;/p&gt;
 &lt;p&gt;Data provides critical business insights into what’s important and what needs to be changed. Organizations also need to securely save and serve their clients’ data on demand. Timely access to the required data under varying conditions (including increasing reads and writes, disk and node failures, network and power outages, and others) is necessary to successfully run an online business.&lt;/p&gt;
-&lt;p&gt;We need the following characteristics from our data store:
-- Availability under faults (failure of one or more disks, nodes, network, or power outages).
-- Scalability (with increasing reads, writes, and other operations).
-- Performance (low latency and high throughput for the clients).&lt;/p&gt;
+&lt;p&gt;We need the following characteristics from our data store:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Availability under faults (failure of one or more disks, nodes, network, or power outages).&lt;/li&gt;
+&lt;li&gt;Scalability (with increasing reads, writes, and other operations).&lt;/li&gt;
+&lt;li&gt;Performance (low latency and high throughput for the clients).&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;It’s challenging, or even impossible, to achieve the above characteristics on a single node.&lt;/p&gt;
 &lt;h2&gt;Replication&lt;/h2&gt;
 &lt;p&gt;Replication refers to keeping multiple copies of the data at various nodes (preferably geographically distributed) to achieve availability, scalability, and performance. In this lesson, we assume that a single node is enough to hold our entire data. We won’t use this assumption while discussing the partitioning of data in multiple nodes. Often, the concepts of replication and partitioning go together.&lt;/p&gt;
-&lt;p&gt;Replication provides several key benefits for distributed systems:
-- Keeps data geographically close to your users, thus reducing access latency.
-- Allows the system to continue working even if some of its parts have failed, thus increasing availability.
-- Scales out the number of machines that can serve read queries, thus increasing read throughput.&lt;/p&gt;
+&lt;p&gt;Replication provides several key benefits for distributed systems:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Keeps data geographically close to your users, thus reducing access latency.&lt;/li&gt;
+&lt;li&gt;Allows the system to continue working even if some of its parts have failed, thus increasing availability.&lt;/li&gt;
+&lt;li&gt;Scales out the number of machines that can serve read queries, thus increasing read throughput.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;However, with many benefits, like availability, replication comes with its complexities. Replication is relatively simple if the replicated data doesn’t require frequent changes. The main problem in replication arises when we have to maintain changes in the replicated data over time.&lt;/p&gt;
 &lt;p&gt;If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data is a real challenge; it requires careful thinking about concurrency and all the things that can go wrong so that we can deal with the consequences of those faults.&lt;/p&gt;
 &lt;p&gt;Additional complexities that could arise due to replication are as follows:&lt;/p&gt;
@@ -795,9 +820,9 @@ Various database management systems (DBMS) are used to define relational databas
 &lt;p&gt;There are two ways to disseminate changes to the replica nodes:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Synchronous replication&lt;/li&gt;
-&lt;li&gt;Asynchronous replication
-In synchronous replication, the primary node waits for acknowledgments from secondary nodes to confirm that the data has been updated.&lt;/li&gt;
+&lt;li&gt;Asynchronous replication&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;In synchronous replication, the primary node waits for acknowledgments from secondary nodes to confirm that the data has been updated.&lt;/p&gt;
 &lt;p&gt;After receiving acknowledgment from all secondary nodes, the primary node reports success to the client. In asynchronous replication, the primary node doesn’t wait for acknowledgments from the secondary nodes and reports success to the client after updating itself. The advantage of synchronous replication is that all secondary nodes are completely up-to-date with the primary node.&lt;/p&gt;
 &lt;p&gt;However, there’s a disadvantage to this approach.&lt;/p&gt;
 &lt;p&gt;If one of the secondary nodes fails to acknowledge due to a network failure or fault, the primary node will be unable to acknowledge the client until it receives a successful acknowledgment from the crashed node. This causes high latency in the response from the primary node to the client. On the other hand, the advantage of asynchronous replication is that the primary node can continue its work even if all the secondary nodes are down.&lt;/p&gt;
@@ -815,17 +840,12 @@ In synchronous replication, the primary node waits for acknowledgments from seco
 &lt;h2&gt;Data replication models&lt;/h2&gt;
 &lt;p&gt;If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.&lt;/p&gt;
 &lt;p&gt;At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.&lt;/p&gt;
-&lt;p&gt;Here are the following algorithms for replicating changes across nodes:
-- Single leader or primary-secondary, or master-slave replication
-- Multi-leader replication
-- Peer-to-peer or leaderless replication&lt;/p&gt;
-&lt;h3&gt;Data replication models&lt;/h3&gt;
-&lt;p&gt;If the data that you are replicating does not change over time, then the replication process is a one-time thing. Frequently changing data presents a significant challenge; it requires careful consideration of concurrency and potential issues to mitigate the consequences of those faults.&lt;/p&gt;
-&lt;p&gt;At a minimum, we need to address unavailable nodes, network interruptions, and silent data corruption resulting from application bugs.&lt;/p&gt;
-&lt;p&gt;Here are the following algorithms for replicating changes across nodes:
-- Single leader or primary-secondary, or master-slave replication
-- Multi-leader replication
-- Peer-to-peer or leaderless replication&lt;/p&gt;
+&lt;p&gt;Here are the following algorithms for replicating changes across nodes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Single leader or primary-secondary, or master-slave replication&lt;/li&gt;
+&lt;li&gt;Multi-leader replication&lt;/li&gt;
+&lt;li&gt;Peer-to-peer or leaderless replication&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3&gt;Single leader/primary-secondary replication&lt;/h3&gt;
 &lt;p&gt;In primary-secondary replication, data is replicated across multiple nodes.&lt;/p&gt;
 &lt;p&gt;One node is designated as the primary. It’s responsible for processing any writes to data stored on the cluster. It also sends all the writes to the secondary nodes and keeps them in sync. Primary-secondary replication is appropriate when our workload is read-heavy.&lt;/p&gt;
@@ -879,12 +899,14 @@ Asynchronous primary-secondary replication introduces certain challenges that ca
 &lt;p&gt;There are multiple primary nodes that process the writes and send them to all other primary and secondary nodes to replicate.&lt;/p&gt;
 &lt;p&gt;This type of replication is used in databases, along with external tools such as the Tungsten Replicator for MySQL. This kind of replication is particularly useful in applications where we can continue working even when offline—for example, a calendar application that allows us to schedule meetings even without internet access.&lt;/p&gt;
 &lt;p&gt;Once we’re online, it replicates its changes from our local database (our mobile phone or laptop acts as a primary node) to other nodes.&lt;/p&gt;
-&lt;p&gt;** Common data distribution/migration pattern
-- Bi-direction: Reporting instance
-- Unidirectional: Instant fail-over (Multi-leader replication)
-- Peer-to-peer: Load balancing (High Availability)
-- Broadcast: Wide-level data distribution to multiple instances
-- Consolidation: Data warehouse (data storage)&lt;/p&gt;
+&lt;h2&gt;Common data distribution/migration pattern&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Bi-direction: Reporting instance&lt;/li&gt;
+&lt;li&gt;Unidirectional: Instant fail-over (Multi-leader replication)&lt;/li&gt;
+&lt;li&gt;Peer-to-peer: Load balancing (High Availability)&lt;/li&gt;
+&lt;li&gt;Broadcast: Wide-level data distribution to multiple instances&lt;/li&gt;
+&lt;li&gt;Consolidation: Data warehouse (data storage)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h4&gt;Conflict&lt;/h4&gt;
 &lt;p&gt;Multi-leader replication gives better performance and scalability than single-leader replication, but it also has a significant disadvantage.&lt;/p&gt;
 &lt;p&gt;Since all primary nodes concurrently handle write requests, they may modify the same data, potentially creating a conflict between them. For example, suppose the same data is edited by two clients simultaneously. In that case, their writes will be successful in their associated primary nodes, but when they reach the other primary nodes asynchronously, it creates a conflict.&lt;/p&gt;
@@ -912,9 +934,11 @@ Asynchronous primary-secondary replication introduces certain challenges that ca
 &lt;p&gt;If at least two out of three nodes are guaranteed to return successful updates, it means only one node has failed. This means that if we read from two nodes, at least one of them will have the updated version, and our system can continue working.&lt;/p&gt;
 &lt;p&gt;If we have n nodes, then every write must be updated in at least w nodes to be considered a success, and we must read from r nodes.&lt;/p&gt;
 &lt;p&gt;We’ll get an updated value from reading as long as w + r &amp;gt; n because at least one of the nodes must have an updated write from which we can read. Quorum reads and writes adhere to these r and w values. These n, w and r are configurable in Dynamo-style databases.&lt;/p&gt;
-&lt;p&gt;For more details on the topic of Quorum, refer to these links:
-- &lt;a href="https://www.educative.io/answers/what-is-a-quorum"&gt;What is Quorum?&lt;/a&gt;
-- &lt;a href="https://www.educative.io/answers/what-is-quorum-in-distributed-systems"&gt;What is Quorum in distributed systems?&lt;/a&gt;&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.4 - Data Partitioning</title><link href="https://dmb225.github.io/system-design-lesson-44-data-partitioning.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-44-data-partitioning.html</id><summary type="html">&lt;h2&gt;Why do we partition data?&lt;/h2&gt;
+&lt;p&gt;For more details on the topic of Quorum, refer to these links:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.educative.io/answers/what-is-a-quorum"&gt;What is Quorum?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.educative.io/answers/what-is-quorum-in-distributed-systems"&gt;What is Quorum in distributed systems?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.4 - Data Partitioning</title><link href="https://dmb225.github.io/system-design-lesson-44-data-partitioning.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-44-data-partitioning.html</id><summary type="html">&lt;h2&gt;Why do we partition data?&lt;/h2&gt;
 &lt;p&gt;Data is an asset for any organization. Increasing data and concurrent read/write traffic to the data puts scalability pressure on traditional databases. As a result, the latency and throughput are affected. Traditional databases are attractive due to their properties such as range queries, secondary …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;Why do we partition data?&lt;/h2&gt;
 &lt;p&gt;Data is an asset for any organization. Increasing data and concurrent read/write traffic to the data puts scalability pressure on traditional databases. As a result, the latency and throughput are affected. Traditional databases are attractive due to their properties such as range queries, secondary indices, and transactions with the ACID properties.&lt;/p&gt;
 &lt;p&gt;At some point, a single node-based database isn’t enough to tackle the load. We might need to distribute the data over many nodes, but still export all the nice properties of relational databases. In practice, it has proved challenging to provide single-node database-like properties over a distributed database.&lt;/p&gt;
@@ -924,9 +948,11 @@ Asynchronous primary-secondary replication introduces certain challenges that ca
 &lt;p&gt;We’ll discuss different ways to partition data, related challenges, and their solutions in this lesson.&lt;/p&gt;
 &lt;h2&gt;Sharding&lt;/h2&gt;
 &lt;p&gt;To divide load among multiple nodes, we need to partition the data by a phenomenon known as partitioning or sharding. In this approach, we split a large dataset into smaller chunks of data stored at different nodes on our network.&lt;/p&gt;
-&lt;p&gt;The partitioning must be balanced so that each partition receives about the same amount of data. If partitioning is unbalanced, the majority of queries will fall into a few partitions. Partitions that are heavily loaded will create a system bottleneck. The efficacy of partitioning will be harmed because a significant portion of data retrieval queries will be sent to the nodes that carry the highly congested partitions. Such partitions are known as hotspots. Generally, we use the following two ways to shard the data:
-- Vertical sharding
-- Horizontal sharding&lt;/p&gt;
+&lt;p&gt;The partitioning must be balanced so that each partition receives about the same amount of data. If partitioning is unbalanced, the majority of queries will fall into a few partitions. Partitions that are heavily loaded will create a system bottleneck. The efficacy of partitioning will be harmed because a significant portion of data retrieval queries will be sent to the nodes that carry the highly congested partitions. Such partitions are known as hotspots. Generally, we use the following two ways to shard the data:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Vertical sharding&lt;/li&gt;
+&lt;li&gt;Horizontal sharding&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3&gt;Vertical sharding&lt;/h3&gt;
 &lt;p&gt;We can put different tables in various database instances, which might be running on a different physical server. We might break a table into multiple tables so that some columns are in one table while the rest are in the other. We should be careful if there are joins between multiple tables. We may like to keep such tables together on one shard.&lt;/p&gt;
 &lt;p&gt;Often, vertical sharding is used to increase the speed of data retrieval from a table consisting of columns with very wide text or a binary large object (blob). In this case, the column with large text or a blob is split into a different table.&lt;/p&gt;
@@ -934,17 +960,21 @@ Asynchronous primary-secondary replication introduces certain challenges that ca
 &lt;p&gt;Vertical sharding has its intricacies and is more amenable to manual partitioning, where stakeholders carefully decide how to partition data. In comparison, horizontal sharding is suitable to automate even under dynamic conditions.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Note: Creating shards by moving specific tables of a database around is also a form of vertical sharding. Usually, those tables are put in the same shard because they often appear together in queries, for example, for joins. We will see an example of such a use-case ahead in the course.&lt;/em&gt;&lt;/p&gt;
 &lt;h3&gt;Horizontal sharding&lt;/h3&gt;
-&lt;p&gt;At times, some tables in the databases become too big and affect read/write latency. Horizontal sharding or partitioning is used to divide a table into multiple tables by splitting data row-wise, as shown in the figure in the next section. Each partition of the original table distributed over database servers is called a shard. Usually, there are two strategies available:
-- Key-range based sharding
-- Hash-based sharding&lt;/p&gt;
+&lt;p&gt;At times, some tables in the databases become too big and affect read/write latency. Horizontal sharding or partitioning is used to divide a table into multiple tables by splitting data row-wise, as shown in the figure in the next section. Each partition of the original table distributed over database servers is called a shard. Usually, there are two strategies available:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Key-range based sharding&lt;/li&gt;
+&lt;li&gt;Hash-based sharding&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h4&gt;Key-range based sharding&lt;/h4&gt;
 &lt;p&gt;In the key-range based sharding, each partition is assigned a continuous range of keys.&lt;/p&gt;
 &lt;p&gt;Sometimes, a database consists of multiple tables bound by foreign key relationships. In such a case, the horizontal partition is performed using the same partition key on all tables in a relation. Tables (or subtables) that belong to the same partition key are distributed to one database shard. &lt;/p&gt;
-&lt;p&gt;The basic design techniques used in multi-table sharding are as follows:
-- There’s a partition key in the Customer mapping table. This table resides on each shard and stores the partition keys used in the shard. Applications create a mapping logic between the partition keys and database shards by reading this table from all shards to make the mapping efficient. Sometimes, applications use advanced algorithms to determine the location of a partition key belonging to a specific shard.
-- The partition key column, Customer_Id, is replicated in all other tables as a data isolation point. It has a trade-off between an impact on increased storage and locating the desired shards efficiently. Apart from this, it’s helpful for data and workload distribution to different database shards. The data routing logic uses the partition key at the application tier to map queries specified for a database shard.
+&lt;p&gt;The basic design techniques used in multi-table sharding are as follows:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There’s a partition key in the Customer mapping table. This table resides on each shard and stores the partition keys used in the shard. Applications create a mapping logic between the partition keys and database shards by reading this table from all shards to make the mapping efficient. Sometimes, applications use advanced algorithms to determine the location of a partition key belonging to a specific shard.&lt;/li&gt;
+&lt;li&gt;The partition key column, Customer_Id, is replicated in all other tables as a data isolation point. It has a trade-off between an impact on increased storage and locating the desired shards efficiently. Apart from this, it’s helpful for data and workload distribution to different database shards. The data routing logic uses the partition key at the application tier to map queries specified for a database shard.
 Primary keys are unique across all database shards to avoid key collision during data migration among shards and the merging of data in the online analytical processing (OLAP)environment.
-The column Creation_date serves as the data consistency point, with an assumption that the clocks of all nodes are synchronized. This column is used as a criterion for merging data from all database shards into the global view when essential.&lt;/p&gt;
+The column Creation_date serves as the data consistency point, with an assumption that the clocks of all nodes are synchronized. This column is used as a criterion for merging data from all database shards into the global view when essential.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h5&gt;Advantages&lt;/h5&gt;
 &lt;p&gt;Using key-range-based sharding method, the range-query-based scheme is easy to implement. We precisely know where (which node, which shard) to look for a specific range of keys.
 Range queries can be performed using the partitioning keys, and those can be kept in partitions in sorted order. How exactly such a sorting happens over time as new data comes in is implementation specific.&lt;/p&gt;
@@ -960,10 +990,12 @@ Range queries can be performed using the partitioning keys, and those can be kep
 &lt;p&gt;&lt;strong&gt;Why do you need databases? Why can’t you just use files?&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Answer:&lt;/strong&gt; Databases are crucial for several reasons: they efficiently manage large volumes of data, ensure data consistency and integrity, allow for easy updates, provide robust security measures, guarantee data availability, offer scalability, enable efficient data retrieval, and support data recovery and backup. These capabilities make databases superior to using files for data management, especially in applications requiring quick access to accurate and secure data&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Note: How many shards per database?&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;Empirically, we can determine how much each node can serve with acceptable performance. It can help us find out the maximum amount of data that we would like to keep on any one node. For example, if we find out that we can put a maximum of 50 GB of data on one node, we have the following:
-- Database size = 10 TB
-- Size of a single shard = 50 GB
-- Number of shards the database should be distributed in 10 TB/50 GB = 200 shards&lt;/p&gt;
+&lt;p&gt;Empirically, we can determine how much each node can serve with acceptable performance. It can help us find out the maximum amount of data that we would like to keep on any one node. For example, if we find out that we can put a maximum of 50 GB of data on one node, we have the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Database size = 10 TB&lt;/li&gt;
+&lt;li&gt;Size of a single shard = 50 GB&lt;/li&gt;
+&lt;li&gt;Number of shards the database should be distributed in 10 TB/50 GB = 200 shards&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h4&gt;Consistent hashing&lt;/h4&gt;
 &lt;p&gt;Consistent hashing assigns each server or item in a distributed hash table a place on an abstract circle, called a ring, irrespective of the number of servers in the table. This permits servers and objects to scale without compromising the system’s overall performance.&lt;/p&gt;
 &lt;h5&gt;Advantages of consistent hashing&lt;/h5&gt;
@@ -976,10 +1008,12 @@ Range queries can be performed using the partitioning keys, and those can be kep
 &lt;li&gt;Randomly assigning nodes in the ring may cause non-uniform distribution.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;Rebalance the partitions&lt;/h3&gt;
-&lt;p&gt;Query load can be imbalanced across the nodes due to many reasons, including the following:
-- The distribution of the data isn’t equal.
-- There’s too much load on a single partition.
-- There’s an increase in the query traffic, and we need to add more nodes to keep up.&lt;/p&gt;
+&lt;p&gt;Query load can be imbalanced across the nodes due to many reasons, including the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The distribution of the data isn’t equal.&lt;/li&gt;
+&lt;li&gt;There’s too much load on a single partition.&lt;/li&gt;
+&lt;li&gt;There’s an increase in the query traffic, and we need to add more nodes to keep up.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;We can apply the following strategies to rebalance partitions.&lt;/p&gt;
 &lt;h3&gt;Avoid hash mod n&lt;/h3&gt;
 &lt;p&gt;Usually, we avoid the hash of a key for partitioning (we used such a scheme to explain the concept of hashing in simple terms earlier). The problem with the addition or removal of nodes in the case of hash mod n is that every node’s partition number changes, and a lot of data moves. For example, assume we have hash(key)=1235. If we have five nodes at the start, the key will start on the first node (1235 mod 5=0). Now, if a new node is added, the key would have to be moved to the sixth node (1235 mod 6 = 5), and so on. This moving of keys from one node to another makes rebalancing costly.&lt;/p&gt;
@@ -1015,9 +1049,11 @@ Range queries can be performed using the partitioning keys, and those can be kep
 &lt;h2&gt;ZooKeeper&lt;/h2&gt;
 &lt;p&gt;To track changes in the cluster, many distributed data systems need a separate management server like ZooKeeper. Zookeeper keeps track of all the mappings in the network, and each node connects to ZooKeeper for the information. Whenever there’s a change in the partitioning, or a node is added or removed, ZooKeeper gets updated and notifies the routing tier about the change. HBase, Kafka and SolrCloud use ZooKeeper.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Question:&lt;/strong&gt; Let’s assess our understanding of what’s described in this lesson with the following question:&lt;/p&gt;
-&lt;p&gt;Imagine you’re a database architect for a rapidly expanding e-commerce platform with a global user base. The platform experiences varying user activity levels across different regions. The existing monolithic database struggles to handle the increasing load. Users in different regions have distinct sets of preferences and tend to interact more within their regions. Now, we’re looking for an efficient and scalable solution to optimize performance, enhance scalability, and cater to regional variations in user behavior. Regarding this, which one of the following strategies would you adopt, and why?
-- Database sharding
-- Database replication&lt;/p&gt;
+&lt;p&gt;Imagine you’re a database architect for a rapidly expanding e-commerce platform with a global user base. The platform experiences varying user activity levels across different regions. The existing monolithic database struggles to handle the increasing load. Users in different regions have distinct sets of preferences and tend to interact more within their regions. Now, we’re looking for an efficient and scalable solution to optimize performance, enhance scalability, and cater to regional variations in user behavior. Regarding this, which one of the following strategies would you adopt, and why?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Database sharding&lt;/li&gt;
+&lt;li&gt;Database replication&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; The best strategy here is database sharding. Sharding involves dividing the database into smaller, manageable pieces called shards, each handling a specific region or subset of data. This approach improves scalability and performance by reducing the load on any single database instance and aligns well with regional user preferences and activity levels. It allows the platform to efficiently handle increasing traffic and regional variations.&lt;/p&gt;
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 &lt;p&gt;For all current distributed systems, partitioning has become the standard protocol. Because systems contain increasing amounts of data, partitioning the data makes sense since it speeds up both writes and reads. It increases the system’s availability, scalability, and performance.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 4.5 - Trade-offs in Databases</title><link href="https://dmb225.github.io/system-design-lesson-45-trade-offs-in-databases.html" rel="alternate"/><published>2026-02-05T00:00:00+01:00</published><updated>2026-02-05T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-05:/system-design-lesson-45-trade-offs-in-databases.html</id><summary type="html">&lt;h2&gt;Which is the best database sharding approach?&lt;/h2&gt;
@@ -1126,9 +1162,11 @@ Because the round-robin load-balancing algorithm doesn’t consider any end-serv
 &lt;p&gt;&lt;em&gt;Note: In practice, dynamic algorithms provide far better results because they maintain a state of serving hosts and are, therefore, worth the effort and complexity.&lt;/em&gt;&lt;/p&gt;
 &lt;h2&gt;Stateful versus stateless LBs&lt;/h2&gt;
 &lt;p&gt;While static and dynamic algorithms are required to consider the health of the hosting servers, a state is maintained to hold session information of different clients with hosting servers.&lt;/p&gt;
-&lt;p&gt;If the session information isn’t kept at a lower layer (distributed cache or database), load balancers are used to keep the session information. Below, we describe two ways of handling session maintenance through LBs:
-- Stateful
-- Stateless&lt;/p&gt;
+&lt;p&gt;If the session information isn’t kept at a lower layer (distributed cache or database), load balancers are used to keep the session information. Below, we describe two ways of handling session maintenance through LBs:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Stateful&lt;/li&gt;
+&lt;li&gt;Stateless&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3&gt;Stateful load balancing&lt;/h3&gt;
 &lt;p&gt;As the name indicates, stateful load balancing involves maintaining a state of the sessions established between clients and hosting servers. The stateful LB incorporates state information in its algorithm to perform load balancing.&lt;/p&gt;
 &lt;p&gt;Essentially, the stateful LBs retain a data structure that maps incoming clients to hosting servers. Stateful LBs increase complexity and limit scalability because session information of all the clients is maintained across all the load balancers. That is, load balancers share their state information with each other to make forwarding decisions.&lt;/p&gt;
@@ -1188,9 +1226,9 @@ Because the round-robin load-balancing algorithm doesn’t consider any end-serv
 &lt;p&gt;There are two basic types of databases:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;SQL (relational databases)&lt;/li&gt;
-&lt;li&gt;NoSQL (non-relational databases)
-They differ in terms of their intended use case, the type of information they hold, and the storage method they employ.&lt;/li&gt;
+&lt;li&gt;NoSQL (non-relational databases)&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;They differ in terms of their intended use case, the type of information they hold, and the storage method they employ.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Relational database has a well defined structure such as attributes (columns of the table). NoSQL databases such as document databases often have application-defined structure of data.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Relational databases, like phone books that record contact numbers and addresses, are organized and have predetermined schemas. Non-relational databases, like file directories that store anything from a person’s contact information to shopping preferences, are unstructured, scattered, and feature a dynamic schema. We’ll discuss their differences and their types in detail in the next lesson.&lt;/p&gt;
 &lt;h2&gt;Advantages&lt;/h2&gt;
@@ -1215,7 +1253,6 @@ They differ in terms of their intended use case, the type of information they ho
 &lt;p&gt;Let’s get started by understanding different types of databases and their preferred use cases.&lt;/p&gt;</content><category term="Blog"/><category term="system-design"/><category term="databases"/></entry><entry><title>System Design: Lesson 1 - Building Blocks</title><link href="https://dmb225.github.io/system-design-lesson-1-building-blocks.html" rel="alternate"/><published>2026-02-03T00:00:00+01:00</published><updated>2026-02-03T00:00:00+01:00</updated><author><name>Dao Malick BENIN</name></author><id>tag:dmb225.github.io,2026-02-03:/system-design-lesson-1-building-blocks.html</id><summary type="html">&lt;p&gt;System design problems usually have some similarities, though specific details are often unique. We have extracted these similarities across design problems as the basic building blocks we’ll be covering. One example of a building block is a load-balancing component, which we’ll probably use in every design problem in …&lt;/p&gt;</summary><content type="html">&lt;p&gt;System design problems usually have some similarities, though specific details are often unique. We have extracted these similarities across design problems as the basic building blocks we’ll be covering. One example of a building block is a load-balancing component, which we’ll probably use in every design problem in one way or the other.&lt;/p&gt;
 &lt;p&gt;The purpose of separating the building blocks is to thoroughly discuss their design just once. This means that later we can use them anywhere without having to go over them in detail again. We can think about building blocks as bricks to construct more effective, capable systems.&lt;/p&gt;
 &lt;p&gt;Many of the building blocks we discuss are also available for actual use in the public clouds, such as Amazon Web Services (AWS), Azure, and Google Cloud Platform (GCP). We can use such constructs to build a system to further cement our understanding. (We won’t construct the system in this course, but we’ve left it as an exercise for interested learners.)&lt;/p&gt;
-&lt;hr&gt;
 &lt;p&gt;We’ll discuss the following building blocks in detail:&lt;/p&gt;
 &lt;h3&gt;Domain Name System&lt;/h3&gt;
 &lt;p&gt;This building block focuses on how to design hierarchical and distributed naming systems for computers connected to the Internet via different Internet protocols.&lt;/p&gt;
@@ -1252,7 +1289,6 @@ They differ in terms of their intended use case, the type of information they ho
 &lt;p&gt;Let’s consider the example of a mobile phone where a unique number is associated with each user. To make calls to friends, we can initially try to memorize some of the phone numbers. However, as the number of contacts grows, we’ll have to use …&lt;/p&gt;</summary><content type="html">&lt;h2&gt;The origins of DNS&lt;/h2&gt;
 &lt;p&gt;Let’s consider the example of a mobile phone where a unique number is associated with each user. To make calls to friends, we can initially try to memorize some of the phone numbers. However, as the number of contacts grows, we’ll have to use a phone book to keep track of all our contacts. This way, whenever we need to make a call, we’ll refer to the phone book and dial the number we need.&lt;/p&gt;
 &lt;p&gt;Similarly, computers are uniquely identified by IP addresses—for example, 104.18.2.119 is an IP address. We use IP addresses to visit a website hosted on a machine. Since humans cannot easily remember IP addresses to visit domain names (an example domain name being google.com), we need a phone book-like repository that can maintain all mappings of domain names to IP addresses. In this chapter, we’ll see how DNS serves as the Internet’s phone book.&lt;/p&gt;
-&lt;hr&gt;
 &lt;h2&gt;What is DNS?&lt;/h2&gt;
 &lt;p&gt;The domain name system (DNS) is the Internet’s naming service that maps human-friendly domain names to machine-readable IP addresses. The service of DNS is transparent to users. When a user enters a domain name in the browser, the browser has to translate the domain name to IP address by asking the DNS infrastructure. Once the desired IP address is obtained, the user’s request is forwarded to the destination web server.&lt;/p&gt;
 &lt;p&gt;The entire operation is performed very quickly. Therefore, the end user experiences minimum delay. We’ll also see how browsers save some of the frequently used mappings for later use in the next lesson.&lt;/p&gt;

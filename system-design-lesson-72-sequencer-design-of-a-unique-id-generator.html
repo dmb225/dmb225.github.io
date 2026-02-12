@@ -119,12 +119,41 @@
 <p>This system is scalable, available, and yields user IDs that have no duplicates. Moreover, we can maintain this range in 64 bits, which is numeric.</p>
 <h3>Cons of using a range handler</h3>
 <p>We lose a significant range when a server dies and can only provide a new range once it’s live again. We can overcome this shortcoming by allocating shorter ranges to the servers, although ranges should be large enough to serve identifiers for a while.</p>
-<p>The following table sums up what this approach fulfills for us:
-|       | Unique | Sca﻿lable | Available | 64-bit numeric ID |
-|------------------------|--------|-----------|-----------|-----------------|
-| Using UUID             | ✖️     | ✔️        | ✔️        | ✖️              |
-| Using database servers | ✖️     | ✔️        | ✔️        | ✔️              |
-| Using a range handler  | ✔️     | ✔️        | ✔️        | ✔️              |</p>
+<p>The following table sums up what this approach fulfills for us:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Unique</th>
+<th>Scalable</th>
+<th>Available</th>
+<th>64-bit numeric ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Using UUID</td>
+<td>✖️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✖️</td>
+</tr>
+<tr>
+<td>Using database servers</td>
+<td>✖️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+</tr>
+<tr>
+<td>Using a range handler</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+<td>✔️</td>
+</tr>
+</tbody>
+</table>
 <p>We developed a solution that provides us with a unique ID, which we can assign to various events and even use as a primary key. But what if we add a requirement that the ID is time sortable too?</p>
       </div><!-- /.entry-content -->
 

@@ -43,9 +43,13 @@
 <li>Atomicity: A transaction is considered an atomic unit. Therefore, either all the statements within a transaction will successfully execute, or none of them will execute. If a statement fails within a transaction, it should be aborted and rolled back.</li>
 <li>Consistency: At any given time, the database should be in a consistent state, and it should remain in a consistent state after every transaction. For example, if multiple users want to view a record from the database, it should return a similar result each time.</li>
 <li>Isolation: In the case of multiple transactions running concurrently, they shouldn’t be affected by each other. The final state of the database should be the same as the transactions that were executed sequentially.</li>
-<li>Durability: The system should guarantee that completed transactions will survive permanently in the database even in system failure events.
-Various database management systems (DBMS) are used to define relational database schema along with other operations, such as storing, retrieving, and running SQL queries on data. Some of the popular DBMSs are as follows:</li>
-<li>MySQL</li>
+<li>
+<p>Durability: The system should guarantee that completed transactions will survive permanently in the database even in system failure events.
+Various database management systems (DBMS) are used to define relational database schema along with other operations, such as storing, retrieving, and running SQL queries on data. Some of the popular DBMSs are as follows:</p>
+</li>
+<li>
+<p>MySQL</p>
+</li>
 <li>Oracle Database</li>
 <li>Microsoft SQL Server</li>
 <li>IBM DB2</li>
@@ -97,7 +101,7 @@ Various database management systems (DBMS) are used to define relational databas
 <p>NoSQL doesn’t follow any specific standard, like how relational databases follow relational algebra. Porting applications from one type of NoSQL database to another might be a challenge.</p>
 <h4>Consistency</h4>
 <p>NoSQL databases provide different products based on the specific trade-offs between consistency and availability when failures can happen. We won’t have strong data integrity, like primary and referential integrities in a relational database. Data might not be strongly consistent but slowly converging using a weak model like eventual consistency.</p>
-<p><strong>? Let’s assess our understanding of the lesson’s content with the following question. ?</strong></p>
+<p><em>Let’s assess our understanding of the lesson’s content with the following question.</em></p>
 <p>Imagine we’re designing a recommendation engine for a social networking platform with millions of users. The goal is to provide personalized recommendations for users to connect with others based on their interests, activities, and connections. Which database would be a natural fit for modeling and querying the complex relationship in a social network and why?</p>
 <p><strong>Solution:</strong> A graph database is the natural fit for modeling and querying complex relationships in a social network. It uses nodes and edges to represent users, interests, activities, and connections, making it efficient for traversing relationships and providing personalized recommendations. Its flexibility and scalability support the dynamic nature of social data, leading to more relevant suggestions.</p>
 <h2>Choose the right database</h2>

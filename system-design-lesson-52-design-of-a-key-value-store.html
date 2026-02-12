@@ -65,10 +65,12 @@
 <p><strong>Answer:</strong> Key-value stores are designed for simple retrievals using a unique key, and they typically lack complex query languages. They often prioritize availability and scalability over strict consistency, and they store unstructured data. Traditional relational databases, on the other hand, organize data into tables with predefined schemas, support complex queries, and usually emphasize consistency.</p>
 <p>Key-value stores are particularly advantageous in scenarios involving massive data volumes, high-speed lookups, or when the data structure is flexible or not fully known in advance.</p>
 <h2>Assumptions</h2>
-<p>We’ll assume the following to keep our design simple:
-- The data centers hosting the service are trusted (non-hostile).
-- All the required authentication and authorization are already completed.
-- User requests and responses are relayed over HTTPS.</p>
+<p>We’ll assume the following to keep our design simple:</p>
+<ul>
+<li>The data centers hosting the service are trusted (non-hostile).</li>
+<li>All the required authentication and authorization are already completed.</li>
+<li>User requests and responses are relayed over HTTPS.</li>
+</ul>
 <h2>API design</h2>
 <p>Key-value stores, like ordinary hash tables, provide two primary functions, which are get and put.</p>
 <p>Let’s look at the API design.</p>
