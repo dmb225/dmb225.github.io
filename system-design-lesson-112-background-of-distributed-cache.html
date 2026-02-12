@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 11.2 - Background of Distributed Cache</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="The main goal of this chapter is to design a distributed cache. To achieve this goal, we should have substantial background knowledge, mainly on..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-112-background-of-distributed-cache.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 11.2 - Background of Distributed Cache">System Design: Lesson 11.2 - Background of Distributed Cache</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-10T00:00:00+01:00">
+                Published: Tue 10 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-cache.html">distributed-cache</a> </p>        
+</footer><!-- /.post-info -->        <p>The main goal of this chapter is to design a distributed cache. To achieve this goal, we should have substantial background knowledge, mainly on different reading and writing techniques. This lesson will help us build that background knowledge. Let’s look at the structure of this lesson in the table below</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Motivation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Writing policies</td>
+<td>Data is written to cache and databases. The order in which data writing happens has performance implications. We’ll discuss various writing policies to help decide which writing policy would be suitable for the distributed cache we want to design.</td>
+</tr>
+<tr>
+<td>Eviction policies</td>
+<td>Since the cache is built on limited storage (RAM), we ideally want to keep the most frequently accessed data in the cache. Therefore, we’ll discuss different eviction policies to replace less frequently accessed data with most frequently accessed data.</td>
+</tr>
+<tr>
+<td>Cache invalidation</td>
+<td>Certain cached data may get outdated. We’ll discuss different invalidation methods to remove stale or outdated entries from the cache in this section.</td>
+</tr>
+<tr>
+<td>Storage mechanism</td>
+<td>A distributed storage has many servers. We’ll discuss important design considerations, such as which cache entry should be stored in which server and what data structure to use for storage.</td>
+</tr>
+<tr>
+<td>Cache client</td>
+<td>A cache server stores cache entries, but a cache client calls the cache server to request data. We’ll discuss the details of a cache client library in this section.</td>
+</tr>
+</tbody>
+</table>
+<h2>Writing policies</h2>
+<p>Often, a cache stores a copy (or part) of data, which is persistently stored in a data store. When we store data to the data store, some important questions arise:</p>
+<ul>
+<li><em>Where do we store the data first? Database or cache?</em></li>
+<li><em>What will be the implication of each strategy for consistency models?</em></li>
+</ul>
+<p>The short answer is, it depends on the application requirements. Let’s look at the details of different writing policies to understand the concept better:</p>
+<ul>
+<li><strong>Write-through cache:</strong> The write-through mechanism writes on the cache as well as on the database. Writing on both storages can happen concurrently or one after the other. This increases the write latency but ensures strong consistency between the database and the cache.</li>
+<li><strong>Write-back cache:</strong> In the write-back cache mechanism, the data is first written to the cache and asynchronously written to the database. Although the cache has updated data, inconsistency is inevitable in scenarios where a client reads stale data from the database. However, systems using this strategy will have small writing latency.</li>
+<li><strong>Write-around cache:</strong> This strategy involves writing data to the database only. Later, when a read is triggered for the data, it’s written to cache after a cache miss. The database will have updated data, but such a strategy isn’t favorable for reading recently updated data.</li>
+</ul>
+<h2>Eviction policies</h2>
+<p>One of the main reasons caches perform fast is that they’re small. Small caches mean limited storage capacity. Therefore, we need an eviction mechanism to remove less frequently accessed data from the cache.</p>
+<p>Several well-known strategies are used to evict data from the cache. The most well-known strategies include the following:</p>
+<ul>
+<li>Least recently used (LRU)</li>
+<li>Most recently used (MRU)</li>
+<li>Least frequently used (LFU)</li>
+<li>Most frequently used (MFU)</li>
+</ul>
+<p>Other strategies like first in, first out (FIFO) also exist. The choice of each of these algorithms depends on the system the cache is being developed for.</p>
+<h2>Cache invalidation</h2>
+<p>Apart from the eviction of less frequently accessed data, some data residing in the cache may become stale or outdated over time. Such cache entries are invalid and must be marked for deletion.</p>
+<p>The situation demands a question: How do we identify stale entries?</p>
+<p>Resolution of the problem requires storing metadata corresponding to each cache entry. Specifically, maintaining a time-to-live (TTL) value to deal with outdated cache items.</p>
+<p>We can use two different approaches to deal with outdated items using TTL:</p>
+<ul>
+<li>Active expiration: This method actively checks the TTL of cache entries through a daemon process or thread.</li>
+<li>Passive expiration: This method checks the TTL of a cache entry at the time of access.</li>
+</ul>
+<p>Each expired item is removed from the cache upon discovery.</p>
+<h2>Storage mechanism</h2>
+<p>Storing data in the cache isn’t as trivial as it seems because the distributed cache has multiple cache servers. When we use multiple cache servers, the following design questions need to be answered:</p>
+<ul>
+<li>Which data should we store in which cache servers?</li>
+<li>What data structure should we use to store the data?</li>
+</ul>
+<p>The above two questions are important design issues because they’ll decide the performance of our distributed cache, which is our most important requirement. We’ll use the following techniques to answer the questions above.</p>
+<h3>Hash function</h3>
+<p>It’s possible to use hashing in two different scenarios:</p>
+<ul>
+<li>Identify the cache server in a distributed cache to store and retrieve data.</li>
+<li>Locate cache entries inside each cache server.</li>
+</ul>
+<p>For the first scenario, we can use different hashing algorithms. However, consistent hashing or its flavors usually perform well in distributed systems because simple hashing won’t be ideal in case of crashes or scaling.</p>
+<p>In the second scenario, we can use typical hash functions to locate a cache entry to read or write inside a cache server. However, a hash function alone can only locate a cache entry. It doesn’t say anything about managing data within the cache server. That is, it doesn’t say anything about how to implement a strategy to evict less frequently accessed data from the cache server. It also doesn’t say anything about what data structures are used to store the data within the cache servers. This is exactly the second design question of the storage mechanism. Let’s take a look at the data structure next.</p>
+<p><strong><em>Explain why consistent hashing is preferred over simple hashing in distributed cache systems and how it improves scalability and fault tolerance.</em></strong></p>
+<p><strong>Answer:</strong> Consistent hashing is preferred over simple hashing in distributed cache systems because it significantly reduces the amount of data that needs to be moved when nodes are added or removed, which helps with scalability. Additionally, it improves fault tolerance by limiting the data redistribution to only a small portion of the data when a node fails. This way, the system remains efficient and resilient even as it grows or encounters failures.</p>
+<h3>Linked list</h3>
+<p>We’ll use a doubly linked list. The main reason is its widespread usage and simplicity. Furthermore, adding and removing data from the doubly linked list in our case will be a constant time operation. This is because we either evict a specific entry from the tail of the linked list or relocate an entry to the head of the doubly linked list. Therefore, no iterations are required.</p>
+<p><strong>Note:</strong> Bloom filters are an interesting choice for quickly finding if a cache entry doesn’t exist in the cache servers. We can use bloom filters to determine that a cache entry is definitely not present in the cache server, but the possibility of its presence is probabilistic. Bloom filters are quite useful in large caching or database systems.</p>
+<h2>Sharding in cache clusters</h2>
+<p>To avoid SPOF and high load on a single cache instance, we introduce sharding. Sharding involves splitting up cache data among multiple cache servers. It can be performed in the following two ways.</p>
+<h3>Dedicated cache servers</h3>
+<p>In the dedicated cache servers method, we separate the application and web servers from the cache servers.</p>
+<p>The advantages of using dedicated cache servers are the following:</p>
+<ul>
+<li>There’s flexibility in terms of hardware choices for each functionality.</li>
+<li>It’s possible to scale web/application servers and cache servers separately.</li>
+</ul>
+<p>Apart from the advantages above, working as a standalone caching service enables other microservices to benefit from them—for example, Cache as a Service. In that case, the caching system will have to be aware of different applications so that their data doesn’t collide.</p>
+<h3>Co-located cache</h3>
+<p>The co-located cache embeds cache and service functionality within the same host.</p>
+<p>The main advantage of this strategy is the reduction in CAPEX and OPEX of extra hardware. Furthermore, with the scaling of one service, automatic scaling of the other service is obtained. However, the failure of one machine will result in the loss of both services simultaneously.</p>
+<h3>Cache client</h3>
+<p>We discussed that the hash functions should be used for the selection of cache servers. But what entity performs these hash calculations?</p>
+<p>A cache client is a piece of code residing in hosting servers that do (hash) computations to store and retrieve data in the cache servers. Also, cache clients may coordinate with other system components like monitoring and configuration services. All cache clients are programmed in the same way so that the same PUT, and GET operations from different clients return the same results. Some of the characteristics of cache clients are the following:</p>
+<ul>
+<li>Each cache client will know about all the cache servers.</li>
+<li>All clients can use well-known transport protocols like TCP or UDP to talk to the cache servers.</li>
+</ul>
+<p><strong><em>What will be the behavior of cache clients to an access request if one of the cache servers is dead?</em></strong></p>
+<p><strong>Answer:</strong> Since the data within the cache servers will no longer be available, cache clients will mark that access request as a cache miss.</p>
+<h2>Conclusion</h2>
+<p>In this lesson, we learned what distributed caches are and highlighted their significance in distributed systems. We also discussed different storage and eviction mechanisms for caches. Caches are vital for any distributed system and are located at different points within the design of a system. It’s important to understand how distributed caches can be designed as part of a large system.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>

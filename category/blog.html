@@ -20,7 +20,170 @@
 
                 <aside id="featured" class="body">
                     <article>
-                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-101-focus-on-client-side-errors-in-a-monitoring-system.html">System Design: Lesson 10.1 - Focus on Client-Side Errors in a Monitoring System</a></h1>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-111-the-distributed-cache.html">System Design: Lesson 11.1 - The Distributed Cache</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2026-02-10T00:00:00+01:00">
+                Published: Tue 10 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-cache.html">distributed-cache</a> </p>        
+</footer><!-- /.post-info --><h2>Problem statement</h2>
+<p>A typical system consists of these components:</p>
+<ul>
+<li>It has a client who requests the service.</li>
+<li>It has one or more service hosts that entertain client requests.</li>
+<li>It utilizes a database for data storage, which is used by the service.</li>
+</ul>
+<p>Under normal circumstances, this abstraction performs fine.</p>
+<p>However, as the number of users increases, the number of database queries also increases. As a result, service providers are overburdened, leading to slow performance. In such cases, a cache is added to the system to deal with performance deterioration.</p>
+<p>A cache is a temporary data storage that can serve data faster by keeping data entries in memory.</p>
+<p>Caches store only the most frequently accessed data. When a request reaches the serving host, it retrieves data from the cache (cache hit) and serves the user. However, if the data is unavailable in the cache (cache miss), the data will be queried from the database.</p>
+<p>Additionally, the cache is populated with the new value to prevent cache misses in the future.</p>
+<p>A cache is a non-persistent storage area used to store data that is repeatedly read and written, providing the end user with lower latency. Therefore, a cache must serve data from a storage component that is fast, has sufficient storage, and is affordable in terms of dollar cost as the caching service scales.</p>
+<p>We understand the need for a cache and suitable storage hardware, but what is a distributed cache? Let’s discuss this next.</p>
+<p>What is a distributed cache?
+A distributed cache is a caching system where multiple cache servers coordinate to store frequently accessed data.</p>
+<p>Distributed caches are necessary in environments where a single cache server is insufficient to store all the data. At the same time, it’s scalable and guarantees a higher degree of availability. Caches are generally small, frequently accessed, short-term storage with fast read time. Caches use the locality of reference principle.</p>
+<p>Generally, distributed caches are beneficial in these ways:</p>
+<ul>
+<li>They minimize user-perceived latency by precalculating results and storing frequently accessed data.</li>
+<li>They pre-generate expensive queries from the database.</li>
+<li>They store user session data temporarily.</li>
+<li>They serve data from temporary storage even if the data store is down temporarily.</li>
+<li>They reduce network costs by serving data from local resources.</li>
+<li>They can be scaled horizontally by adding more servers, making them ideal for applications with high traffic or large datasets.</li>
+<li>They can reduce the load on databases by offloading frequently accessed data to memory, freeing up database resources for more complex queries and transactions.</li>
+<li>They are typically more highly available than databases, as they are not subject to single points of failure.</li>
+</ul>
+<p>While these benefits are compelling, you might wonder why we can't simply use a larger single cache server instead. Let’s examine the practical reasons that make distribution necessary.</p>
+<h2>Why distributed cache?</h2>
+<p>As the size of the data required in the cache increases, storing the entire dataset in one system becomes impractical. This is because of the following three reasons:</p>
+<ul>
+<li>It can be a potential single point of failure (SPOF).</li>
+<li>A system is designed in layers, and each layer should have its caching mechanism to ensure the decoupling of sensitive data from different layers.</li>
+<li>Caching at different locations helps reduce the latency of serving at that layer.</li>
+</ul>
+<p>In the table below, we describe how caching is performed at different layers using various technologies. It’s essential to note that key-value store components are utilized across multiple layers.</p>
+<table>
+<thead>
+<tr>
+<th>System Layer</th>
+<th>Technology in Use</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web</td>
+<td>HTTP cache headers, web accelerators, key-value store, CDNs, and so on</td>
+<td>Accelerate retrieval of static web content and manage sessions</td>
+</tr>
+<tr>
+<td>Application</td>
+<td>Local cache and key-value data store</td>
+<td>Accelerate application-level computations and data retrieval</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Database cache, buffers, and key-value data store</td>
+<td>Reduce data retrieval latency and I/O load from database</td>
+</tr>
+</tbody>
+</table>
+<p><em>Apart from the three system layers above, caching is also performed at DNS and client-side technologies like browsers or end-devices.</em></p>
+<p>Understanding where to implement caching is only part of the equation. To truly maximize its effectiveness, we must follow established practices for managing our distributed cache.</p>
+<h2>How does distributed caching work?</h2>
+<p>Here’s an example of how distributed caching can be used in a web application:</p>
+<ol>
+<li>A web application makes a request to the distributed cache for data.</li>
+<li>The distributed cache server checks whether the data is in the cache. If it is, the cache server returns the data to the application.</li>
+<li>If the data is not in the cache, the cache server retrieves the data from the backend system (e.g., a database) and stores it in the cache for future requests.</li>
+<li>The cache server then returns the data to the application.</li>
+<li>The distributed cache server can be located on the same server as the application or on a separate server. Distributed cache servers are often deployed in a cluster to improve performance and scalability.</li>
+</ol>
+<p>By using distributed caching, the web server can avoid retrieving the required data from the database for every request. This can significantly improve the performance of the web application.</p>
+<h2>Cache management best practices</h2>
+<p>To maximize the benefits of distributed caching, adhere to these best practices, which we will discuss in the coming lesson in detail:</p>
+<ul>
+<li>Cache eviction: Implement cache eviction policies, such as Least Recently Used (LRU) or Time to Live (TTL), to maintain a refreshed and relevant cache.</li>
+<li>Data consistency: Ensure data consistency between the cache and the primary data source, especially for frequently updated data.</li>
+<li>Monitoring: Regularly monitor cache performance metrics, such as hit and miss rates, to identify areas for improvement.</li>
+<li>Scalability: Design the cache infrastructure to be scalable, allowing for easy addition of cache nodes as the application grows.</li>
+</ul>
+<p><em>Implementing distributed caching involves selecting the right solution, installing and configuring it on all nodes, defining data partitioning and replication strategies, integrating the cache with the application, and continuously monitoring and fine-tuning performance.</em></p>
+<p>With these benefits in mind, let’s examine some of the industry-standard tools available for implementing distributed caching.</p>
+<h2>Use cases for distributed caching</h2>
+<p>Distributed caching can be used in a variety of scenarios, including:</p>
+<ul>
+<li>Web applications: Distributed caches can be used to store frequently accessed web pages, images, and other resources. This can improve the performance and scalability of web applications.</li>
+<li>E-commerce applications: Distributed caches can store product catalogs, shopping carts, and other customer data. This can improve the performance and scalability of e-commerce applications.</li>
+<li>Content delivery networks (CDNs): Distributed caches are often used in CDNs to store static content, such as images, CSS, and JavaScript files. This can improve the performance of websites and web applications.</li>
+<li>Gaming applications: Distributed caches can store game state data, including player inventory, map data, and leaderboard information. This can improve the performance and scalability of gaming applications.</li>
+</ul>
+<h2>Popular distributed caching solutions</h2>
+<p>There are a number of popular distributed caching solutions available, including:</p>
+<ul>
+<li><strong>Redis</strong> is an open-source in-memory data structure store that can be used as a distributed cache. It is known for its speed and scalability.</li>
+<li><strong>Memcached</strong> is another popular open-source distributed cache. It is simple to use and easily scalable.</li>
+<li><strong>Hazelcast</strong> is a commercial distributed caching solution that offers several advanced features, including data replication and eventing.</li>
+<li><strong>Apache Ignite</strong> is an open-source distributed caching and computing platform. It offers several features, including in-memory data processing and distributed SQL queries.
+Distributed caching is a powerful way to improve application performance, scalability, and availability.</li>
+</ul>
+<p>To use it effectively, focus on caching data that is frequently accessed and rarely changes, set appropriate expiration times to keep data fresh, monitor cache performance regularly, and consider using a cache management library to handle eviction and synchronization efficiently.</p>
+<h1>How will we design a distributed cache?</h1>
+<p>We’ll divide the task of designing and reinforcing the learning of major concepts of distributed cache into five lessons:</p>
+<ul>
+<li><strong>Background of Distributed Cache:</strong><br>
+  It’s imperative to build the background knowledge necessary to make critical decisions when designing distributed caches. This lesson will revisit some fundamental yet essential concepts.</li>
+<li><strong>High-level Design of a Distributed Cache:</strong><br>
+  We’ll build a high-level design of a distributed cache in this lesson.</li>
+<li><strong>Detailed Design of a Distributed Cache:</strong><br>
+  We’ll identify some limitations of our high-level design and work toward a scalable, affordable, and performant solution.</li>
+<li><strong>Evaluation of a Distributed Cache Design:</strong><br>
+  This lesson will assess our design against various non-functional requirements, including scalability, consistency, and availability.</li>
+<li><strong>Memcached versus Redis:</strong><br>
+  We’ll discuss well-known industrial solutions, namely Memcached and Redis. We’ll also go through their details and compare their features to help us understand their potential use cases and how they relate to our design.</li>
+</ul>
+<p>Let’s begin by exploring the background of the distributed cache in the next lesson.</p>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-112-background-of-distributed-cache.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 11.2 - Background of Distributed Cache">System Design: Lesson 11.2 - Background of Distributed Cache</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-10T00:00:00+01:00">
+                Published: Tue 10 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-cache.html">distributed-cache</a> </p>        
+</footer><!-- /.post-info -->                        <p>The main goal of this chapter is to design a distributed cache. To achieve this goal, we should have substantial background knowledge, mainly on different reading and writing techniques. This lesson will help us build that background knowledge. Let’s look at the structure of this lesson in the table …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-112-background-of-distributed-cache.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-101-focus-on-client-side-errors-in-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 10.1 - Focus on Client-Side Errors in a Monitoring System">System Design: Lesson 10.1 - Focus on Client-Side Errors in a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2026-02-09T00:00:00+01:00">
                 Published: Mon 09 February 2026
@@ -31,29 +194,12 @@
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
-</footer><!-- /.post-info --><h2>Client-side errors</h2>
+</footer><!-- /.post-info -->                        <h2>Client-side errors</h2>
 <p>In a distributed system, clients often access the service via an HTTP request. We can monitor our web and application servers’ logs if a request fails to process. If multiple requests fail, we can observe a spike in internal errors (error 500).</p>
-<p>Those errors whose root cause is on the client side are hard to respond to because the service has little to no insight into the client’s system. We might try to look for a dip in the load compared to averages, but such a graph is usually hard. It can have false positives and false negatives due to factors such as unexpectedly variable load or if a small portion of the client population is affected.</p>
-<p>There are many factors that can cause failures that can result in clients being unable to reach the server. These include the following:</p>
-<ul>
-<li>Failure in DNS name resolution.</li>
-<li>Any failure in routing along the path from the client to the service provider.</li>
-<li>Any failures with third-party infrastructure, such as middleboxes and content delivery networks (CDNs).</li>
-</ul>
-<h2>Failures due to a routing bug</h2>
-<p>Let’s look at a real-world example of an error that impacted a large number of service customers, but the service wasn’t readily aware of it.</p>
-<p>One of Google’s peer ISPs accidentally announced Internet routes that it wasn’t supposed to. As a result, the traffic of many of Google’s customers started routing through unintended ISPs and wasn’t reaching Google because of the BGP leak; one of the examples of the BGP leak is shown in the illustration below. Clients were frustrated because they weren’t able to reach Google, while Google might have been unaware of such problems right away because these issues didn’t happen on its infrastructure.</p>
-<p><strong>Details:</strong> Border Gateway Protocol (BGP) is a routing protocol that connects the entire Internet. The routing is easy in a local area network because every device is connected to the same computer network. However, it gets complicated as the network grows, and the Internet is comprised of millions of networks all around the globe. Big organizations and ISPs manage Internet connectivity for multiple network sites and locations themselves. It’s called an autonomous system (AS).</p>
-<p>An AS handles the network traffic inside it, and the BGP router manages the inbound and outbound traffic. Each BGP router contains routing tables. It allows BGP to find the best path over the Internet to send the packet to its destination. But a leaked route can occur. A leaked route occurs when an autonomous system propagates some routing announcements beyond their intended scope.</p>
-<p>On November 12, 2018, a BGP leak occurred, and it impacted clients worldwide, including Google, Meta, and Amazon. A service announced a 216.58.192.0/19 route to some autonomous systems and a more specific route (216.58.192.0/22) to one autonomous system, which wasn’t supposed to announce it further. IP forwarding picks the longest prefix as a match. In the example, a /22 will be longer than a /19 prefix. Due to configuration errors, the more specific route leaked to the Internet, and because since it’s so specific, all traffic went through the wrong autonomous system, resulting in dropping the traffic.</p>
-<p>The above leak isn't unique. Similar issues keep arising. Another such leakage happened on April 16, 2021, when an AS mistakenly announced over 30,000 BGP prefixes. This resulted in a 13 times spike in the inbound traffic to their network. However, an increase in influx was observed, and the problem was solved.</p>
-<p>The impacted services' monitoring systems might not catch the above events readily.
-Monitoring such situations is crucial so that the application remains available for all of its customers. Therefore, in the next lessons, we’ll go through methods that help us to monitor the situations mentioned above.</p>                    </article>
-                </aside><!-- /#featured -->
-                    <section id="content" class="body">
-                        <h1>Other articles</h1>
-                        <hr />
-                        <ol id="posts-list" class="hfeed">
+<p>Those errors whose root cause is …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-101-focus-on-client-side-errors-in-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
 
                 <li><article class="hentry">
                     <header>
@@ -218,51 +364,6 @@ Monitoring such situations is crucial so that the application remains available 
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
 </footer><!-- /.post-info -->                        <p>Large data centers have millions of servers, and visualizing the health data for all of them is challenging. An important aspect of monitoring a fleet of servers is to know which ones are alive and which ones are offline. A modern data center can house many thousands of servers in …</p>
                         <a class="readmore" href="https://dmb225.github.io/system-design-lesson-93-visualize-data-in-a-monitoring-system.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-71-sequencer.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 7.1 - Sequencer">System Design: Lesson 7.1 - Sequencer</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-08T00:00:00+01:00">
-                Published: Sun 08 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Motivation</h2>
-<p>There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet, and posting a picture on Instagram are just a few examples of such events. We need a mechanism to distinguish these events from each other. One …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-71-sequencer.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 7.2 - Sequencer: Design of a Unique ID Generator">System Design: Lesson 7.2 - Sequencer: Design of a Unique ID Generator</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-08T00:00:00+01:00">
-                Published: Sun 08 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
-</footer><!-- /.post-info -->                        <p>In the previous lesson, we saw how unique identifiers are used in many systems, for example, to label tweets, uploaded videos, or track execution flow across services. In this lesson, we will build on that by exploring different ways to design a system that generates such unique IDs. We will …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html">read more</a>
                     </div><!-- /.entry-content -->
                 </article></li>
                     </ol><!-- /#posts-list -->
