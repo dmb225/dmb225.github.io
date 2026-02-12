@@ -13,13 +13,221 @@
                 <header id="banner" class="body">
                         <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
                         <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
                                                 <li><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
                         </ul></nav>
                 </header><!-- /#banner -->
 
                 <aside id="featured" class="body">
                     <article>
-                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-71-sequencer.html">System Design: Lesson 7.1 - Sequencer</a></h1>
+                        <h1 class="entry-title"><a href="https://dmb225.github.io/system-design-lesson-101-focus-on-client-side-errors-in-a-monitoring-system.html">System Design: Lesson 10.1 - Focus on Client-Side Errors in a Monitoring System</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info --><h2>Client-side errors</h2>
+<p>In a distributed system, clients often access the service via an HTTP request. We can monitor our web and application servers’ logs if a request fails to process. If multiple requests fail, we can observe a spike in internal errors (error 500).</p>
+<p>Those errors whose root cause is on the client side are hard to respond to because the service has little to no insight into the client’s system. We might try to look for a dip in the load compared to averages, but such a graph is usually hard. It can have false positives and false negatives due to factors such as unexpectedly variable load or if a small portion of the client population is affected.</p>
+<p>There are many factors that can cause failures that can result in clients being unable to reach the server. These include the following:</p>
+<ul>
+<li>Failure in DNS name resolution.</li>
+<li>Any failure in routing along the path from the client to the service provider.</li>
+<li>Any failures with third-party infrastructure, such as middleboxes and content delivery networks (CDNs).</li>
+</ul>
+<h2>Failures due to a routing bug</h2>
+<p>Let’s look at a real-world example of an error that impacted a large number of service customers, but the service wasn’t readily aware of it.</p>
+<p>One of Google’s peer ISPs accidentally announced Internet routes that it wasn’t supposed to. As a result, the traffic of many of Google’s customers started routing through unintended ISPs and wasn’t reaching Google because of the BGP leak; one of the examples of the BGP leak is shown in the illustration below. Clients were frustrated because they weren’t able to reach Google, while Google might have been unaware of such problems right away because these issues didn’t happen on its infrastructure.</p>
+<p><strong>Details:</strong> Border Gateway Protocol (BGP) is a routing protocol that connects the entire Internet. The routing is easy in a local area network because every device is connected to the same computer network. However, it gets complicated as the network grows, and the Internet is comprised of millions of networks all around the globe. Big organizations and ISPs manage Internet connectivity for multiple network sites and locations themselves. It’s called an autonomous system (AS).</p>
+<p>An AS handles the network traffic inside it, and the BGP router manages the inbound and outbound traffic. Each BGP router contains routing tables. It allows BGP to find the best path over the Internet to send the packet to its destination. But a leaked route can occur. A leaked route occurs when an autonomous system propagates some routing announcements beyond their intended scope.</p>
+<p>On November 12, 2018, a BGP leak occurred, and it impacted clients worldwide, including Google, Meta, and Amazon. A service announced a 216.58.192.0/19 route to some autonomous systems and a more specific route (216.58.192.0/22) to one autonomous system, which wasn’t supposed to announce it further. IP forwarding picks the longest prefix as a match. In the example, a /22 will be longer than a /19 prefix. Due to configuration errors, the more specific route leaked to the Internet, and because since it’s so specific, all traffic went through the wrong autonomous system, resulting in dropping the traffic.</p>
+<p>The above leak isn't unique. Similar issues keep arising. Another such leakage happened on April 16, 2021, when an AS mistakenly announced over 30,000 BGP prefixes. This resulted in a 13 times spike in the inbound traffic to their network. However, an increase in influx was observed, and the problem was solved.</p>
+<p>The impacted services' monitoring systems might not catch the above events readily.
+Monitoring such situations is crucial so that the application remains available for all of its customers. Therefore, in the next lessons, we’ll go through methods that help us to monitor the situations mentioned above.</p>                    </article>
+                </aside><!-- /#featured -->
+                    <section id="content" class="body">
+                        <h1>Other articles</h1>
+                        <hr />
+                        <ol id="posts-list" class="hfeed">
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-102-design-of-a-client-side-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 10.2 - Design of a Client-Side Monitoring System">System Design: Lesson 10.2 - Design of a Client-Side Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <p>A service has no visibility of the errors that don’t occur at its infrastructure. Still, such failures are equally frustrating for the customers, and they might have to ask their friends, “Is the service X down for you as well?” or head to sites like Downdetector to see if …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-102-design-of-a-client-side-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-81-distributed-monitoring.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 8.1 - Distributed Monitoring">System Design: Lesson 8.1 - Distributed Monitoring</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-monitoring.html">distributed-monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Monitoring</h2>
+<p>The modern economy depends on the continual operation of IT infrastructure. Such infrastructure contains hardware, distributed services, and network resources. These components are interlinked in such infrastructure, making it challenging to keep everything functioning smoothly and without application downtime.</p>
+<p>It’s challenging to know what’s happening at the …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-81-distributed-monitoring.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-82-introduction-to-distributed-monitoring.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 8.2 - Introduction to Distributed Monitoring">System Design: Lesson 8.2 - Introduction to Distributed Monitoring</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-monitoring.html">distributed-monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Need for monitoring</h2>
+<p>Let’s go over how the failure of a single service can affect the smooth execution of related systems. To avoid cascading failures, monitoring can play a vital role with early warnings or steering us to the root cause of faults.</p>
+<p>Let’s consider a scenario where …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-82-introduction-to-distributed-monitoring.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-83-prerequisites-of-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 8.3 - Prerequisites of a Monitoring System">System Design: Lesson 8.3 - Prerequisites of a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-monitoring.html">distributed-monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Monitoring: metrics and alerting</h2>
+<p>A good monitoring system needs to clearly define what to measure and in what units (metrics). The monitoring system also needs to define threshold values of all metrics and the ability to inform appropriate stakeholders (alerts) when values are out of acceptable ranges. Knowing the state …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-83-prerequisites-of-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-91-design-of-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 9.1 - Design of a Monitoring System">System Design: Lesson 9.1 - Design of a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <h1>Requirements</h1>
+<p>Let’s sum up what we want our monitoring system to do for us:</p>
+<ul>
+<li>Monitor critical local processes on a server for crashes.</li>
+<li>Monitor any anomalies in the use of CPU, memory, disk, or network bandwidth by a process on a server.</li>
+<li>Monitor overall server health, such as CPU …</li></ul>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-91-design-of-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-92-detailed-design-of-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 9.2 - Detailed Design of a Monitoring System">System Design: Lesson 9.2 - Detailed Design of a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <p>We’ll discuss the core components of our monitoring system, identify the shortcomings of our design, and improve the design to fulfill our requirements.</p>
+<h2>Storage</h2>
+<p>We’ll use time-series databases to save the data locally on the server where our monitoring service is running. Then, we’ll integrate it with …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-92-detailed-design-of-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-93-visualize-data-in-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 9.3 - Visualize Data in a Monitoring System">System Design: Lesson 9.3 - Visualize Data in a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <p>Large data centers have millions of servers, and visualizing the health data for all of them is challenging. An important aspect of monitoring a fleet of servers is to know which ones are alive and which ones are offline. A modern data center can house many thousands of servers in …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-93-visualize-data-in-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-71-sequencer.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 7.1 - Sequencer">System Design: Lesson 7.1 - Sequencer</a></h1>
+                    </header>
+
+                    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2026-02-08T00:00:00+01:00">
                 Published: Sun 08 February 2026
@@ -30,24 +238,11 @@
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
 <p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
-</footer><!-- /.post-info --><h2>Motivation</h2>
-<p>There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet, and posting a picture on Instagram are just a few examples of such events. We need a mechanism to distinguish these events from each other. One such mechanism is the assignment of globally unique IDs to each of these events.</p>
-<p>Assigning a primary key to an entry in a database is another use case of a unique ID. Usually, the auto-increment feature in databases fulfills this requirement. However, that feature won’t work for a distributed database, where different nodes independently generate the identifiers. For this case, we need a unique ID generator that acts as a primary key in a distributed setting—for example, a horizontally-sharded table.</p>
-<p>A unique ID helps us identify the flow of an event in the logs and is useful for debugging. A real-world example of unique ID usage is Facebook’s end-to-end performance tracing and analysis system, Canopy. Canopy uses TraceID to identify an event uniquely across the execution path that may potentially perform hundreds of microservices to fulfill one user request.</p>
-<p><em>Explain why we need to design a time-sortable unique ID generator.</em></p>
-<p><strong>Answer:</strong> A unique ID generator that is time-sortable is important because it helps maintain a chronological order of events or objects within a system. This ordering is crucial for analyzing event sequences, debugging issues, and performing efficient database queries, as it allows quick access to the most recent or relevant data.</p>
-<h2>How do we design a sequencer?</h2>
-<p>We’ve divided the sequencer’s comprehensive design into the following two lessons:</p>
-<ul>
-<li>Design of a Unique ID Generator: After enlisting the requirements of the design, we discuss three ways to generate unique IDs: using UUID, using a database, and using a range handler.</li>
-<li>Unique IDs with Causality: In this lesson, we incorporate an additional factor of time in the generation of IDs and explain the process by taking causality into consideration.</li>
-</ul>
-<p>Unique IDs are important for identifying events and objects within a distributed system. However, designing a unique ID generator within a distributed system is challenging. In the next lesson, let’s look at the requirements for a distributed unique ID generation system.</p>                    </article>
-                </aside><!-- /#featured -->
-                    <section id="content" class="body">
-                        <h1>Other articles</h1>
-                        <hr />
-                        <ol id="posts-list" class="hfeed">
+</footer><!-- /.post-info -->                        <h2>Motivation</h2>
+<p>There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet, and posting a picture on Instagram are just a few examples of such events. We need a mechanism to distinguish these events from each other. One …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-71-sequencer.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
 
                 <li><article class="hentry">
                     <header>
@@ -70,202 +265,12 @@
                         <a class="readmore" href="https://dmb225.github.io/system-design-lesson-72-sequencer-design-of-a-unique-id-generator.html">read more</a>
                     </div><!-- /.entry-content -->
                 </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-73-sequencer-unique-ids-with-causality.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality">System Design: Lesson 7.3 - Sequencer: Unique IDs with Causality</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-08T00:00:00+01:00">
-                Published: Sun 08 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Causality</h2>
-<p>In the previous lesson, we generated unique IDs to differentiate between various events. Apart from having unique identifiers for events, we’re also interested in finding the sequence of these events. Let’s consider an example where Peter and John are two Twitter users. John posts a comment (event …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-73-sequencer-unique-ids-with-causality.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-61-the-content-delivery-network-cdn.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 6.1 - The Content Delivery Network (CDN)">System Design: Lesson 6.1 - The Content Delivery Network (CDN)</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-07T00:00:00+01:00">
-                Published: Sat 07 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/cdn.html">cdn</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Problem statement</h2>
-<p>Let’s start with a question: If millions of users worldwide use our data-intensive applications, and our service is deployed in a single data center to serve the users’ requests, what possible problems can arise?</p>
-<p>The following problems can arise:</p>
-<ul>
-<li><strong>High latency:</strong> The user-perceived latency will be high …</li></ul>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-61-the-content-delivery-network-cdn.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-62-introduction-to-a-cdn.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 6.2 - Introduction to a CDN">System Design: Lesson 6.2 - Introduction to a CDN</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-07T00:00:00+01:00">
-                Published: Sat 07 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/cdn.html">cdn</a> </p>        
-</footer><!-- /.post-info -->                        <p>A content delivery network (CDN) is a distributed system of servers placed in many geographic locations to improve the speed and reliability of delivering online content. Rather than relying on a single origin server that holds the original version of the data, a CDN uses a network of proxy servers …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-62-introduction-to-a-cdn.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-63-cdn-design.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 6.3 - CDN Design">System Design: Lesson 6.3 - CDN Design</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-07T00:00:00+01:00">
-                Published: Sat 07 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/cdn.html">cdn</a> </p>        
-</footer><!-- /.post-info -->                        <h2>CDN design</h2>
-<p>We’ll explain our CDN design in two phases. In the first phase, we’ll cover the components that comprise a CDN. By the end of this phase, we’ll understand why we need a specific component. In the second phase, we’ll explore the workflow by explaining …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-63-cdn-design.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-51-the-key-value-store.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.1 - The Key-Value Store">System Design: Lesson 5.1 - The Key-Value Store</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Introduction to key-value stores</h2>
-<p>Key-value stores are distributed hash tables (DHTs). A key is generated by the hash function and should be unique. In a key-value store, a key binds to a specific value and doesn’t assume anything about the structure of the value. A value can be a …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-51-the-key-value-store.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.2 - Design of a Key-Value Store">System Design: Lesson 5.2 - Design of a Key-Value Store</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Requirements</h2>
-<p>Let’s list the requirements of designing a key-value store to overcome the problems of traditional databases.</p>
-<h3>Functional requirements</h3>
-<p>Typically, key-value stores are expected to offer functions such as get and put. However, what sets this particular key-value store system apart is its distinct characteristics, explained as follows:</p>
-<ul>
-<li>Configurable …</li></ul>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-53-key-value-store-scalability-and-replication.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.3 - Key-Value Store Scalability and Replication">System Design: Lesson 5.3 - Key-Value Store Scalability and Replication</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Add scalability</h2>
-<p>Let’s start with one of the core design requirements: scalability. We store key-value data in storage nodes. With a change in demand, we might need to add or remove storage nodes. It means we need to partition data over the nodes in the system to distribute the …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-53-key-value-store-scalability-and-replication.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.4 - Key-Value Store Data Versioning">System Design: Lesson 5.4 - Key-Value Store Data Versioning</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Data versioning</h2>
-<p>When network partitions and node failures occur during an update, an object’s version history might become fragmented. As a result, it requires a reconciliation effort on the part of the system. It’s necessary to build a way that explicitly accepts the potential of several copies of …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
                     </ol><!-- /#posts-list -->
   <nav>
     <ul>
-      <li>Page 1 / 3</li>
+      <li>Page 1 / 4</li>
         <li><a href="https://dmb225.github.io/index2.html">&rang;</a></li>
-        <li><a href="https://dmb225.github.io/index3.html">&Rang;</a></li>
+        <li><a href="https://dmb225.github.io/index4.html">&Rang;</a></li>
     </ul>
   </nav>
                     </section><!-- /#content -->

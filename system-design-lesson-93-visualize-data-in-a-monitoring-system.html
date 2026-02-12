@@ -4,10 +4,10 @@
                         <meta charset="utf-8" />
                         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                         <meta name="generator" content="Pelican" />
-                        <title>System Design: Lesson 7.1 - Sequencer</title>
+                        <title>System Design: Lesson 9.3 - Visualize Data in a Monitoring System</title>
                         <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
                                 <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
-    <meta name="description" content="Motivation There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet,..." />
+    <meta name="description" content="Large data centers have millions of servers, and visualizing the health data for all of them is challenging. An important aspect of monitoring a..." />
         </head>
 
         <body id="index" class="home">
@@ -22,34 +22,34 @@
     <article>
       <header>
         <h1 class="entry-title">
-          <a href="https://dmb225.github.io/system-design-lesson-71-sequencer.html" rel="bookmark"
-             title="Permalink to System Design: Lesson 7.1 - Sequencer">System Design: Lesson 7.1 - Sequencer</a></h1>
+          <a href="https://dmb225.github.io/system-design-lesson-93-visualize-data-in-a-monitoring-system.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 9.3 - Visualize Data in a Monitoring System">System Design: Lesson 9.3 - Visualize Data in a Monitoring System</a></h1>
       </header>
 
       <div class="entry-content">
 <footer class="post-info">
-        <abbr class="published" title="2026-02-08T00:00:00+01:00">
-                Published: Sun 08 February 2026
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
         </abbr>
 
                 <address class="vcard author">
                         By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
                 </address>
         <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/sequencer.html">sequencer</a> </p>        
-</footer><!-- /.post-info -->        <h2>Motivation</h2>
-<p>There can be millions of events happening per second in a large distributed system. Commenting on a post on Facebook, sharing a Tweet, and posting a picture on Instagram are just a few examples of such events. We need a mechanism to distinguish these events from each other. One such mechanism is the assignment of globally unique IDs to each of these events.</p>
-<p>Assigning a primary key to an entry in a database is another use case of a unique ID. Usually, the auto-increment feature in databases fulfills this requirement. However, that feature won’t work for a distributed database, where different nodes independently generate the identifiers. For this case, we need a unique ID generator that acts as a primary key in a distributed setting—for example, a horizontally-sharded table.</p>
-<p>A unique ID helps us identify the flow of an event in the logs and is useful for debugging. A real-world example of unique ID usage is Facebook’s end-to-end performance tracing and analysis system, Canopy. Canopy uses TraceID to identify an event uniquely across the execution path that may potentially perform hundreds of microservices to fulfill one user request.</p>
-<p><em>Explain why we need to design a time-sortable unique ID generator.</em></p>
-<p><strong>Answer:</strong> A unique ID generator that is time-sortable is important because it helps maintain a chronological order of events or objects within a system. This ordering is crucial for analyzing event sequences, debugging issues, and performing efficient database queries, as it allows quick access to the most recent or relevant data.</p>
-<h2>How do we design a sequencer?</h2>
-<p>We’ve divided the sequencer’s comprehensive design into the following two lessons:</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->        <p>Large data centers have millions of servers, and visualizing the health data for all of them is challenging. An important aspect of monitoring a fleet of servers is to know which ones are alive and which ones are offline. A modern data center can house many thousands of servers in a building. We can use a heat map to display information about thousands of servers compactly in a data center.</p>
+<p>A heat map is a data visualization technique that shows the magnitude of a phenomenon in two dimensions by using colors.</p>
+<h2>Using heat maps to troubleshoot</h2>
+<p>We’ll identify if a server is down by using heat maps. Each rack of servers is named and is sorted by data center, then cluster, then row, so problems common at any of these levels are readily apparent.</p>
+<p>A heat map depicting the operational state of a large number of components is an effective method. The health of each component is indicated by the color of each cell in a big matrix. Nodes with green cells operate within permitted parameters, while nodes with red cells are nonresponsive on multiple tries.</p>
+<p>We can use heat maps for the globally distributed systems and continuously share the health information of a server. We can use one bit (one for live, zero for dead). For 1,000,000 servers, we have 125 KB of data. We can quickly find out which server is down by the red color and focus on the problematic parts.</p>
+<p>We can create similar heat maps to get a bird’s-eye view of any resource, like filesystems, networking switches, links, and so on.</p>
+<h2>Summary</h2>
 <ul>
-<li>Design of a Unique ID Generator: After enlisting the requirements of the design, we discuss three ways to generate unique IDs: using UUID, using a database, and using a range handler.</li>
-<li>Unique IDs with Causality: In this lesson, we incorporate an additional factor of time in the generation of IDs and explain the process by taking causality into consideration.</li>
+<li>Monitoring systems are critical in distributed systems because they help in analyzing the system and alerting the stakeholders if a problem occurs.</li>
+<li>We can make a monitoring system scalable using a hybrid of the push and pull methods.</li>
+<li>Heat maps are a powerful tool for visualization and help us learn about the health of thousands of servers in a compact space.</li>
 </ul>
-<p>Unique IDs are important for identifying events and objects within a distributed system. However, designing a unique ID generator within a distributed system is challenging. In the next lesson, let’s look at the requirements for a distributed unique ID generation system.</p>
       </div><!-- /.entry-content -->
 
     </article>

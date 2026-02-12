@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 9.1 - Design of a Monitoring System</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="Requirements Let’s sum up what we want our monitoring system to do for us: Monitor critical local processes on a server for crashes. Monitor any..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-91-design-of-a-monitoring-system.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 9.1 - Design of a Monitoring System">System Design: Lesson 9.1 - Design of a Monitoring System</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->        <h1>Requirements</h1>
+<p>Let’s sum up what we want our monitoring system to do for us:</p>
+<ul>
+<li>Monitor critical local processes on a server for crashes.</li>
+<li>Monitor any anomalies in the use of CPU, memory, disk, or network bandwidth by a process on a server.</li>
+<li>Monitor overall server health, such as CPU, memory, disk, network bandwidth, average load, and so on.</li>
+<li>Monitor hardware component faults on a server, such as memory failures, failing or slowing disks, and so on.</li>
+<li>Monitor the server’s ability to reach out-of-server critical services, such as network file systems, and so on.</li>
+<li>Monitor all network switches, load balancers, and any other specialized hardware inside a data center.</li>
+<li>Monitor power consumption at the server, rack, and data center levels.</li>
+<li>Monitor any power events on the servers, racks, and data center.</li>
+<li>Monitor routing information and DNS for external clients.</li>
+<li>Monitor network links and path latency inside and across data centers.</li>
+<li>Monitor network status at the peering points.</li>
+<li>Monitor overall service health that might span multiple data centers—for example, a CDN and its performance.</li>
+</ul>
+<p>We want automated monitoring that identifies anomalies in the system and informs the alert manager or shows progress on a dashboard.</p>
+<p>Cloud service providers provide a health status of their services:</p>
+<ul>
+<li><strong>AWS:</strong> https://health.aws.amazon.com/health/status  </li>
+<li><strong>Azure:</strong> https://status.azure.com/en-us/status  </li>
+<li><strong>Google Cloud:</strong> https://status.cloud.google.com/</li>
+</ul>
+<p><strong><em>In a distributed system, why is a dedicated monitoring solution necessary instead of simply relying on individual server logs?</em></strong></p>
+<p><strong>Answer:</strong> A dedicated monitoring solution is necessary in a distributed system because it provides centralized visibility across the entire system, making it easier to detect correlations and patterns that individual server logs might miss. Additionally, it enables proactive alerts and faster troubleshooting, ensuring the system remains reliable and efficient.</p>
+<h2>Building blocks we will use</h2>
+<p>The design of distributed monitoring will consist of the following building block:</p>
+<p><strong>Blob storage:</strong> We’ll use blob storage to store our information about metrics.</p>
+<h2>High-level design</h2>
+<p>The high-level components of our monitoring service are the following:</p>
+<ul>
+<li>Storage: A time-series database stores metrics data, such as the current CPU use or the number of exceptions in an application.</li>
+<li>Data collector service: This fetches the relevant data from each service and saves it in the storage.</li>
+<li>Querying service: This is an API that can query on the time-series database and return the relevant information.</li>
+</ul>
+<p>Let’s dive deep into the components mentioned above in the next lesson.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
