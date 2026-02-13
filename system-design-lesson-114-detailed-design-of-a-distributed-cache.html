@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 11.4 - Detailed Design of a Distributed Cache</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="This lesson will identify some shortcomings of the high-level design of a distributed cache and improve the design to cover the gaps. Let’s get..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-114-detailed-design-of-a-distributed-cache.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 11.4 - Detailed Design of a Distributed Cache">System Design: Lesson 11.4 - Detailed Design of a Distributed Cache</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-10T00:00:00+01:00">
+                Published: Tue 10 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-cache.html">distributed-cache</a> </p>        
+</footer><!-- /.post-info -->        <p>This lesson will identify some shortcomings of the high-level design of a distributed cache and improve the design to cover the gaps. Let’s get started.</p>
+<h2>Find and remove limitations</h2>
+<p>Before we get to the detailed design, we need to understand and overcome some challenges:</p>
+<ul>
+<li>There’s no way for the cache client to realize the addition or failure of a cache server.</li>
+<li>The solution will suffer from the problem of single point of failure (SPOF) because we have a single cache server for each set of cache data. Not only that, if some of the data on any of the cache servers is frequently accessed (generally referred to as a hotkey problem), then our performance will also be slow.</li>
+<li>Our solution also didn’t highlight the internals of cache servers. That is, what kind of data structures will it use to store and what eviction policy will it use?</li>
+</ul>
+<h2>Maintain cache servers list</h2>
+<p>Let’s start by resolving the first problem. We’ll take incremental steps toward the best possible solution.</p>
+<ul>
+<li>Solution 1: It’s possible to have a configuration file in each of the service hosts where the cache clients reside. The configuration file will contain the updated health and metadata required for the cache clients to utilize the cache servers efficiently. Each copy of the configuration file can be updated through a push service by any DevOps tool. The main problem with this strategy is that the configuration file will have to be manually updated and deployed through some DevOps tools.</li>
+<li>Solution 2: We can store the configuration file in a centralized location that the cache clients can use to get updated information about cache servers. This solves the deployment issue, but we still need to manually update the configuration file and monitor the health of each server.</li>
+<li>Solution 3: An automatic way of handling the issue is to use a configuration service that continuously monitors the health of the cache servers. In addition to that, the cache clients will get notified when a new cache server is added to the cluster. When we use this strategy, no human intervention or monitoring will be required in case of failures or the addition of new nodes. Finally, the cache clients obtain the list of cache servers from the configuration service.</li>
+</ul>
+<p><strong><em>The configuration service has the highest operational cost. At the same time, it’s a complex solution. However, it’s the most robust among all the solutions we presented.</em></strong></p>
+<h2>Improve availability</h2>
+<p>The second problem relates to cache unavailability if the cache servers fail. A simple solution is the addition of replica nodes. We can start by adding one primary and two backup nodes in a cache shard. With replicas, there’s always a possibility of inconsistency. If our replicas are in close proximity, writing over replicas is performed synchronously to avoid inconsistencies between shard replicas. It’s crucial to divide cache data among shards so that neither the problem of unavailability arises nor any hardware is wasted.</p>
+<p>This solution has two main advantages:</p>
+<ul>
+<li>There’s improved availability in case of failures.</li>
+<li>Hot shards can have multiple nodes (primary-secondary) for reads.</li>
+</ul>
+<p>Not only will such a solution improve availability, but it will also add to the performance.</p>
+<h2>Internals of cache server</h2>
+<p>Each cache client should use three mechanisms to store and evict entries from the cache servers:</p>
+<ul>
+<li>Hash map: The cache server uses a hash map to store or locate different entries inside the RAM of cache servers. The illustration below shows that the map contains pointers to each cache value.</li>
+<li>Doubly linked list: If we have to evict data from the cache, we require a linked list so that we can order entries according to their frequency of access. The illustration below depicts how entries are connected using a doubly linked list.</li>
+<li>Eviction policy: The eviction policy depends on the application requirements. Here, we assume the least recently used (LRU) eviction policy.</li>
+</ul>
+<p>It’s evident from the explanation above that we don’t provide a delete API. This is because the eviction (through eviction algorithm) and deletion (of expired entries through TTL) is done locally at cache servers. Nevertheless, situations can arise where the delete API may be required. For example, when we delete a recently added entry from the database, it should result in the removal of items from the cache for the sake of consistency.</p>
+<h2>Detailed design</h2>
+<p>We’re now ready to formalize the detailed design after resolving each of the three previously highlighted problems.</p>
+<p>Let’s summarize the proposed detailed design in a few points:</p>
+<ul>
+<li>The client’s requests reach the service hosts through the load balancers where the cache clients reside.</li>
+<li>Each cache client uses consistent hashing to identify the cache server. Next, the cache client forwards the request to the cache server maintaining a specific shard.</li>
+<li>Each cache server has primary and replica servers. Internally, every server uses the same mechanisms to store and evict cache entries.</li>
+<li>Configuration service ensures that all the clients see an updated and consistent view of the cache servers.</li>
+<li>Monitoring services can be additionally used to log and report different metrics of the caching service.</li>
+</ul>
+<p><strong>Note:</strong> An important aspect of the design is that cache entries are stored and retrieved from RAM. We discussed the suitability of RAM for designing a caching system in the previous lesson.</p>
+<p><strong><em>While consistent hashing is a good choice, it may result in unequal distribution of data, and certain servers may get overloaded. How do we resolve this problem?</em></strong></p>
+<p>A number of consistent hashing algorithms’ flavors have been suggested over time. We can use one such flavor (used here) that distributes load uniformly and even makes multiple copies of the same data on different cache servers. Each cache server can have virtual servers inside it, and the number of virtual servers in a machine depends on the machine’s capability. This results in a finer control on the amount of load on a cache server. At the same time, it improves availability.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>

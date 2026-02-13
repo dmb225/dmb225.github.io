@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 11.3 - High-Level Design of a Distributed Cache</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="In this lesson, we’ll learn to design a distributed cache. We’ll also discuss the trade-offs and design choices that can occur while we progress..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-113-high-level-design-of-a-distributed-cache.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 11.3 - High-Level Design of a Distributed Cache">System Design: Lesson 11.3 - High-Level Design of a Distributed Cache</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-10T00:00:00+01:00">
+                Published: Tue 10 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-cache.html">distributed-cache</a> </p>        
+</footer><!-- /.post-info -->        <p>In this lesson, we’ll learn to design a distributed cache. We’ll also discuss the trade-offs and design choices that can occur while we progress in our journey towards developing a solution.</p>
+<h2>Requirements</h2>
+<p>Let us start by understanding the requirements of our solution.</p>
+<h3>Functional</h3>
+<p>The following are the functional requirements:</p>
+<ul>
+<li>Insert data: The user of a distributed cache system must be able to insert an entry to the cache.</li>
+<li>Retrieve data: The user should be able to retrieve data corresponding to a specific key.</li>
+</ul>
+<h3>Non-functional requirements</h3>
+<p>We’ll consider the following non-functional requirements:</p>
+<ul>
+<li>High performance: The primary reason for the cache is to enable fast retrieval of data. Therefore, both the insert and retrieve operations must be fast.</li>
+<li>Scalability: The cache system should scale horizontally with no bottlenecks on an increasing number of requests.</li>
+<li>High availability: The unavailability of the cache will put an extra burden on the database servers, which can also go down at peak load intervals. We also require our system to survive occasional failures of components and network, as well as power outages.</li>
+<li>Consistency: Data stored on the cache servers should be consistent. For example, different cache clients retrieving the same data from different cache servers (primary or secondary) should be up to date.</li>
+<li>Affordability: Ideally, the caching system should be designed from commodity hardware instead of an expensive supporting component within the design of a system.</li>
+</ul>
+<h2>API design</h2>
+<p>The API design for this problem is sufficiently easy since there are only two basic operations.</p>
+<h3>Insertion</h3>
+<p>The API call to perform insertion should look like this:
+<code>insert(key, value)</code></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>This is a unique identifier.</td>
+</tr>
+<tr>
+<td>value</td>
+<td>This is the data stored against a unique key.</td>
+</tr>
+</tbody>
+</table>
+<p>This function returns an acknowledgment or an error depicting the problem at the server end.</p>
+<h3>Retrieval</h3>
+<p>The API call to retrieve data from the cache should look like this: <code>retrieve(key)</code></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>This returns the data stored against the key.</td>
+</tr>
+</tbody>
+</table>
+<p>This call returns an object to the caller.</p>
+<p><strong><em>The API design of the distributed cache looks exactly like the key-value store. What are the possible differences between a key-value store and a distributed cache?</em></strong></p>
+<p><strong>Answer:</strong> Some of the key differences are the following:</p>
+<ul>
+<li>Key-value stores need to durably store data (persistence). A cache is used in addition to persistent storage to increase reading performance.</li>
+<li>A cache serves data from the RAM. A key-value store writes data to non-volatile storage.</li>
+<li>Key-value stores are robust and should survive failures. However, caches can crash and be populated from scratch after recovery.</li>
+</ul>
+<h2>Design considerations</h2>
+<p>Before designing the distributed cache system, it’s important to consider some design choices. Each of these choices will be purely based on our application requirements. However, we can highlight some key differences here:</p>
+<h3>Storage hardware</h3>
+<p>If our data is large, we may require sharding and therefore use shard servers for cache partitions. Should these shard servers be specialized or commodity hardware? Specialized hardware will have good performance and storage capacity, but it will cost more. We can build a large cache from commodity servers. In general, the number of shard servers will depend on the cache’s size and access frequency.</p>
+<p>Furthermore, we can consider storing our data on the secondary storage of these servers for persistence while we still serve data from RAM. Secondary storage may be used in cases where a reboot happens, and cache rebuilding takes a long time. Persistence, however, may not be a requirement in a cache system if there’s a dedicated persistence layer, such as a database.</p>
+<h3>Data structures</h3>
+<p>A vital part of the design has to be the speed of accessing data. Hash tables are data structures that take a constant time on average to store and retrieve data. Furthermore, we need another data structure to enforce an eviction algorithm on the cached data. In particular, linked lists are a good option (as discussed in the previous lesson).</p>
+<p>Also, we need to understand what kind of data structures a cache can store. Even though we discussed in the API design section that we’ll use strings for simplicity, it’s possible to store different data structures or formats, like hash maps, arrays, sets, and so on, within the cache. In the next lesson, we’ll see a practical example of such a cache.</p>
+<h3>Cache client</h3>
+<p>It’s the client process or library that places the insert and retrieve calls. The location of the client process is a design issue. For example, it’s possible to place the client process within a serving host if the cache is for internal use only. Otherwise, in the case where the caching system is provided as a service for external use, a dedicated cache client can send users’ requests to the cache servers.</p>
+<h3>Writing policy</h3>
+<p>The writing strategy over the cache and database has consistency implications. In general, there’s no optimal choice, but depending on our application, the preference of writing policy is significantly important.</p>
+<h3>Eviction policy</h3>
+<p>By design, the cache provides low-latency reads and writes. To achieve this, data is often served from RAM memory. Usually, we can’t put all the data in the cache due to the limited size of the cache as compared to the full dataset. So, we need to carefully decide what stays in the cache and how to make room for new entries.</p>
+<p>With the addition of new data, some of the existing data may have to be evicted from the cache. However, choosing a victim entry depends on the eviction policy. Numerous eviction policies exist, but the choice again depends on the application using it. For instance, least recently used (LRU) can be a good choice for social media services where recently uploaded content will likely get the most views.</p>
+<p>Apart from the details in the sections above, optimizing the time-to-live (TTL) value can play an essential role in reducing the number of cache misses.</p>
+<p><strong><em>How does sharding help mitigate single points of failure (SPOF) in a distributed cache system?</em></strong></p>
+<p><strong>Answer</strong>: Sharding helps mitigate single points of failure (SPOFs) in a distributed cache system by dividing the cache data into smaller, manageable chunks called shards and distributing them across multiple cache servers. This means that if one server fails, only the data on the affected shard is lost, while the rest of the system continues to function normally. By ensuring that each shard is stored on a different server, sharding enhances the overall reliability and availability of the cache system.</p>
+<h2>High-level design</h2>
+<p>The main components in this high-level design are the following:</p>
+<ul>
+<li>Cache client: This library resides in the service application servers. It holds all the information regarding cache servers. The cache client will choose one of the cache servers using a hash and search algorithm for each incoming insert and retrieve request. All the cache clients should have a consistent view of all the cache servers. Also, the resolution technique to move data to and from the cache servers should be the same. Otherwise, different clients will request different servers for the same data.</li>
+<li>Cache servers: These servers maintain the cache of the data. Each cache server is accessible by all the cache clients. Each server is connected to the database to store or retrieve data. Cache clients use TCP or UDP protocol to perform data transfer to or from the cache servers. However, if any cache server is down, requests to those servers are resolved as a missed cache by the cache clients.</li>
+</ul>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
