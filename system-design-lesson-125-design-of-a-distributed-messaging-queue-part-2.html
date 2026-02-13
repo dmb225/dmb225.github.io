@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 12.5 - Design of a Distributed Messaging Queue: Part 2</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="In the previous lesson, we discussed the responsibilities of front-end servers and metadata services. In this lesson, we’ll focus on the main part..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-125-design-of-a-distributed-messaging-queue-part-2.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 12.5 - Design of a Distributed Messaging Queue: Part 2">System Design: Lesson 12.5 - Design of a Distributed Messaging Queue: Part 2</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-11T00:00:00+01:00">
+                Published: Wed 11 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/distributed-messaging-queue.html">distributed-messaging-queue</a> </p>        
+</footer><!-- /.post-info -->        <p>In the previous lesson, we discussed the responsibilities of front-end servers and metadata services. In this lesson, we’ll focus on the main part of the design where the queues and messages are stored: the back-end service.</p>
+<h2>Back-end service</h2>
+<p>This is the core part of the architecture where major activities take place. When the front-end receives a message, it refers to the metadata service to determine the host where the message needs to be sent. The message is then forwarded to the host and is replicated on the relevant hosts to overcome a possible availability issue. The message replication in a cluster on different hosts can be performed using one of the following two models:</p>
+<ol>
+<li>Primary-secondary model</li>
+<li>A cluster of independent hosts</li>
+</ol>
+<p>Before delving into the details of these models, let’s discuss the two types of cluster managers responsible for queue management: internal and external cluster managers. The differences between these two cluster managers are shown in the following table.</p>
+<table>
+<thead>
+<tr>
+<th>Internal Cluster Manager</th>
+<th>External Cluster Manager</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>It manages the assignment of queues within a cluster.</td>
+<td>It manages the assignment of queues across clusters.</td>
+</tr>
+<tr>
+<td>It knows about each and every node within a cluster.</td>
+<td>It knows about each cluster. However, it doesn’t have information on every host that’s present inside a cluster.</td>
+</tr>
+<tr>
+<td>It listens to the heartbeat from each node.</td>
+<td>It monitors the health of each independent cluster.</td>
+</tr>
+<tr>
+<td>It manages host failure, instance addition, and removals from the cluster.</td>
+<td>It manages and utilizes clusters.</td>
+</tr>
+<tr>
+<td>It partitions a queue into several parts and each part gets a primary server.</td>
+<td>It may split a queue across several clusters, so that messages for the same queue are equally distributed between several clusters.</td>
+</tr>
+</tbody>
+</table>
+<h2>Primary-secondary model</h2>
+<p>In the primary-secondary model, each node is considered a primary host for a collection of queues. The responsibility of a primary host is to receive requests for a particular queue and be fully responsible for data replication. The request is received by the front-end, which in turn communicates with the metadata service to determine the primary host for the request.</p>
+<p>For example, suppose we have two queues with the identities 101 and 102 residing on four different hosts A, B, C, and D. In this example, instance B is the primary host of queue 101 and the secondary hosts where the queue 101 is replicated are A and C. As the front-end receives message requests, it identifies the primary server from the internal cluster manager through the metadata service. The message is retrieved from the primary instance, which is also responsible for deleting the original message upon usage and all of its replicas.</p>
+<h2>A cluster of independent hosts</h2>
+<p>In the approach involving a cluster of independent hosts, we have several clusters of multiple independent hosts that are distributed across data centers. As the front-end receives a message, it determines the corresponding cluster via the metadata service from the external cluster manager. The message is then forwarded to a random host in the cluster, which replicates the message in other hosts where the queue is stored.</p>
+<p><strong><em>How does a random host within a cluster replicate data—that is, messages—in the queues on other hosts within the same cluster?</em></strong></p>
+<p><strong>Answer:</strong> Each host consists of mapping between the queues and the hosts within a cluster, making the replication easier.</p>
+<p>Assume that we have a cluster, say Y, having hosts A, B, and C. This cluster has two queues with IDs 101 and 103 stored on different hosts, as shown in the following table. This table is stored on each host within the cluster Y. When a random host receives a message, say host C, for a queue having ID 103, host C replicates this message on the other hosts where the queue 103 is stored, i.e., Node A and Node B.</p>
+<p>The same process is applied to receive message requests from the consumer. Similar to the first approach, the randomly selected host is responsible for message delivery and cleanup upon a successful processing of the message.</p>
+<p>Furthermore, another component called an external cluster manager is introduced, which is accountable for maintaining the mapping between queues and clusters, as shown in the following figure. The external cluster manager is also responsible for queue management and cluster assignment to a particular queue.</p>
+<p>The following figure illustrates the cluster of independent hosts. There are two clusters, A and B, which consist of several nodes. The external cluster manager has the mapping table between queues and their corresponding cluster. Whenever a front-end receives a request for a queue, it determines the corresponding cluster for the queue and forwards the request to the cluster where the queue resides. The nodes within that cluster are responsible for storing and sending messages accordingly.</p>
+<p><strong><em>How is message replication handled in distributed queue systems?</em></strong></p>
+<p>There are two ways to replicate messages in a queue residing on multiple hosts.</p>
+<ol>
+<li>Synchronous replication</li>
+<li>Asynchronous replication</li>
+</ol>
+<p>In synchronous replication, the primary host is responsible for replicating the message in all the relevant queues on other hosts. After acknowledgment from secondary hosts, the primary host then notifies the client regarding the reception of messages. In this approach, messages remain consistent in all queue replicas; however, it costs extra delay in communication and causes partial to no availability while an election is in progress to promote a secondary as a primary.</p>
+<p>In asynchronous replication, once the primary host receives the messages, it acknowledges the client and, in the next step, starts replicating the message to other hosts. This approach has other problems, such as replication lag and consistency issues.</p>
+<p>Based on the needs of an application, we can pick one or the other.</p>
+<p>We have completed the design of a distributed messaging queue and discussed the two models for organizing the back-end server. We also described the management process of queues and how messages are processed at the back-end. Furthermore, we discussed how back-end servers are managed through different cluster managers.</p>
+<p>In the next lesson, we’ll discuss how our system fulfills the functional and non-functional requirements that were described earlier in the chapter.</p>
+<p><strong><em>If the internal cluster manager suddenly became slower at mapping primaries and secondaries, how might this influence the overall design goals of the back-end service?</em></strong></p>
+<p>A slowdown in the internal cluster manager would likely decrease the reliability and performance of the back-end service. Since the system relies on quick primary and secondary mappings, delays could lead to increased latency, reduced responsiveness, and potential inconsistencies. This might prompt a reconsideration of how responsibilities are distributed within the system to maintain robustness.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
