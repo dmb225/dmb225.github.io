@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 13.2 - Introduction to Pub-Sub</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="Pub-sub messaging offers asynchronous communication. Let’s explore the use cases where it is beneficial to have a pub-sub system. Use cases of..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-132-introduction-to-pub-sub.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 13.2 - Introduction to Pub-Sub">System Design: Lesson 13.2 - Introduction to Pub-Sub</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-11T00:00:00+01:00">
+                Published: Wed 11 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/pub-sub.html">pub-sub</a> </p>        
+</footer><!-- /.post-info -->        <p>Pub-sub messaging offers asynchronous communication. Let’s explore the use cases where it is beneficial to have a pub-sub system.</p>
+<h2>Use cases of pub-sub</h2>
+<p>A few use cases of pub-sub are listed below:</p>
+<ul>
+<li><strong>Improved performance:</strong> The pub-sub system enables push-based distribution, alleviating the need for message recipients to check for new information and changes regularly. It encourages faster response times and lowers the delivery latency.</li>
+<li><strong>Handling ingestion:</strong> The pub-sub helps in handling log ingestion. The user-interaction data can help us figure out useful analyses about the behavior of users. We can ingest a large amount of data to the pub-sub system, so much so that it can deliver the data to any analytical system to understand the behavior patterns of users. Moreover, we can also log the details of the event that’s happening while completing a request from the user. Large services like Meta use a pub-sub system called Scribe to know exactly who needs what data, and remove or archive processed or unwanted data. Doing this is necessary to manage an enormous amount of data.</li>
+<li><strong>Real-time monitoring:</strong> Raw or processed messages of an application or system can be provided to multiple applications to monitor a system in real time.</li>
+<li><strong>Replicating data:</strong> The pub-sub system can be used to distribute changes. For example, in a leader-follower protocol, the leader sends the changes to its followers via a pub-sub system. It allows followers to update their data asynchronously. The distributed caches can also refresh themselves by receiving the modifications asynchronously. Along the same lines, applications like WhatsApp that allow multiple views of the same conversation—for example, on a mobile phone and a computer’s browser—can elegantly work using a pub-sub, where multiple views can act either as a publisher or a subscriber.</li>
+</ul>
+<p><strong><em>What are the similarities and differences between a pub-sub system and queues?</em></strong></p>
+<p><strong>Answer:</strong> The pub-sub system and queues are similar because they deliver information that’s produced by the producer to the consumer. The difference is that only one consumer consumes a message in the queue, while there can be multiple consumers of the same message in a pub-sub system.</p>
+<h2>Requirements</h2>
+<p>We aim to design a pub-sub system that has the following requirements.</p>
+<h3>Functional requirements</h3>
+<p>Let’s specify the functional requirements of a pub-sub system:</p>
+<ul>
+<li>Create a topic: The producer should be able to create a topic.</li>
+<li>Write messages: Producers should be able to write messages to the topic.</li>
+<li>Subscription: Consumers should be able to subscribe to the topic to receive messages.</li>
+<li>Read messages: The consumer should be able to read messages from the topic.</li>
+<li>Specify retention time: The consumers should be able to specify the retention time after which the message should be deleted from the system.</li>
+<li>Delete messages: A message should be deleted from the topic or system after a certain retention period as defined by the user of the system.</li>
+</ul>
+<p>Imagine ou’re designing a real-time chat application that has channels for different discussions. Explain how you would use a pub-sub system for its messaging component. </p>
+<p>Describe the mapping of the chatting application onto the following pub-sub components:</p>
+<ul>
+<li>Topics</li>
+<li>Subscribers</li>
+<li>How message delivery would work</li>
+</ul>
+<p><strong>Answer:</strong> In a pub-sub system for a real-time chat application:</p>
+<ul>
+<li>Topics: These are the channels where discussions happen.</li>
+<li>Subscribers: These are the users who join and listen to a specific channel.</li>
+<li>Message delivery: When a user sends a message, they publish it to the relevant topic. The pub-sub broker then broadcasts this message to all subscribers of that topic.</li>
+</ul>
+<h3>Non-functional requirements</h3>
+<ul>
+<li>Scalable: The system should scale with an increasing number of topics and increasing writing (by producers) and reading (by consumers) load.</li>
+<li>Available: The system should be highly available, so that producers can add their data and consumers can read data from it anytime.</li>
+<li>Durability: The system should be durable. Messages accepted from producers must not be lost and should be delivered to the intended subscribers.</li>
+<li>Fault tolerance: Our system should be able to operate in the event of failures.</li>
+<li>Concurrent: The system should handle concurrency issues where reading and writing are performed simultaneously.</li>
+</ul>
+<h2>API Design</h2>
+<p>We’ll exclude some parameters from the functions below, such as the producer or consumer’s identifier. Let’s assume that this information is available from the underlying connection context. The API design for this problem is as follows:</p>
+<h3>1. Create a topic</h3>
+<p>The API call to create a topic should look like this:</p>
+<p><code>create(topic_ID, topic_name)</code></p>
+<p>This function returns an acknowledgment if it successfully creates a topic, or an error if it fails to do so.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic_ID</td>
+<td>It uniquely identifies the topic.</td>
+</tr>
+<tr>
+<td>topic_name</td>
+<td>It contains the name of the topic.</td>
+</tr>
+</tbody>
+</table>
+<h3>2. Write a message to a topic</h3>
+<p>The API call to write into the pub-sub system should look like this:</p>
+<p><code>write(topic_ID, message)</code></p>
+<p>The API call will write a message into a topic with an ID of topic_ID. Each message can have a maximum size of 1 MB. This function will return an acknowledgment if it successfully places the data in the systems, or an appropriate error if it fails.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>message</td>
+<td>The message to be written in the system.</td>
+</tr>
+</tbody>
+</table>
+<h3>3. Read a message</h3>
+<p>The API call to read data from the system should look like this:</p>
+<p><code>read(topic_ID)</code></p>
+<p>The topic is found using topic_ID, and the call will return an object containing the message to the caller.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic_ID</td>
+<td>It is the ID of the topic against which the message will be read.</td>
+</tr>
+</tbody>
+</table>
+<h3>4. Subscribe to a topic</h3>
+<p>The API call to subscribe to a topic from the system should look like this:</p>
+<p><code>subscribe(topic_ID)</code></p>
+<p>The function removes the consumer as a subscriber from the topic that has the topic_ID.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic_ID</td>
+<td>The ID of the topic to which the consumer will be subscribed.</td>
+</tr>
+</tbody>
+</table>
+<h3>5. Delete a topic</h3>
+<p>The API call to delete a topic from the system should look like this:</p>
+<p><code>delete_topic(topic_ID)</code></p>
+<p>The function deletes the topic on the basis of the topic_ID.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic_ID</td>
+<td>The ID of the topic which is to be deleted.</td>
+</tr>
+</tbody>
+</table>
+<h3>Building blocks we will use</h3>
+<p>The design of pub-sub utilizes many building blocks that have been discussed in the initial chapters. We’ll consider the following lessons on building blocks.</p>
+<ul>
+<li>Database: We’ll use databases to store information like subscription details.</li>
+<li>Distributed messaging queue: We’ll use a messaging queue to store messages sent by the producer.</li>
+<li>Key-value: We’ll use a key-value store to hold information about consumers.</li>
+</ul>
+<p>In the next lesson, we’ll focus on designing a pub-sub system.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>

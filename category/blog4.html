@@ -22,6 +22,79 @@
                         <ol id="posts-list" class="hfeed" start="9">
                 <li><article class="hentry">
                     <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 5.2 - Design of a Key-Value Store">System Design: Lesson 5.2 - Design of a Key-Value Store</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-06T00:00:00+01:00">
+                Published: Fri 06 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Requirements</h2>
+<p>Let’s list the requirements of designing a key-value store to overcome the problems of traditional databases.</p>
+<h3>Functional requirements</h3>
+<p>Typically, key-value stores are expected to offer functions such as get and put. However, what sets this particular key-value store system apart is its distinct characteristics, explained as follows:</p>
+<ul>
+<li>Configurable …</li></ul>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-53-key-value-store-scalability-and-replication.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 5.3 - Key-Value Store Scalability and Replication">System Design: Lesson 5.3 - Key-Value Store Scalability and Replication</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-06T00:00:00+01:00">
+                Published: Fri 06 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Add scalability</h2>
+<p>Let’s start with one of the core design requirements: scalability. We store key-value data in storage nodes. With a change in demand, we might need to add or remove storage nodes. It means we need to partition data over the nodes in the system to distribute the …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-53-key-value-store-scalability-and-replication.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 5.4 - Key-Value Store Data Versioning">System Design: Lesson 5.4 - Key-Value Store Data Versioning</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-06T00:00:00+01:00">
+                Published: Fri 06 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
+</footer><!-- /.post-info -->                        <h2>Data versioning</h2>
+<p>When network partitions and node failures occur during an update, an object’s version history might become fragmented. As a result, it requires a reconciliation effort on the part of the system. It’s necessary to build a way that explicitly accepts the potential of several copies of …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
                         <h1><a href="https://dmb225.github.io/system-design-lesson-55-key-value-store-fault-tolerance.html" rel="bookmark"
                                title="Permalink to System Design: Lesson 5.5 - Key-Value Store Fault Tolerance">System Design: Lesson 5.5 - Key-Value Store Fault Tolerance</a></h1>
                     </header>
@@ -182,74 +255,6 @@
 <h2>Algorithms of load balancers</h2>
 <p>Load balancers distribute client requests according to an algorithm. Some …</p>
                         <a class="readmore" href="https://dmb225.github.io/system-design-lesson-33-advanced-details-of-load-balancers.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 4.1 - Introduction to Databases">System Design: Lesson 4.1 - Introduction to Databases</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-04T00:00:00+01:00">
-                Published: Wed 04 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/databases.html">databases</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Problem statement</h2>
-<p>Let’s start with a simple question. Can we make a software application without using databases? Let’s suppose we have an application like WhatsApp. People use our application to communicate with their friends. Now, where and how can we store information (a list of people’s names …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-41-introduction-to-databases.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-1-building-blocks.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 1 - Building Blocks">System Design: Lesson 1 - Building Blocks</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> </p>        
-</footer><!-- /.post-info -->                        <p>System design problems usually have some similarities, though specific details are often unique. We have extracted these similarities across design problems as the basic building blocks we’ll be covering. One example of a building block is a load-balancing component, which we’ll probably use in every design problem in …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-1-building-blocks.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-21-introduction-to-domain-name-system-dns.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 2.1 - Introduction to Domain Name System (DNS)">System Design: Lesson 2.1 - Introduction to Domain Name System (DNS)</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-03T00:00:00+01:00">
-                Published: Tue 03 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/dns.html">dns</a> </p>        
-</footer><!-- /.post-info -->                        <h2>The origins of DNS</h2>
-<p>Let’s consider the example of a mobile phone where a unique number is associated with each user. To make calls to friends, we can initially try to memorize some of the phone numbers. However, as the number of contacts grows, we’ll have to use …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-21-introduction-to-domain-name-system-dns.html">read more</a>
                     </div><!-- /.entry-content -->
                 </article></li>
                     </ol><!-- /#posts-list -->

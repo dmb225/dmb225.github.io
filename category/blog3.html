@@ -22,6 +22,79 @@
                         <ol id="posts-list" class="hfeed" start="9">
                 <li><article class="hentry">
                     <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-91-design-of-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 9.1 - Design of a Monitoring System">System Design: Lesson 9.1 - Design of a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <h1>Requirements</h1>
+<p>Let’s sum up what we want our monitoring system to do for us:</p>
+<ul>
+<li>Monitor critical local processes on a server for crashes.</li>
+<li>Monitor any anomalies in the use of CPU, memory, disk, or network bandwidth by a process on a server.</li>
+<li>Monitor overall server health, such as CPU …</li></ul>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-91-design-of-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-92-detailed-design-of-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 9.2 - Detailed Design of a Monitoring System">System Design: Lesson 9.2 - Detailed Design of a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <p>We’ll discuss the core components of our monitoring system, identify the shortcomings of our design, and improve the design to fulfill our requirements.</p>
+<h2>Storage</h2>
+<p>We’ll use time-series databases to save the data locally on the server where our monitoring service is running. Then, we’ll integrate it with …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-92-detailed-design-of-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
+                        <h1><a href="https://dmb225.github.io/system-design-lesson-93-visualize-data-in-a-monitoring-system.html" rel="bookmark"
+                               title="Permalink to System Design: Lesson 9.3 - Visualize Data in a Monitoring System">System Design: Lesson 9.3 - Visualize Data in a Monitoring System</a></h1>
+                    </header>
+
+                    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-09T00:00:00+01:00">
+                Published: Mon 09 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/monitoring.html">monitoring</a> </p>        
+</footer><!-- /.post-info -->                        <p>Large data centers have millions of servers, and visualizing the health data for all of them is challenging. An important aspect of monitoring a fleet of servers is to know which ones are alive and which ones are offline. A modern data center can house many thousands of servers in …</p>
+                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-93-visualize-data-in-a-monitoring-system.html">read more</a>
+                    </div><!-- /.entry-content -->
+                </article></li>
+
+                <li><article class="hentry">
+                    <header>
                         <h1><a href="https://dmb225.github.io/system-design-lesson-71-sequencer.html" rel="bookmark"
                                title="Permalink to System Design: Lesson 7.1 - Sequencer">System Design: Lesson 7.1 - Sequencer</a></h1>
                     </header>
@@ -179,79 +252,6 @@
 </footer><!-- /.post-info -->                        <h2>Introduction to key-value stores</h2>
 <p>Key-value stores are distributed hash tables (DHTs). A key is generated by the hash function and should be unique. In a key-value store, a key binds to a specific value and doesn’t assume anything about the structure of the value. A value can be a …</p>
                         <a class="readmore" href="https://dmb225.github.io/system-design-lesson-51-the-key-value-store.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.2 - Design of a Key-Value Store">System Design: Lesson 5.2 - Design of a Key-Value Store</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Requirements</h2>
-<p>Let’s list the requirements of designing a key-value store to overcome the problems of traditional databases.</p>
-<h3>Functional requirements</h3>
-<p>Typically, key-value stores are expected to offer functions such as get and put. However, what sets this particular key-value store system apart is its distinct characteristics, explained as follows:</p>
-<ul>
-<li>Configurable …</li></ul>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-52-design-of-a-key-value-store.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-53-key-value-store-scalability-and-replication.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.3 - Key-Value Store Scalability and Replication">System Design: Lesson 5.3 - Key-Value Store Scalability and Replication</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Add scalability</h2>
-<p>Let’s start with one of the core design requirements: scalability. We store key-value data in storage nodes. With a change in demand, we might need to add or remove storage nodes. It means we need to partition data over the nodes in the system to distribute the …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-53-key-value-store-scalability-and-replication.html">read more</a>
-                    </div><!-- /.entry-content -->
-                </article></li>
-
-                <li><article class="hentry">
-                    <header>
-                        <h1><a href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html" rel="bookmark"
-                               title="Permalink to System Design: Lesson 5.4 - Key-Value Store Data Versioning">System Design: Lesson 5.4 - Key-Value Store Data Versioning</a></h1>
-                    </header>
-
-                    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2026-02-06T00:00:00+01:00">
-                Published: Fri 06 February 2026
-        </abbr>
-
-                <address class="vcard author">
-                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
-                </address>
-        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
-<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/key-value-store.html">key-value-store</a> </p>        
-</footer><!-- /.post-info -->                        <h2>Data versioning</h2>
-<p>When network partitions and node failures occur during an update, an object’s version history might become fragmented. As a result, it requires a reconciliation effort on the part of the system. It’s necessary to build a way that explicitly accepts the potential of several copies of …</p>
-                        <a class="readmore" href="https://dmb225.github.io/system-design-lesson-54-key-value-store-data-versioning.html">read more</a>
                     </div><!-- /.entry-content -->
                 </article></li>
                     </ol><!-- /#posts-list -->

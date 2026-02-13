@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta name="generator" content="Pelican" />
+                        <title>System Design: Lesson 13.3 - Design of a Pub-Sub System</title>
+                        <link rel="stylesheet" href="https://dmb225.github.io/theme/css/main.css" />
+                                <link href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dao Malick BENIN Atom Feed" />
+    <meta name="description" content="First design In the previous lesson, we discussed that a producer writes into topics, and consumers subscribe to a topic to read messages from..." />
+        </head>
+
+        <body id="index" class="home">
+                <header id="banner" class="body">
+                        <h1><a href="https://dmb225.github.io/">Dao Malick BENIN</a></h1>
+                        <nav><ul>
+                                                <li><a href="https://dmb225.github.io/category/about.html">About</a></li>
+                                                <li class="active"><a href="https://dmb225.github.io/category/blog.html">Blog</a></li>
+                        </ul></nav>
+                </header><!-- /#banner -->
+  <section id="content" class="body">
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="https://dmb225.github.io/system-design-lesson-133-design-of-a-pub-sub-system.html" rel="bookmark"
+             title="Permalink to System Design: Lesson 13.3 - Design of a Pub-Sub System">System Design: Lesson 13.3 - Design of a Pub-Sub System</a></h1>
+      </header>
+
+      <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2026-02-11T00:00:00+01:00">
+                Published: Wed 11 February 2026
+        </abbr>
+
+                <address class="vcard author">
+                        By                                 <a class="url fn" href="https://dmb225.github.io/author/dao-malick-benin.html">Dao Malick BENIN</a>
+                </address>
+        <p>In <a href="https://dmb225.github.io/category/blog.html">Blog</a>.</p>
+<p>tags: <a href="https://dmb225.github.io/tag/system-design.html">system-design</a> <a href="https://dmb225.github.io/tag/pub-sub.html">pub-sub</a> </p>        
+</footer><!-- /.post-info -->        <p>First design
+In the previous lesson, we discussed that a producer writes into topics, and consumers subscribe to a topic to read messages from that topic. Since new messages are added at the end of the queue, we can use distributed messaging queues for topics.</p>
+<p>The components we’ll need have been listed below:</p>
+<ul>
+<li><strong>Topic queue:</strong> Each topic will be a distributed messaging queue so we can store the messages sent to us from the producer. A producer will write their messages to that queue.</li>
+<li><strong>Database:</strong> We’ll use a relational database that will store the subscription details. For example, we need to store which consumer has subscribed to which topic so we can provide the consumers with their desired messages. We’ll use a relational database since our consumer-related data is structured and we want to ensure our data integrity.</li>
+<li><strong>Message director:</strong> This service will read the message from the topic queue, fetch the consumers from the database, and send the message to the consumer queue.</li>
+<li><strong>Consumer queue:</strong> The message from the topic queue will be copied to the consumer’s queue so the consumer can read the message. For each consumer, we’ll define a separate distributed queue.</li>
+<li><strong>Subscriber:</strong> When the consumer requests a subscription to a topic, this service will add an entry into the database.</li>
+</ul>
+<p>The consumer will subscribe to a topic, and the system will add the subscriber’s details to the database. The producer will write into the topics, and the message director will read the message from the queue, fetch the details to whom it should add the message, and send it to them. The consumers will consume the message from their queue.</p>
+<p><strong>Note:</strong> We’ll use fail-over services for the message director and subscriber to guard against failures.</p>
+<p>Using the distributed messaging queues makes our design simple. However, the huge number of queues needed is a significant concern. If we have millions of subscribers for thousands of topics, defining and maintaining millions of queues is expensive. Moreover, we’ll copy the same message for a topic in all subscriber queues, which is unnecessary duplication and takes up space.</p>
+<p><strong><em>Is there a way to avoid maintaining a separate queue for each reader?</em></strong></p>
+<p><strong>Answer:</strong> In messaging queues, the message disappears after the reader consumes it. So, what if we add a counter for each message? The counter value decrements as a subscriber consumes the message. It does not delete the message until the counter becomes zero. Now, we don’t need to keep a separate queue for each reader.</p>
+<h2>Second design</h2>
+<p>Let’s consider another approach to designing a pub-sub system.</p>
+<h3>High-level design</h3>
+<p>At a high level, the pub-sub system will have the following components:</p>
+<ul>
+<li><strong>Broker:</strong> This server will handle the messages. It will store the messages sent from the producer and allow the consumers to read them.</li>
+<li><strong>Cluster manager:</strong> We’ll have numerous broker servers to cater to our scalability needs. We need a cluster manager to supervise the broker’s health. It will notify us if a broker fails.</li>
+<li><strong>Storage:</strong> We’ll use a relational database to store consumer details, such as subscription information and retention period.</li>
+<li><strong>Consumer manager:</strong> This is responsible for managing the consumers. For example, it will verify if the consumer is authorized to read a message from a certain topic or not.</li>
+</ul>
+<p>Besides these components, we also have the following design considerations:</p>
+<ul>
+<li><strong>Acknowledgment:</strong> An acknowledgment is used to notify the producer that the received message has been stored successfully. The system will wait for an acknowledgment from the consumer if it has successfully consumed the message.</li>
+<li><strong>Retention time:</strong> The consumers can specify the retention period time of their messages. The default will be seven days, but it is configurable. Some applications like banking applications require the data to be stored for a few weeks as a business requirement, while an analytical application might not need the data after consumption.</li>
+</ul>
+<p>Let’s understand the role of each component in detail.</p>
+<h3>Broker</h3>
+<p>The broker server is the core component of our pub-sub system. It will handle write and read requests. A broker will have multiple topics, where each topic can have multiple partitions associated with it. We use partitions to store messages in the local storage for persistence. Consequently, this improves availability. Partitions contain messages encapsulated in segments.</p>
+<p>Segments help identify the start and end of a message using an offset address. Using segments, consumers consume the message of their choice from a partition by reading from a specific offset address. </p>
+<p>As we know, a topic is a persistent sequence of messages stored in the local storage of the broker. Once the data has been added to the topic, it cannot be modified. Reading and writing a message from or to a topic is an I/O task for computers, and scaling such tasks is challenging. This is the reason we split the topics into multiple partitions. The data belonging to a single topic can be present in numerous partitions. For example, let’s assume we have Topic A and we allocate three partitions for it. The producers will send their messages to the relevant topic. The messages received will be sent to various partitions on the basis of the round-robin algorithm. We’ll use a variation of round-robin: weighted round-robin. The following slides show how the messages are stored in various partitions belonging to a single topic.</p>
+<p><strong>Strict ordering ensures that the messages are stored in the order in which they are produced. How can we ensure strict ordering for our messages?</strong></p>
+<p><strong>Answer:</strong> </p>
+<p>We’ll assign each partition a unique ID, partition_ID. The user can provide the partition_ID while writing into the system. In this way, the messages will be sent to the specified partition, and the ordering will be strict. Our API call to write into the pub-sub system looks like this:</p>
+<p><code>write(topic_ID, partition_ID, message)</code></p>
+<p>If the user does not provide the partition_ID, we’ll use the weighted round-robin algorithm to decide which message has to be sent to which partition.</p>
+<p>It might seem strange to give the ability to choose a partition to the client of pub-sub. However, such a facility can be the basis from where clients can get data for some specific time period—for example, getting data from yesterday. For simplicity, we won’t include time-based reading in our design.</p>
+<p>We’ll allocate the partitions to various brokers in the system. This just means that different partitions of the same topic will be in different brokers. We’ll follow strict ordering in partitions by adding newer content at the end of existing messages.</p>
+<p>Consider the slides below. We have various brokers in our system. Each broker has different topics. The topic is divided into multiple partitions.</p>
+<p>We discussed that a message will be stored in a segment. We’ll identify each segment using an offset. Since these are immutable records, the readers are independent and they can read messages anywhere from this file using the necessary API functions. The following slides show the segment level detail.</p>
+<p>The broker solved the problems that our first design had. We avoided a large number of queues by partitioning the topic. We introduced parallelism using partitions that avoided bottlenecks while consuming the message.</p>
+<p><strong><em>How would you design a pub-sub system to ensure consumers receive messages in the correct order, even when subscribing to multiple topics or partitions, assuming messages have different time stamps?</em></strong></p>
+<p>To design a pub-sub system that ensures consumers receive messages in the correct order across multiple topics or partitions with different timestamps, you should:</p>
+<ol>
+<li>Use a partitioning strategy that assigns each topic to its own partition, maintaining order within each partition.
+2; Include timestamps in each message and process messages based on these timestamps to preserve global order.</li>
+<li>Maintain separate consumer queues for each topic or merge queues while respecting timestamps to keep order across topics.</li>
+<li>Employ a coordinator system to track and synchronize message order across multiple partitions based on timestamps.</li>
+</ol>
+<p>This approach helps maintain the correct message order even in complex scenarios.</p>
+<h4>Cluster manager</h4>
+<p>We’ll have multiple brokers in our cluster. The cluster manager will perform the following tasks:</p>
+<ul>
+<li>Broker and topics registry: This stores the list of topics for each broker.</li>
+<li>Manage replication: The cluster manager manages replication by using the leader-follower approach. One of the brokers is the leader. If it fails, the manager decides who the next leader is. In case the follower fails, it adds a new broker and makes sure to turn it into an updated follower. It updates the metadata accordingly. We’ll keep three replicas of each partition on different brokers.</li>
+<li>Authorization: The cluster manager handles authorization for broker and topic access, as well as controlling message replication across clusters.</li>
+</ul>
+<h3>Consumer manager</h3>
+<p>The consumer manager will manage the consumers. It has the following responsibilities:</p>
+<ul>
+<li>Verify the consumer: The manager will fetch the data from the database and verify if the consumer is allowed to read a certain message. For example, if the consumer has subscribed to Topic A (but not to Topic B), then it should not be allowed to read from Topic B. The consumer manager verifies the consumer’s request.</li>
+<li>Retention time management: The manager will also verify if the consumer is allowed to read the specific message or not. If, according to its retention time, the message should be inaccessible to the consumer, then it will not allow the consumer to read the message.</li>
+<li>Message receiving options management: There are two methods for consumers to get data. The first is that our system pushes the data to its consumers. This method may result in overloading the consumers with continuous messages. Another approach is for consumers to request the system to read data from a specific topic. The drawback is that a few consumers might want to know about a message as soon as it is published, but we do not support this function.Therefore, we’ll support both techniques. Each consumer will inform the broker that it wants the data to be pushed automatically or it needs the data to read itself. We can avoid overloading the consumer and also provide liberty to the consumer. We’ll save this information in the relational database along with other consumer details.</li>
+<li>Allow multiple reads: The consumer manager stores the offset information of each consumer. We’ll use a key-value to store offset information against each consumer. It allows fast fetching and increases the availability of the consumers. If Consumer 1 has read from offset 0 and has sent the acknowledgment, we’ll store it. So, when the consumer wants to read again, we can provide the next offset to the reader for reading the message.</li>
+</ul>
+<h2>Conclusion</h2>
+<p>We saw two designs of pub-sub, using queues and using our custom storage optimized for writing and reading small-sized data.</p>
+<p>There are numerous use cases of a pub-sub. Due to decoupling between producers and consumers, the system can scale dynamically, and the failures are well-contained. Additionally, due to proper accounting of data consumption, the pub-sub is a system of choice for a large-scale system that produces enormous data. We can determine precisely which data is needed and not needed.</p>
+      </div><!-- /.entry-content -->
+
+    </article>
+  </section>
+                <section id="extras" class="body">
+                                <div class="blogroll">
+                                        <h2>links</h2>
+                                        <ul>
+                                                        <li><a href="https://getpelican.com/">Pelican</a></li>
+                                                        <li><a href="https://www.python.org/">Python.org</a></li>
+                                                        <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
+                                        </ul>
+                                </div><!-- /.blogroll -->
+                                <div class="social">
+                                        <h2>social</h2>
+                                        <ul>
+                                                        <li><a href="https://dmb225.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                                                        <li><a href="https://www.linkedin.com/in/dao-malick-benin/">LinkedIn</a></li>
+                                                        <li><a href="https://github.com/dmb225">GitHub</a></li>
+                                        </ul>
+                                </div><!-- /.social -->
+                </section><!-- /#extras -->
+
+                <footer id="contentinfo" class="body">
+                        <address id="about" class="vcard body">
+                                Proudly powered by <a rel="nofollow" href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a rel="nofollow" href="https://www.python.org/">Python</a>.
+                        </address><!-- /#about -->
+
+                        <p>The theme is by <a rel="nofollow" href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+                </footer><!-- /#contentinfo -->
+
+        </body>
+</html>
